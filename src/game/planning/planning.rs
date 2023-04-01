@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AddFixedEvent, AppState, AssetLibrary};
+use crate::{AddFixedEvent, AppState, AssetLibrary, FixedInput};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum PlanningSystem {
@@ -64,7 +64,7 @@ fn planning_start(
     }
 }
 
-fn planning_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
+fn planning_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<FixedInput<KeyCode>>) {
     if keys.just_pressed(KeyCode::Space) {
         next_state.set(AppState::GameBattle);
     }

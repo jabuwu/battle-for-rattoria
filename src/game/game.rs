@@ -12,8 +12,8 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn game_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
+fn game_update(mut next_app_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::Key0) {
-        next_state.set(AppState::MainMenu);
+        next_app_state.set(AppState::MainMenu);
     }
 }

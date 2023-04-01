@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AddFixedEvent, AppState, AssetLibrary, EventSet, UnitSpawnEvent};
+use crate::{AddFixedEvent, AppState, AssetLibrary, EventSet, FixedInput, UnitSpawnEvent};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum BattleSystem {
@@ -30,6 +30,7 @@ impl Plugin for BattlePlugin {
             )
             .add_system(
                 battle_update
+                    .run_if(in_state(AppState::GameBattle))
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(BattleSystem::Update),
             );
@@ -43,7 +44,7 @@ pub struct BattleState {
 
 impl Default for BattleState {
     fn default() -> Self {
-        Self { battle_time: 3. }
+        Self { battle_time: 1.5 }
     }
 }
 
@@ -76,7 +77,7 @@ fn battle_start(
                 },
             )
             .with_alignment(TextAlignment::Center),
-            transform: Transform::from_xyz(0., 300., 0.),
+            transform: Transform::from_xyz(0., 200., 0.),
             ..Default::default()
         });
         unit_spawn_events.send_default();
@@ -87,9 +88,10 @@ fn battle_update(
     mut battle_state: ResMut<BattleState>,
     mut next_state: ResMut<NextState<AppState>>,
     time: Res<FixedTime>,
+    keys: Res<FixedInput<KeyCode>>,
 ) {
     battle_state.battle_time -= time.period.as_secs_f32();
-    if battle_state.battle_time < 0. {
+    if battle_state.battle_time < 0. || keys.just_pressed(KeyCode::Space) {
         next_state.set(AppState::GamePlanning);
     }
 }

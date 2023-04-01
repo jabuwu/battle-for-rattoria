@@ -44,8 +44,17 @@ fn unit_spawn(
         commands.spawn((
             SpineBundle {
                 skeleton: asset_library.spine_rat.clone(),
-                transform: Transform::from_xyz(-300., 0., 0.)
+                transform: Transform::from_xyz(-180., 0., 0.)
                     .with_scale(Vec2::splat(0.4).extend(1.)),
+                ..Default::default()
+            },
+            Unit,
+        ));
+        commands.spawn((
+            SpineBundle {
+                skeleton: asset_library.spine_rat.clone(),
+                transform: Transform::from_xyz(180., 0., 0.)
+                    .with_scale(Vec2::new(-0.4, 0.4).extend(1.)),
                 ..Default::default()
             },
             Unit,
@@ -68,6 +77,7 @@ fn unit_spine_ready(
 
 fn unit_update(mut unit_query: Query<&mut Transform, With<Unit>>, time: Res<FixedTime>) {
     for mut unit_transform in unit_query.iter_mut() {
-        unit_transform.translation.x += time.period.as_secs_f32() * 100.;
+        unit_transform.translation.x +=
+            time.period.as_secs_f32() * 100. * unit_transform.scale.x.signum();
     }
 }
