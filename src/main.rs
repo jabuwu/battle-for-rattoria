@@ -1,28 +1,30 @@
-// disable console on windows for release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
-use bevy::winit::WinitWindows;
-use bevy::DefaultPlugins;
-use bevy_game::GamePlugin;
+use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy_game::{
+    AppState, AppStatePlugin, CommonPlugins, GamePlugins, MainMenuPlugin, MainMenuPlugins,
+};
 use std::io::Cursor;
 use winit::window::Icon;
 
 fn main() {
     App::new()
         .insert_resource(Msaa::Off)
-        .insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)))
+        .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Bevy game".to_string(), // ToDo
-                resolution: (800., 600.).into(),
+                title: "Bevy game".to_owned(), // ToDo
+                resolution: (1280., 768.).into(),
                 canvas: Some("#bevy".to_owned()),
+                fit_canvas_to_parent: true,
                 ..default()
             }),
             ..default()
         }))
-        .add_plugin(GamePlugin)
+        .add_plugin(AppStatePlugin)
+        .add_plugins(CommonPlugins)
+        .add_plugins(MainMenuPlugins)
+        .add_plugins(GamePlugins)
         .add_system(set_window_icon.on_startup())
         .run();
 }

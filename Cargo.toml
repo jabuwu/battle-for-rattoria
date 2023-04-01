@@ -2,7 +2,7 @@
 name = "bevy_game" # ToDo
 version = "0.1.0"
 publish = false
-authors = ["Niklas Eicker <git@nikl.me>"] # ToDo: you are the author ;)
+authors = ["jabu <jabu@gx.ag>"]
 edition = "2021"
 exclude = ["dist", "build", "assets", "credits"]
 
@@ -50,9 +50,8 @@ default = [
 ]
 
 [dependencies]
-bevy = { version = "0.10", default-features = false }
-bevy_kira_audio = { version = "0.15" }
-bevy_asset_loader = { version = "0.15" }
+bevy = { version = "0.10.1", default-features = false }
+bevy_audio_plus = { git = "https://github.com/jabuwu/bevy_audio_plus", rev = "cd1607ee479432851e2c815993a1c6bd24fc4141" }
 rand = { version = "0.8.3" }
 
 # keep the following in sync with Bevy's dependencies

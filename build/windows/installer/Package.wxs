@@ -2,8 +2,8 @@
     <!-- ToDo use your own keys for Name and Manufacturer, as well as a new UUID for UpgradeCode -->
     <Package
         Name="BevyGame"
-        Manufacturer="My Name"
-        UpgradeCode="132bb59d-de4f-4893-a535-93dfd0597731"
+        Manufacturer="jabu"
+        UpgradeCode="179b76ca-6096-4299-ab07-65429849d91f"
         Version="0.1.0"
 
         Scope="perUserOrMachine">
