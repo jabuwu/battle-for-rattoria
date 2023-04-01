@@ -6,7 +6,22 @@ use crate::cleanup_non_persistent_entities;
 pub enum AppState {
     #[default]
     MainMenu,
-    Game,
+    GamePlanning,
+    GameBattle,
+}
+
+impl AppState {
+    pub fn is_game_state(&self) -> bool {
+        match self {
+            AppState::MainMenu => false,
+            AppState::GamePlanning => true,
+            AppState::GameBattle => true,
+        }
+    }
+}
+
+pub fn in_game_state() -> impl FnMut(Res<State<AppState>>) -> bool + Clone {
+    move |current_state: Res<State<AppState>>| current_state.0.is_game_state()
 }
 
 pub struct AppStatePlugin;

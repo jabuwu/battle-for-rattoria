@@ -1,6 +1,6 @@
 use bevy::{app::PluginGroupBuilder, prelude::*};
 
-use crate::{BattlePlugin, GamePlugin, UnitPlugin};
+use crate::{BattlePlugin, GamePlugin, PlanningPlugin, UnitPlugin};
 
 pub struct GamePlugins;
 
@@ -9,6 +9,9 @@ impl PluginGroup for GamePlugins {
         let mut group = PluginGroupBuilder::start::<Self>();
 
         group = group.add(GamePlugin);
+
+        // planning
+        group = group.add(PlanningPlugin);
 
         // battle
         group = group.add(BattlePlugin);

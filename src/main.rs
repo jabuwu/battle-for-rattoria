@@ -1,7 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
-use bevy_game::{AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GamePlugins, MainMenuPlugins};
+use bevy_game::{
+    AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GamePlugins, MainMenuPlugins, Persistent,
+};
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -24,9 +26,14 @@ fn main() {
         .add_plugins(CommonPlugins)
         .add_plugins(MainMenuPlugins)
         .add_plugins(GamePlugins)
+        .add_system(setup.in_schedule(CoreSchedule::Startup))
         .add_system(set_window_icon.in_schedule(CoreSchedule::Startup))
         .insert_resource(FixedTime::new_from_secs(1. / 120.))
         .run();
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn((Camera2dBundle::default(), Persistent));
 }
 
 // Sets the icon on windows and X11

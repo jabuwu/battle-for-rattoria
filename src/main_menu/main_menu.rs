@@ -14,8 +14,6 @@ impl Plugin for MainMenuPlugin {
 }
 
 fn main_menu_enter(mut commands: Commands, asset_library: Res<AssetLibrary>) {
-    commands.spawn(Camera2dBundle::default());
-
     commands.spawn(Text2dBundle {
         text: Text::from_section(
             "Main Menu\nPress space to play",
@@ -33,6 +31,6 @@ fn main_menu_enter(mut commands: Commands, asset_library: Res<AssetLibrary>) {
 
 fn main_menu_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::Space) {
-        next_state.set(AppState::Game);
+        next_state.set(AppState::GamePlanning);
     }
 }
