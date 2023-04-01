@@ -1,9 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
-use bevy_game::{
-    AppState, AppStatePlugin, CommonPlugins, GamePlugins, MainMenuPlugin, MainMenuPlugins,
-};
+use bevy_game::{AppStatePlugin, CommonPlugins, GamePlugins, MainMenuPlugins};
 use std::io::Cursor;
 use winit::window::Icon;
 
