@@ -1,6 +1,10 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 
-use crate::{AddFixedEvent, AppState, AssetLibrary, EventSet, FixedInput, UnitSpawnEvent};
+use crate::{
+    AddFixedEvent, AppState, AssetLibrary, Depth, EventSet, FixedInput, Transform2, UnitSpawnEvent,
+    DEPTH_BATTLE_TEXT,
+};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum BattleSystem {
@@ -66,21 +70,40 @@ fn battle_start(
     asset_library: Res<AssetLibrary>,
 ) {
     for _ in start_events.iter() {
-        commands.spawn(Text2dBundle {
-            text: Text::from_section(
-                "Battling!",
-                TextStyle {
-                    font: asset_library.font_placeholder.clone(),
-                    font_size: 72.,
-                    color: Color::WHITE,
-                    ..Default::default()
-                },
-            )
-            .with_alignment(TextAlignment::Center),
-            transform: Transform::from_xyz(0., 200., 0.),
-            ..Default::default()
-        });
-        unit_spawn_events.send_default();
+        commands.spawn((
+            Text2dBundle {
+                text: Text::from_section(
+                    "Battling!",
+                    TextStyle {
+                        font: asset_library.font_placeholder.clone(),
+                        font_size: 72.,
+                        color: Color::WHITE,
+                        ..Default::default()
+                    },
+                )
+                .with_alignment(TextAlignment::Center),
+                ..Default::default()
+            },
+            Transform2::from_xy(0., 200.),
+            Depth::from(DEPTH_BATTLE_TEXT),
+        ));
+        let mut rng = thread_rng();
+        for _ in 0..10 {
+            let x = rng.gen_range(-400.0..-160.0);
+            let y = rng.gen_range(-80.0..80.0);
+            unit_spawn_events.send(UnitSpawnEvent {
+                position: Vec2::new(x, y),
+                moving_right: true,
+            });
+        }
+        for _ in 0..10 {
+            let x = rng.gen_range(160.0..400.0);
+            let y = rng.gen_range(-80.0..80.0);
+            unit_spawn_events.send(UnitSpawnEvent {
+                position: Vec2::new(x, y),
+                moving_right: false,
+            });
+        }
     }
 }
 

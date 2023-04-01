@@ -2,7 +2,7 @@ use bevy::{app::PluginGroupBuilder, prelude::*};
 use bevy_audio_plus::AudioPlusPlugin;
 use bevy_spine::SpinePlugin;
 
-use crate::{FixedTimestepPlugin, ForceRatioPlugin};
+use crate::{FixedTimestepPlugin, ForceRatioPlugin, Transform2Plugin, YOrderPlugin};
 
 pub struct CommonPlugins;
 
@@ -15,6 +15,8 @@ impl PluginGroup for CommonPlugins {
 
         group = group.add(FixedTimestepPlugin);
         group = group.add(ForceRatioPlugin);
+        group = group.add(Transform2Plugin);
+        group = group.add(YOrderPlugin);
 
         group
     }
