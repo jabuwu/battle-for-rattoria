@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::AppState;
+use crate::{AppState, AssetLibrary};
 
 pub struct MainMenuPlugin;
 
@@ -13,14 +13,14 @@ impl Plugin for MainMenuPlugin {
     }
 }
 
-fn main_menu_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn main_menu_enter(mut commands: Commands, asset_library: Res<AssetLibrary>) {
     commands.spawn(Camera2dBundle::default());
 
     commands.spawn(Text2dBundle {
         text: Text::from_section(
             "Main Menu\nPress space to play",
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font: asset_library.font_placeholder.clone(),
                 font_size: 72.,
                 color: Color::WHITE,
                 ..Default::default()

@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
-use bevy_game::{AppStatePlugin, CommonPlugins, GamePlugins, MainMenuPlugins};
+use bevy_game::{AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GamePlugins, MainMenuPlugins};
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -20,10 +20,12 @@ fn main() {
             ..default()
         }))
         .add_plugin(AppStatePlugin)
+        .add_plugin(AssetLibraryPlugin)
         .add_plugins(CommonPlugins)
         .add_plugins(MainMenuPlugins)
         .add_plugins(GamePlugins)
-        .add_system(set_window_icon.on_startup())
+        .add_system(set_window_icon.in_schedule(CoreSchedule::Startup))
+        .insert_resource(FixedTime::new_from_secs(1. / 120.))
         .run();
 }
 

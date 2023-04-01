@@ -519,6 +519,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_audio_plus",
+ "bevy_kira_audio",
  "embed-resource",
  "image",
  "rand",

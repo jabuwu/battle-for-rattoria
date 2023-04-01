@@ -1,10 +1,7 @@
 use bevy::prelude::*;
-use bevy_audio_plus::{
-    prelude::{AudioPlusListener, AudioPlusSoundEffect},
-    source::AudioPlusSource,
-};
+use bevy_audio_plus::prelude::AudioPlusListener;
 
-use crate::AppState;
+use crate::{AppState, BattleStartEvent};
 
 pub struct GamePlugin;
 
@@ -17,29 +14,10 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn game_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn game_enter(mut commands: Commands, mut battle_start_events: EventWriter<BattleStartEvent>) {
     commands.spawn((Camera2dBundle::default(), AudioPlusListener));
 
-    commands.spawn(
-        AudioPlusSource::new(AudioPlusSoundEffect::single(
-            asset_server.load("audio/flying.ogg"),
-        ))
-        .as_looping(),
-    );
-
-    commands.spawn(Text2dBundle {
-        text: Text::from_section(
-            "Game!\nPress escape to go back!",
-            TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                font_size: 72.,
-                color: Color::WHITE,
-                ..Default::default()
-            },
-        )
-        .with_alignment(TextAlignment::Center),
-        ..Default::default()
-    });
+    battle_start_events.send_default();
 }
 
 fn game_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
