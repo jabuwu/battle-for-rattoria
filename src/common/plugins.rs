@@ -1,5 +1,6 @@
 use bevy::{app::PluginGroupBuilder, prelude::*};
 use bevy_audio_plus::AudioPlusPlugin;
+use bevy_spine::SpinePlugin;
 
 use crate::ForceRatioPlugin;
 
@@ -10,6 +11,7 @@ impl PluginGroup for CommonPlugins {
         let mut group = PluginGroupBuilder::start::<Self>();
 
         group = group.add(AudioPlusPlugin);
+        group = group.add(SpinePlugin);
 
         group = group.add(ForceRatioPlugin);
 

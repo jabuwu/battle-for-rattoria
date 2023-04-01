@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
+use bevy_spine::SkeletonData;
 
 #[derive(Resource, Default)]
 pub struct AssetLibrary {
     pub font_placeholder: Handle<Font>,
     pub sound_placeholder: Handle<AudioSource>,
     pub image_rat: Handle<Image>,
+    pub spine_rat: Handle<SkeletonData>,
 }
 
 pub struct AssetLibraryPlugin;
@@ -20,8 +22,17 @@ impl Plugin for AssetLibraryPlugin {
     }
 }
 
-fn asset_library_load(mut asset_library: ResMut<AssetLibrary>, asset_server: Res<AssetServer>) {
+fn asset_library_load(
+    mut asset_library: ResMut<AssetLibrary>,
+    mut skeletons: ResMut<Assets<SkeletonData>>,
+    asset_server: Res<AssetServer>,
+) {
     asset_library.font_placeholder = asset_server.load("fonts/FiraSans-Bold.ttf");
     asset_library.sound_placeholder = asset_server.load("audio/flying.ogg");
     asset_library.image_rat = asset_server.load("images/rat.png");
+
+    asset_library.spine_rat = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/rat_test/skeleton.skel"),
+        asset_server.load("spines/rat_test/rat_test.atlas"),
+    ));
 }

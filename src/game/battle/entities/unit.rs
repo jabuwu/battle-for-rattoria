@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_spine::{Spine, SpineBundle, SpineReadyEvent, SpineSet};
 
 use crate::{AddFixedEvent, AssetLibrary, EventSet};
 
@@ -19,6 +20,7 @@ impl Plugin for UnitPlugin {
                     .in_set(UnitSystem::Spawn)
                     .after(EventSet::<UnitSpawnEvent>::Sender),
             )
+            .add_system(unit_spine_ready.in_set(SpineSet::OnReady))
             .add_system(
                 unit_update
                     .in_schedule(CoreSchedule::FixedUpdate)
@@ -40,8 +42,8 @@ fn unit_spawn(
 ) {
     for _ in spawn_events.iter() {
         commands.spawn((
-            SpriteBundle {
-                texture: asset_library.image_rat.clone(),
+            SpineBundle {
+                skeleton: asset_library.spine_rat.clone(),
                 transform: Transform::from_xyz(-300., 0., 0.)
                     .with_scale(Vec2::splat(0.4).extend(1.)),
                 ..Default::default()
@@ -51,13 +53,21 @@ fn unit_spawn(
     }
 }
 
-fn unit_update(
-    mut unit_query: Query<&mut Transform, With<Unit>>,
-    time: Res<FixedTime>,
-    t: Res<Time>,
+fn unit_spine_ready(
+    mut spine_ready_events: EventReader<SpineReadyEvent>,
+    mut spine_query: Query<&mut Spine, With<Unit>>,
 ) {
+    for spine_ready_event in spine_ready_events.iter() {
+        if let Ok(mut spine) = spine_query.get_mut(spine_ready_event.entity) {
+            let _ = spine
+                .animation_state
+                .set_animation_by_name(0, "animation", true);
+        }
+    }
+}
+
+fn unit_update(mut unit_query: Query<&mut Transform, With<Unit>>, time: Res<FixedTime>) {
     for mut unit_transform in unit_query.iter_mut() {
         unit_transform.translation.x += time.period.as_secs_f32() * 100.;
-        unit_transform.rotation = Quat::from_rotation_z((t.elapsed_seconds() * 19.).sin() * 0.05);
     }
 }
