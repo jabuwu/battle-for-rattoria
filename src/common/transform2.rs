@@ -127,6 +127,7 @@ fn update_transform2_recursive(
 pub enum DepthLayer {
     Back(f32),
     YOrder(f32),
+    Foreground(f32),
     Front(f32),
 }
 
@@ -134,8 +135,9 @@ impl From<DepthLayer> for Depth {
     fn from(depth_layer: DepthLayer) -> Self {
         match depth_layer {
             DepthLayer::Back(x) => Depth::Exact(0.01_f32.lerp(0.29, x)),
-            DepthLayer::YOrder(x) => Depth::Exact(0.3_f32.lerp(0.79, x)),
-            DepthLayer::Front(x) => Depth::Exact(0.8_f32.lerp(0.99, x)),
+            DepthLayer::YOrder(x) => Depth::Exact(0.3_f32.lerp(0.69, x)),
+            DepthLayer::Foreground(x) => Depth::Exact(0.7_f32.lerp(0.89, x)),
+            DepthLayer::Front(x) => Depth::Exact(0.9_f32.lerp(0.99, x)),
         }
     }
 }

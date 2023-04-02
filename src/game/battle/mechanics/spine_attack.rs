@@ -5,7 +5,6 @@ use crate::{DamageSystem, HurtBox, UpdateSet};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum SpineAttackSystem {
-    Ready,
     Update,
 }
 
@@ -14,11 +13,6 @@ pub struct SpineAttackPlugin;
 impl Plugin for SpineAttackPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(
-            spine_attack_ready
-                .in_set(SpineAttackSystem::Ready)
-                .in_set(SpineSet::OnReady),
-        )
-        .add_system(
             spine_attack_update
                 .in_schedule(CoreSchedule::FixedUpdate)
                 .in_set(SpineAttackSystem::Update)
@@ -31,19 +25,6 @@ impl Plugin for SpineAttackPlugin {
 #[derive(Default, Component)]
 pub struct SpineAttack {
     pub hurt_box: HurtBox,
-}
-
-pub fn spine_attack_ready(
-    mut spine_ready_events: EventReader<SpineReadyEvent>,
-    mut spine_query: Query<&mut Spine, With<SpineAttack>>,
-) {
-    for spine_ready_event in spine_ready_events.iter() {
-        if let Ok(mut spine) = spine_query.get_mut(spine_ready_event.entity) {
-            let _ = spine
-                .animation_state
-                .set_animation_by_name(0, "animation", false);
-        }
-    }
 }
 
 pub fn spine_attack_update(
@@ -67,13 +48,6 @@ pub fn spine_attack_update(
                             }
                         }
                         _ => {}
-                    }
-                }
-            }
-            SpineEvent::Complete { entity, .. } => {
-                if spine_attack_query.contains(*entity) {
-                    if let Some(entity_commands) = commands.get_entity(*entity) {
-                        entity_commands.despawn_recursive();
                     }
                 }
             }

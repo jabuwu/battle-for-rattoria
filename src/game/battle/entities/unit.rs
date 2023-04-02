@@ -6,13 +6,14 @@ use strum_macros::EnumIter;
 use crate::{
     AddFixedEvent, AssetLibrary, CollisionShape, DamageKind, DamageReceiveEvent, DamageSystem,
     DefenseKind, Depth, DepthLayer, EventSet, FramesToLive, Health, HealthDieEvent, HitBox,
-    HurtBox, SpawnSet, SpineAttack, Team, Transform2, UpdateSet, YOrder,
+    HurtBox, SpawnSet, SpineAttack, SpineFx, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum UnitSystem {
     Spawn,
     Slow,
+    DamageFx,
     Update,
     Attack,
     Die,
@@ -36,7 +37,15 @@ impl Plugin for UnitPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::Slow)
                     .in_set(UpdateSet)
-                    .before(UnitSystem::Update),
+                    .before(UnitSystem::Update)
+                    .before(EventSet::<DamageReceiveEvent>::Sender),
+            )
+            .add_system(
+                unit_damage_fx
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::DamageFx)
+                    .in_set(UpdateSet)
+                    .before(EventSet::<DamageReceiveEvent>::Sender),
             )
             .add_system(
                 unit_update
@@ -289,6 +298,31 @@ fn unit_slow(
     }
 }
 
+fn unit_damage_fx(
+    mut damage_receive_events: EventReader<DamageReceiveEvent>,
+    mut commands: Commands,
+    unit_query: Query<&GlobalTransform, With<Unit>>,
+    asset_library: Res<AssetLibrary>,
+) {
+    let mut rng = thread_rng();
+    for damage_receive_event in damage_receive_events.iter() {
+        if let Ok(unit_transform) = unit_query.get(damage_receive_event.entity) {
+            commands.spawn((
+                SpineBundle {
+                    skeleton: asset_library.spine_fx_blood_splat.clone(),
+                    ..Default::default()
+                },
+                Transform2::from_translation(
+                    unit_transform.translation().truncate()
+                        + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(-70.0..70.0)),
+                ),
+                Depth::from(DEPTH_BLOOD_FX),
+                SpineFx,
+            ));
+        }
+    }
+}
+
 fn unit_update(mut unit_query: Query<(&mut Transform2, &Unit)>, time: Res<FixedTime>) {
     for (mut unit_transform, unit) in unit_query.iter_mut() {
         let speed = if unit.slow_timer > 0. {
@@ -359,6 +393,7 @@ fn unit_attack(
                                         max_hits: attack_stats.hit_count,
                                     },
                                 },
+                                SpineFx,
                                 Transform2::from_translation(Vec2::new(
                                     rng.gen_range(-200.0..200.0),
                                     -200.,

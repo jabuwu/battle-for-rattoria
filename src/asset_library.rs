@@ -11,6 +11,7 @@ pub struct AssetLibrary {
     pub spine_rat_warrior: Handle<SkeletonData>,
     pub spine_rat_mage: Handle<SkeletonData>,
     pub spine_attack_magic: Handle<SkeletonData>,
+    pub spine_fx_blood_splat: Handle<SkeletonData>,
 }
 
 pub struct AssetLibraryPlugin;
@@ -52,5 +53,10 @@ fn asset_library_load(
     asset_library.spine_attack_magic = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/magic_attack/skeleton.skel"),
         asset_server.load("spines/magic_attack/magic_attack.atlas"),
+    ));
+
+    asset_library.spine_fx_blood_splat = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/blood_splat/skeleton.skel"),
+        asset_server.load("spines/blood_splat/blood_splat.atlas"),
     ));
 }
