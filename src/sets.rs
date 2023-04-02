@@ -6,6 +6,12 @@ use std::{
 
 use bevy::prelude::*;
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct SpawnSet;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct UpdateSet;
+
 #[derive(Copy, SystemSet)]
 pub enum EventSet<T: Send + Sync + 'static> {
     Sender,
@@ -56,3 +62,12 @@ impl<T: Send + Sync + 'static> PartialEq for EventSet<T> {
 }
 
 impl<T: Send + Sync + 'static> Eq for EventSet<T> {}
+
+pub struct SetsPlugin;
+
+impl Plugin for SetsPlugin {
+    fn build(&self, app: &mut App) {
+        let schedule = app.get_schedule_mut(CoreSchedule::FixedUpdate).unwrap();
+        schedule.configure_set(UpdateSet.after(SpawnSet));
+    }
+}

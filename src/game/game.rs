@@ -6,9 +6,9 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
+        app.init_resource::<GameState>();
         if app.world.contains_resource::<State<AppState>>() {
-            app.init_resource::<GameState>()
-                .add_system(game_update.run_if(in_game_state()));
+            app.add_system(game_update.run_if(in_game_state()));
         }
     }
 }

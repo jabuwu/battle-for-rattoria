@@ -14,7 +14,7 @@ pub struct GameState {
 impl Default for GameState {
     fn default() -> Self {
         Self {
-            food: 30,
+            food: 0,
             available_army: UnitComposition {
                 peasants: 100,
                 warriors: 20,

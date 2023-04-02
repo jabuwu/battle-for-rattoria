@@ -6,7 +6,7 @@ use bevy_spine::SkeletonData;
 pub struct AssetLibrary {
     pub font_placeholder: Handle<Font>,
     pub sound_placeholder: Handle<AudioSource>,
-    pub image_rat: Handle<Image>,
+    pub image_background_bg: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
 }
@@ -30,7 +30,7 @@ fn asset_library_load(
 ) {
     asset_library.font_placeholder = asset_server.load("fonts/FiraSans-Bold.ttf");
     asset_library.sound_placeholder = asset_server.load("audio/flying.ogg");
-    asset_library.image_rat = asset_server.load("images/rat.png");
+    asset_library.image_background_bg = asset_server.load("images/battlefield_bg.png");
 
     asset_library.spine_rat = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/rat_test/skeleton.skel"),

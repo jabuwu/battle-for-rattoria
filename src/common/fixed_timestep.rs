@@ -1,14 +1,28 @@
 use std::{hash::Hash, marker::PhantomData};
 
-use bevy::{input::InputSystem, prelude::*, reflect::Reflect};
+use bevy::{
+    input::InputSystem,
+    prelude::*,
+    reflect::Reflect,
+    transform::systems::{propagate_transforms, sync_simple_transforms},
+};
+
+use crate::transform2_propagate;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub struct FixedInputSystem;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
+pub enum FixedTransformSystem {
+    Transform2Propagate,
+    TransformPropagate,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 #[system_set(base)]
 pub enum FixedSet {
     Update,
+    UpdateFlush,
     PostUpdate,
 }
 
@@ -20,12 +34,33 @@ impl Plugin for FixedTimestepPlugin {
             let schedule = app.get_schedule_mut(CoreSchedule::FixedUpdate).unwrap();
             schedule
                 .set_default_base_set(FixedSet::Update)
-                .configure_set(FixedSet::Update.before(FixedSet::PostUpdate));
+                .configure_set(FixedSet::Update.before(FixedSet::UpdateFlush))
+                .configure_set(FixedSet::UpdateFlush.before(FixedSet::PostUpdate));
         }
         app.add_fixed_input::<KeyCode>()
             .add_fixed_input::<ScanCode>()
             .add_fixed_input::<MouseButton>()
-            .add_fixed_input::<GamepadButton>();
+            .add_fixed_input::<GamepadButton>()
+            .add_system(
+                apply_system_buffers
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_base_set(FixedSet::UpdateFlush),
+            )
+            .add_systems((
+                transform2_propagate
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(FixedTransformSystem::Transform2Propagate)
+                    .in_base_set(FixedSet::PostUpdate)
+                    .before(FixedTransformSystem::TransformPropagate),
+                sync_simple_transforms
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(FixedTransformSystem::TransformPropagate)
+                    .in_base_set(FixedSet::PostUpdate),
+                propagate_transforms
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(FixedTransformSystem::TransformPropagate)
+                    .in_base_set(FixedSet::PostUpdate),
+            ));
     }
 }
 

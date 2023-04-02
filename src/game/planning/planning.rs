@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
-use crate::{AddFixedEvent, AppState, GameState, UnitKind};
+use crate::{AddFixedEvent, AppState, GameState, SpawnSet, UnitKind, UpdateSet};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum PlanningSystem {
@@ -29,12 +29,14 @@ impl Plugin for PlanningPlugin {
             .add_system(
                 planning_start
                     .in_schedule(CoreSchedule::FixedUpdate)
-                    .in_set(PlanningSystem::Start),
+                    .in_set(PlanningSystem::Start)
+                    .in_set(SpawnSet),
             )
             .add_system(
                 planning_update
                     .in_schedule(CoreSchedule::FixedUpdate)
-                    .in_set(PlanningSystem::Update),
+                    .in_set(PlanningSystem::Update)
+                    .in_set(UpdateSet),
             )
             .add_system(planning_ui.in_set(PlanningSystem::Ui));
     }

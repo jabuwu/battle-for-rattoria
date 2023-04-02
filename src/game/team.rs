@@ -20,4 +20,11 @@ impl Team {
             Self::Enemy => DamageFlags::FRIENDLY,
         }
     }
+
+    pub fn move_direction(&self) -> f32 {
+        match self {
+            Self::Friendly => 1.,
+            Self::Enemy => -1.,
+        }
+    }
 }

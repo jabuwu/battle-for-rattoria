@@ -39,7 +39,11 @@ impl Plugin for GameDirectorPlugin {
 #[derive(Component)]
 pub struct GameDirector;
 
-fn game_director_planning_enter(mut planning_start_events: EventWriter<PlanningStartEvent>) {
+fn game_director_planning_enter(
+    mut game_state: ResMut<GameState>,
+    mut planning_start_events: EventWriter<PlanningStartEvent>,
+) {
+    game_state.food += 30;
     planning_start_events.send_default();
 }
 
@@ -53,7 +57,7 @@ fn game_director_battle_enter(
             friendly_units,
             enemy_units: UnitComposition {
                 peasants: 10,
-                warriors: 10,
+                warriors: 3,
             },
         },
     });

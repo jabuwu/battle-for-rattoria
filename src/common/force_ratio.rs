@@ -2,8 +2,8 @@ use bevy::{prelude::*, transform::TransformSystem};
 
 use crate::Persistent;
 
-const DESIRED_WIDTH: f32 = 1280.;
-const DESIRED_HEIGHT: f32 = 768.;
+const DESIRED_WIDTH: f32 = 1280. * 2.;
+const DESIRED_HEIGHT: f32 = 768. * 2.;
 const RATIO_BAR_SIZE: f32 = 100_000.;
 
 pub struct ForceRatioPlugin;

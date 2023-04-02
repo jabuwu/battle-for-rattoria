@@ -3,8 +3,8 @@ use rand::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, Depth, EventSet, FixedInput, Team, Transform2, UnitKind,
-    UnitSpawnEvent, DEPTH_BATTLE_TEXT,
+    AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, Depth, EventSet, FixedInput, SpawnSet,
+    Team, Transform2, UnitKind, UnitSpawnEvent, UpdateSet, DEPTH_BATTLE_TEXT,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -24,6 +24,8 @@ impl Plugin for BattlePlugin {
                 battle_start
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(BattleSystem::Start)
+                    .in_set(SpawnSet)
+                    .in_set(EventSet::<BattlefieldSpawnEvent>::Sender)
                     .in_set(EventSet::<UnitSpawnEvent>::Sender)
                     .after(EventSet::<BattleStartEvent>::Sender),
             )
@@ -31,6 +33,7 @@ impl Plugin for BattlePlugin {
                 battle_update
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(BattleSystem::Update)
+                    .in_set(UpdateSet)
                     .in_set(EventSet::<BattleEndedEvent>::Sender),
             );
     }
@@ -114,6 +117,7 @@ pub struct BattleEndedEvent {
 fn battle_start(
     mut start_events: EventReader<BattleStartEvent>,
     mut battle_state: ResMut<BattleState>,
+    mut battlefield_spawn_events: EventWriter<BattlefieldSpawnEvent>,
     mut unit_spawn_events: EventWriter<UnitSpawnEvent>,
     mut commands: Commands,
     asset_library: Res<AssetLibrary>,
@@ -128,7 +132,7 @@ fn battle_start(
                         value: "Battling!".to_owned(),
                         style: TextStyle {
                             font: asset_library.font_placeholder.clone(),
-                            font_size: 72.,
+                            font_size: 128.,
                             color: Color::WHITE,
                             ..Default::default()
                         },
@@ -137,7 +141,7 @@ fn battle_start(
                         value: "\nPress space to skip".to_owned(),
                         style: TextStyle {
                             font: asset_library.font_placeholder.clone(),
-                            font_size: 22.,
+                            font_size: 42.,
                             color: Color::WHITE,
                             ..Default::default()
                         },
@@ -146,13 +150,17 @@ fn battle_start(
                 .with_alignment(TextAlignment::Center),
                 ..Default::default()
             },
-            Transform2::from_xy(0., 300.),
+            Transform2::from_xy(0., 600.),
             Depth::from(DEPTH_BATTLE_TEXT),
         ));
+        battlefield_spawn_events.send_default();
+        const X_DISTANCE: f32 = 400.;
+        const Y_MIN: f32 = -400.;
+        const Y_MAX: f32 = -100.;
         let mut rng = thread_rng();
         for _ in 0..start_event.config.friendly_units.peasants {
-            let x = rng.gen_range(-400.0..-160.0);
-            let y = rng.gen_range(-40.0..40.0);
+            let x = rng.gen_range(-500.0..-0.0) - X_DISTANCE;
+            let y = rng.gen_range(Y_MIN..Y_MAX);
             unit_spawn_events.send(UnitSpawnEvent {
                 kind: UnitKind::Peasant,
                 position: Vec2::new(x, y),
@@ -160,8 +168,8 @@ fn battle_start(
             });
         }
         for _ in 0..start_event.config.friendly_units.warriors {
-            let x = rng.gen_range(-700.0..-560.0);
-            let y = rng.gen_range(-40.0..40.0);
+            let x = rng.gen_range(-1100.0..-820.0) - X_DISTANCE;
+            let y = rng.gen_range(Y_MIN..Y_MAX);
             unit_spawn_events.send(UnitSpawnEvent {
                 kind: UnitKind::Warrior,
                 position: Vec2::new(x, y),
@@ -169,8 +177,8 @@ fn battle_start(
             });
         }
         for _ in 0..start_event.config.enemy_units.peasants {
-            let x = rng.gen_range(160.0..400.0);
-            let y = rng.gen_range(-40.0..40.0);
+            let x = rng.gen_range(0.0..500.0) + X_DISTANCE;
+            let y = rng.gen_range(Y_MIN..Y_MAX);
             unit_spawn_events.send(UnitSpawnEvent {
                 kind: UnitKind::Peasant,
                 position: Vec2::new(x, y),
@@ -178,8 +186,8 @@ fn battle_start(
             });
         }
         for _ in 0..start_event.config.enemy_units.warriors {
-            let x = rng.gen_range(560.0..700.0);
-            let y = rng.gen_range(-40.0..40.0);
+            let x = rng.gen_range(820.0..1100.0) + X_DISTANCE;
+            let y = rng.gen_range(Y_MIN..Y_MAX);
             unit_spawn_events.send(UnitSpawnEvent {
                 kind: UnitKind::Warrior,
                 position: Vec2::new(x, y),
