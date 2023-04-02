@@ -2,7 +2,8 @@
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_game::{
-    AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GamePlugins, MainMenuPlugins, Persistent,
+    AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GameDirector, GamePlugins, MainMenuPlugins,
+    Persistent,
 };
 use std::io::Cursor;
 use winit::window::Icon;
@@ -34,6 +35,7 @@ fn main() {
 
 fn setup(mut commands: Commands) {
     commands.spawn((Camera2dBundle::default(), Persistent));
+    commands.spawn((GameDirector, Persistent));
 }
 
 // Sets the icon on windows and X11

@@ -51,8 +51,8 @@ fn unit_spawn(
                 ..Default::default()
             },
             Transform2::from_translation(spawn_event.position).with_scale(Vec2::new(
-                if spawn_event.moving_right { 0.4 } else { -0.4 },
-                0.4,
+                if spawn_event.moving_right { 0.3 } else { -0.3 },
+                0.3,
             )),
             Depth::from(DepthLayer::YOrder(0.)),
             YOrder,

@@ -1,5 +1,6 @@
 use bevy::{app::PluginGroupBuilder, prelude::*};
 use bevy_audio_plus::AudioPlusPlugin;
+use bevy_egui::EguiPlugin;
 use bevy_spine::SpinePlugin;
 
 use crate::{FixedTimestepPlugin, ForceRatioPlugin, Transform2Plugin, YOrderPlugin};
@@ -12,6 +13,7 @@ impl PluginGroup for CommonPlugins {
 
         group = group.add(AudioPlusPlugin);
         group = group.add(SpinePlugin);
+        group = group.add(EguiPlugin);
 
         group = group.add(FixedTimestepPlugin);
         group = group.add(ForceRatioPlugin);

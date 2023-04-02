@@ -7,6 +7,7 @@ pub enum PlanningSystem {
     Enter,
     Start,
     Update,
+    LeaveState,
 }
 
 pub struct PlanningPlugin;
@@ -21,6 +22,7 @@ impl Plugin for PlanningPlugin {
             );
         }
         app.add_fixed_event::<PlanningStartEvent>()
+            .add_fixed_event::<PlanningEndedEvent>()
             .add_system(
                 planning_start
                     .in_schedule(CoreSchedule::FixedUpdate)
@@ -28,7 +30,6 @@ impl Plugin for PlanningPlugin {
             )
             .add_system(
                 planning_update
-                    .run_if(in_state(AppState::GamePlanning))
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(PlanningSystem::Update),
             );
@@ -37,6 +38,11 @@ impl Plugin for PlanningPlugin {
 
 #[derive(Default)]
 pub struct PlanningStartEvent;
+
+#[derive(Default)]
+pub struct PlanningEndedEvent {
+    _private: (),
+}
 
 fn planning_enter(mut start_events: EventWriter<PlanningStartEvent>) {
     start_events.send_default();
@@ -64,8 +70,11 @@ fn planning_start(
     }
 }
 
-fn planning_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<FixedInput<KeyCode>>) {
+fn planning_update(
+    mut planning_ended_events: EventWriter<PlanningEndedEvent>,
+    keys: Res<FixedInput<KeyCode>>,
+) {
     if keys.just_pressed(KeyCode::Space) {
-        next_state.set(AppState::GameBattle);
+        planning_ended_events.send(PlanningEndedEvent { _private: () });
     }
 }
