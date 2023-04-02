@@ -60,10 +60,20 @@ pub struct BattleConfig {
     pub enemy_units: UnitComposition,
 }
 
+impl BattleConfig {
+    pub fn get_units(&self, team: Team) -> &UnitComposition {
+        match team {
+            Team::Friendly => &self.friendly_units,
+            Team::Enemy => &self.enemy_units,
+        }
+    }
+}
+
 #[derive(Default, Clone)]
 pub struct UnitComposition {
     pub peasants: usize,
     pub warriors: usize,
+    pub mages: usize,
 }
 
 impl UnitComposition {
@@ -75,6 +85,7 @@ impl UnitComposition {
         match unit_kind {
             UnitKind::Peasant => self.peasants,
             UnitKind::Warrior => self.warriors,
+            UnitKind::Mage => self.mages,
         }
     }
 
@@ -82,6 +93,7 @@ impl UnitComposition {
         match unit_kind {
             UnitKind::Peasant => self.peasants = i,
             UnitKind::Warrior => self.warriors = i,
+            UnitKind::Mage => self.mages = i,
         }
     }
 
@@ -154,45 +166,28 @@ fn battle_start(
             Depth::from(DEPTH_BATTLE_TEXT),
         ));
         battlefield_spawn_events.send_default();
+
         const X_DISTANCE: f32 = 400.;
         const Y_MIN: f32 = -400.;
         const Y_MAX: f32 = -100.;
         let mut rng = thread_rng();
-        for _ in 0..start_event.config.friendly_units.peasants {
-            let x = rng.gen_range(-500.0..-0.0) - X_DISTANCE;
-            let y = rng.gen_range(Y_MIN..Y_MAX);
-            unit_spawn_events.send(UnitSpawnEvent {
-                kind: UnitKind::Peasant,
-                position: Vec2::new(x, y),
-                team: Team::Friendly,
-            });
-        }
-        for _ in 0..start_event.config.friendly_units.warriors {
-            let x = rng.gen_range(-1100.0..-820.0) - X_DISTANCE;
-            let y = rng.gen_range(Y_MIN..Y_MAX);
-            unit_spawn_events.send(UnitSpawnEvent {
-                kind: UnitKind::Warrior,
-                position: Vec2::new(x, y),
-                team: Team::Friendly,
-            });
-        }
-        for _ in 0..start_event.config.enemy_units.peasants {
-            let x = rng.gen_range(0.0..500.0) + X_DISTANCE;
-            let y = rng.gen_range(Y_MIN..Y_MAX);
-            unit_spawn_events.send(UnitSpawnEvent {
-                kind: UnitKind::Peasant,
-                position: Vec2::new(x, y),
-                team: Team::Enemy,
-            });
-        }
-        for _ in 0..start_event.config.enemy_units.warriors {
-            let x = rng.gen_range(820.0..1100.0) + X_DISTANCE;
-            let y = rng.gen_range(Y_MIN..Y_MAX);
-            unit_spawn_events.send(UnitSpawnEvent {
-                kind: UnitKind::Warrior,
-                position: Vec2::new(x, y),
-                team: Team::Enemy,
-            });
+        for team in Team::iter() {
+            let units = start_event.config.get_units(team);
+            for unit_kind in UnitKind::iter() {
+                let unit_stats = unit_kind.stats();
+                for _ in 0..units.get_count(unit_kind) {
+                    let x = (rng
+                        .gen_range(unit_stats.spawn_distance_min..unit_stats.spawn_distance_max)
+                        + X_DISTANCE)
+                        * -team.move_direction();
+                    let y = rng.gen_range(Y_MIN..Y_MAX);
+                    unit_spawn_events.send(UnitSpawnEvent {
+                        kind: unit_kind,
+                        position: Vec2::new(x, y),
+                        team,
+                    });
+                }
+            }
         }
     }
 }

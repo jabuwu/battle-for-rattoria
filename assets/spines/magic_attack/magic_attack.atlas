@@ -1,0 +1,11 @@
+magic_attack.png
+size:790,330
+filter:Nearest,Linear
+pma:true
+magic_boom
+bounds:2,56,786,272
+offsets:102,90,1000,1000
+magic_fall
+bounds:2,2,52,462
+offsets:472,491,1000,1000
+rotate:90

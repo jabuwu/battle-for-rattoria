@@ -1,6 +1,8 @@
+use strum_macros::EnumIter;
+
 use crate::DamageFlags;
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, EnumIter)]
 pub enum Team {
     Friendly,
     Enemy,

@@ -7,8 +7,9 @@ use bevy_egui::{
 };
 use bevy_game::{
     cleanup_non_persistent_entities, AssetLibraryPlugin, BattleConfig, BattleStartEvent,
-    CommonPlugins, EventSet, GamePlugins, Persistent, UnitComposition,
+    CommonPlugins, EventSet, GamePlugins, Persistent, UnitComposition, UnitKind,
 };
+use strum::IntoEnumIterator;
 
 fn main() {
     App::new()
@@ -34,10 +35,12 @@ fn main() {
                 friendly_units: UnitComposition {
                     peasants: 10,
                     warriors: 3,
+                    mages: 3,
                 },
                 enemy_units: UnitComposition {
                     peasants: 10,
                     warriors: 3,
+                    mages: 3,
                 },
             },
         })
@@ -91,14 +94,14 @@ fn fixed_update(
 fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
     egui::Window::new("Battle").show(contexts.ctx_mut(), |ui| {
         fn unit_composition_ui(ui: &mut Ui, unit_composition: &mut UnitComposition) {
-            ui.horizontal(|ui| {
-                ui.label("Peasants");
-                ui.add(egui::DragValue::new(&mut unit_composition.peasants).clamp_range(1..=100));
-            });
-            ui.horizontal(|ui| {
-                ui.label("Warriors");
-                ui.add(egui::DragValue::new(&mut unit_composition.warriors).clamp_range(1..=100));
-            });
+            for unit_kind in UnitKind::iter() {
+                ui.horizontal(|ui| {
+                    ui.label(unit_kind.name_plural());
+                    let mut count = unit_composition.get_count(unit_kind);
+                    ui.add(egui::DragValue::new(&mut count).clamp_range(1..=100));
+                    unit_composition.set_count(unit_kind, count);
+                });
+            }
         }
 
         ui.label("Friendly Units");

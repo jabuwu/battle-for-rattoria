@@ -1,12 +1,12 @@
 use bevy::prelude::*;
-use bevy_spine::{Spine, SpineBundle, SpineEvent, SpineReadyEvent, SpineSet};
+use bevy_spine::{SkeletonData, Spine, SpineBundle, SpineEvent, SpineReadyEvent, SpineSet};
 use rand::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AssetLibrary, CollisionShape, DamageKind, DamageReceiveEvent, DamageSystem,
     DefenseKind, Depth, DepthLayer, EventSet, FramesToLive, Health, HealthDieEvent, HitBox,
-    HurtBox, SpawnSet, Team, Transform2, UpdateSet, YOrder,
+    HurtBox, SpawnSet, SpineAttack, Team, Transform2, UpdateSet, YOrder,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -66,6 +66,7 @@ impl Plugin for UnitPlugin {
 pub enum UnitKind {
     Peasant,
     Warrior,
+    Mage,
 }
 
 impl UnitKind {
@@ -73,25 +74,33 @@ impl UnitKind {
         match self {
             UnitKind::Peasant => UnitStats {
                 cost: 1,
-                speed: 400.,
-                speed_slow: 300.,
+                speed: 300.,
+                speed_slow: 100.,
                 health: 20.,
-                damage: 1.,
-                damage_kind: DamageKind::Flesh,
+                attack: Attack::Claw,
                 defense_kind: DefenseKind::Flesh,
-                hitbox_offset: 100.,
-                hitbox_size: Vec2::new(100., 300.),
+                spawn_distance_min: 0.,
+                spawn_distance_max: 100.,
             },
             UnitKind::Warrior => UnitStats {
                 cost: 5,
                 speed: 200.,
                 speed_slow: 30.,
                 health: 40.,
-                damage: 5.,
-                damage_kind: DamageKind::Sword,
+                attack: Attack::Sword,
                 defense_kind: DefenseKind::Armor,
-                hitbox_offset: 150.,
-                hitbox_size: Vec2::new(200., 300.),
+                spawn_distance_min: 350.,
+                spawn_distance_max: 450.,
+            },
+            UnitKind::Mage => UnitStats {
+                cost: 5,
+                speed: 10.,
+                speed_slow: 100.,
+                health: 30.,
+                attack: Attack::Magic,
+                defense_kind: DefenseKind::Flesh,
+                spawn_distance_min: 600.,
+                spawn_distance_max: 800.,
             },
         }
     }
@@ -100,6 +109,23 @@ impl UnitKind {
         match self {
             UnitKind::Peasant => "Peasant",
             UnitKind::Warrior => "Warrior",
+            UnitKind::Mage => "Mage",
+        }
+    }
+
+    pub fn name_plural(&self) -> &'static str {
+        match self {
+            UnitKind::Peasant => "Peasants",
+            UnitKind::Warrior => "Warriors",
+            UnitKind::Mage => "Mages",
+        }
+    }
+
+    pub fn skeleton(&self, asset_library: &AssetLibrary) -> Handle<SkeletonData> {
+        match self {
+            UnitKind::Peasant => asset_library.spine_rat.clone(),
+            UnitKind::Warrior => asset_library.spine_rat_warrior.clone(),
+            UnitKind::Mage => asset_library.spine_rat_mage.clone(),
         }
     }
 }
@@ -110,11 +136,64 @@ pub struct UnitStats {
     pub speed: f32,
     pub speed_slow: f32,
     pub health: f32,
+    pub attack: Attack,
+    pub defense_kind: DefenseKind,
+    pub spawn_distance_min: f32,
+    pub spawn_distance_max: f32,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Attack {
+    Claw,
+    Sword,
+    Magic,
+}
+
+impl Attack {
+    pub fn stats(&self) -> AttackStats {
+        match self {
+            Attack::Claw => AttackStats {
+                damage: 1.,
+                damage_kind: DamageKind::Flesh,
+                hit_count: 1,
+                hurt_box_kind: AttackHurtBoxKind::OffsetRect {
+                    offset: 100.,
+                    size: Vec2::new(100., 300.),
+                },
+            },
+            Attack::Sword => AttackStats {
+                damage: 5.,
+                damage_kind: DamageKind::Sword,
+                hit_count: 1,
+                hurt_box_kind: AttackHurtBoxKind::OffsetRect {
+                    offset: 150.,
+                    size: Vec2::new(200., 150.),
+                },
+            },
+            Attack::Magic => AttackStats {
+                damage: 1.,
+                damage_kind: DamageKind::Magic,
+                hit_count: 5,
+                hurt_box_kind: AttackHurtBoxKind::AreaOfEffect {
+                    size: Vec2::new(400., 400.),
+                },
+            },
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct AttackStats {
     pub damage: f32,
     pub damage_kind: DamageKind,
-    pub defense_kind: DefenseKind,
-    pub hitbox_offset: f32,
-    pub hitbox_size: Vec2,
+    pub hit_count: usize,
+    pub hurt_box_kind: AttackHurtBoxKind,
+}
+
+#[derive(Clone, Copy)]
+pub enum AttackHurtBoxKind {
+    OffsetRect { offset: f32, size: Vec2 },
+    AreaOfEffect { size: Vec2 },
 }
 
 #[derive(Component)]
@@ -141,11 +220,7 @@ fn unit_spawn(
         let stats = spawn_event.kind.stats();
         commands.spawn((
             SpineBundle {
-                skeleton: if spawn_event.kind == UnitKind::Peasant {
-                    asset_library.spine_rat.clone()
-                } else {
-                    asset_library.spine_rat_warrior.clone()
-                },
+                skeleton: spawn_event.kind.skeleton(asset_library.as_ref()),
                 ..Default::default()
             },
             Transform2::from_translation(spawn_event.position).with_scale(Vec2::new(
@@ -230,6 +305,7 @@ fn unit_attack(
     mut commands: Commands,
     mut spine_events: EventReader<SpineEvent>,
     unit_query: Query<(&Unit, &GlobalTransform)>,
+    asset_library: Res<AssetLibrary>,
 ) {
     for spine_event in spine_events.iter() {
         if let SpineEvent::Event {
@@ -240,24 +316,56 @@ fn unit_attack(
         {
             if spine_event_name == "attack" {
                 if let Ok((unit, unit_transform)) = unit_query.get(*spine_event_entity) {
-                    commands.spawn((
-                        HurtBox {
-                            flags: unit.team.hurt_flags(),
-                            shape: CollisionShape::Rect(unit.stats.hitbox_size),
-                            damage: unit.stats.damage,
-                            damage_kind: unit.stats.damage_kind,
-                            max_hits: 1,
-                        },
-                        TransformBundle::default(),
-                        Transform2::from_translation(
-                            unit_transform.translation().truncate()
-                                + Vec2::new(
-                                    unit.stats.hitbox_offset * unit.team.move_direction(),
-                                    0.,
+                    let attack_stats = unit.stats.attack.stats();
+                    match attack_stats.hurt_box_kind {
+                        AttackHurtBoxKind::OffsetRect {
+                            offset: hurt_box_offset,
+                            size: hurt_box_size,
+                        } => {
+                            commands.spawn((
+                                HurtBox {
+                                    flags: unit.team.hurt_flags(),
+                                    shape: CollisionShape::Rect(hurt_box_size),
+                                    damage: attack_stats.damage,
+                                    damage_kind: attack_stats.damage_kind,
+                                    max_hits: 1,
+                                },
+                                TransformBundle::default(),
+                                Transform2::from_translation(
+                                    unit_transform.translation().truncate()
+                                        + Vec2::new(
+                                            hurt_box_offset * unit.team.move_direction(),
+                                            0.,
+                                        ),
                                 ),
-                        ),
-                        FramesToLive::new(2),
-                    ));
+                                FramesToLive::new(2),
+                            ));
+                        }
+                        AttackHurtBoxKind::AreaOfEffect {
+                            size: hurt_box_size,
+                        } => {
+                            let mut rng = thread_rng();
+                            commands.spawn((
+                                SpineBundle {
+                                    skeleton: asset_library.spine_attack_magic.clone(),
+                                    ..Default::default()
+                                },
+                                SpineAttack {
+                                    hurt_box: HurtBox {
+                                        flags: unit.team.hurt_flags(),
+                                        shape: CollisionShape::Rect(hurt_box_size),
+                                        damage: attack_stats.damage,
+                                        damage_kind: attack_stats.damage_kind,
+                                        max_hits: 1,
+                                    },
+                                },
+                                Transform2::from_translation(Vec2::new(
+                                    rng.gen_range(-200.0..200.0),
+                                    -200.,
+                                )),
+                            ));
+                        }
+                    }
                 }
             }
         }

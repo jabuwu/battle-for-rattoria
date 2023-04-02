@@ -18,11 +18,9 @@ impl Default for GameState {
             available_army: UnitComposition {
                 peasants: 100,
                 warriors: 20,
+                mages: 20,
             },
-            fed_army: UnitComposition {
-                peasants: 0,
-                warriors: 0,
-            },
+            fed_army: UnitComposition::empty(),
         }
     }
 }

@@ -24,6 +24,26 @@ pub enum DamageKind {
     #[default]
     Flesh,
     Sword,
+    Magic,
+}
+
+impl DamageKind {
+    pub fn damage_multiplier(&self, defense_kind: DefenseKind) -> f32 {
+        match self {
+            Self::Flesh => match defense_kind {
+                DefenseKind::Flesh => 1.,
+                DefenseKind::Armor => 0.5,
+            },
+            Self::Sword => match defense_kind {
+                DefenseKind::Flesh => 2.,
+                DefenseKind::Armor => 1.,
+            },
+            Self::Magic => match defense_kind {
+                DefenseKind::Flesh => 1.,
+                DefenseKind::Armor => 2.,
+            },
+        }
+    }
 }
 
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
@@ -31,21 +51,6 @@ pub enum DefenseKind {
     #[default]
     Flesh,
     Armor,
-}
-
-impl DefenseKind {
-    pub fn defense_multiplier(&self, damage_kind: DamageKind) -> f32 {
-        match damage_kind {
-            DamageKind::Flesh => match self {
-                Self::Flesh => 1.,
-                Self::Armor => 0.5,
-            },
-            DamageKind::Sword => match self {
-                Self::Flesh => 1.,
-                Self::Armor => 2.,
-            },
-        }
-    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -88,7 +93,7 @@ pub struct HitBox {
     pub defense_kind: DefenseKind,
 }
 
-#[derive(Default, Component)]
+#[derive(Clone, Copy, Default, Component)]
 pub struct HurtBox {
     pub flags: DamageFlags,
     pub shape: CollisionShape,
@@ -134,10 +139,8 @@ pub fn damage_update(
                 .overlaps(hit_box.shape.at(hit_box_transform.translation().truncate()))
                 && hurt_box.flags & hit_box.flags != DamageFlags::empty()
             {
-                let damage = hurt_box.damage
-                    * hit_box
-                        .defense_kind
-                        .defense_multiplier(hurt_box.damage_kind);
+                let damage =
+                    hurt_box.damage * hurt_box.damage_kind.damage_multiplier(hit_box.defense_kind);
                 if damage > 0. && hurt_box.max_hits > 0 {
                     damage_inflict_events.send(DamageInflictEvent {
                         entity: hit_box_entity,
