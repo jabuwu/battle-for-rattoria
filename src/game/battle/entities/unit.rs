@@ -130,14 +130,14 @@ impl UnitKind {
             },
             UnitKind::Brute => UnitStats {
                 cost: 15,
-                speed: 50.,
-                speed_slow: 30.,
+                speed: 80.,
+                speed_slow: 50.,
                 health: 300.,
                 attack: Attack::Axe,
                 defense_kind: DefenseKind::Armor,
                 spawn_distance_min: 150.,
                 spawn_distance_max: 250.,
-                hit_box_size: Vec2::new(400., 500.),
+                hit_box_size: Vec2::new(300., 500.),
             },
         }
     }
