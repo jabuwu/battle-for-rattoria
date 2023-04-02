@@ -2,7 +2,7 @@ use strum_macros::EnumIter;
 
 use crate::DamageFlags;
 
-#[derive(Copy, Clone, PartialEq, Eq, EnumIter)]
+#[derive(Copy, Clone, PartialEq, Eq, EnumIter, Hash)]
 pub enum Team {
     Friendly,
     Enemy,
@@ -27,6 +27,13 @@ impl Team {
         match self {
             Self::Friendly => 1.,
             Self::Enemy => -1.,
+        }
+    }
+
+    pub fn opposite_team(&self) -> Team {
+        match self {
+            Self::Friendly => Self::Enemy,
+            Self::Enemy => Self::Friendly,
         }
     }
 }

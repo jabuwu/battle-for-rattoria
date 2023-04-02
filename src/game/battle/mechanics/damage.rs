@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bitflags::bitflags;
+use rand::prelude::*;
 
 use crate::{
     AddFixedEvent, CollisionShape, DebugDraw, DebugDrawSettings, DebugRectangle, EventSet,
@@ -41,11 +42,11 @@ impl DamageKind {
             },
             Self::Arrow => match defense_kind {
                 DefenseKind::Flesh => 1.,
-                DefenseKind::Armor => 2.,
+                DefenseKind::Armor => 3.,
             },
             Self::Magic => match defense_kind {
-                DefenseKind::Flesh => 1.,
-                DefenseKind::Armor => 2.,
+                DefenseKind::Flesh => 2.,
+                DefenseKind::Armor => 1.,
             },
         }
     }
@@ -121,6 +122,11 @@ pub struct DamageReceiveEvent {
     _private: (),
 }
 
+pub struct DamageCandidate {
+    entity: Entity,
+    damage: f32,
+}
+
 pub fn damage_update(
     mut damage_inflict_events: EventWriter<DamageInflictEvent>,
     mut hurt_box_query: Query<(Entity, &mut HurtBox, Option<&HurtBoxDespawner>)>,
@@ -135,6 +141,7 @@ pub fn damage_update(
         if hurt_box.max_hits == 0 {
             continue;
         }
+        let mut damage_candidates = vec![];
         for (hit_box_entity, hit_box) in hit_box_query.iter() {
             if hurt_box_entity == hit_box_entity {
                 continue;
@@ -150,13 +157,24 @@ pub fn damage_update(
             {
                 let damage =
                     hurt_box.damage * hurt_box.damage_kind.damage_multiplier(hit_box.defense_kind);
-                if damage > 0. && hurt_box.max_hits > 0 {
-                    damage_inflict_events.send(DamageInflictEvent {
+                if damage > 0. {
+                    damage_candidates.push(DamageCandidate {
                         entity: hit_box_entity,
                         damage,
                     });
-                    hurt_box.max_hits -= 1;
                 }
+            }
+        }
+        damage_candidates.shuffle(&mut thread_rng());
+        for damage_candidate in damage_candidates {
+            if hurt_box.max_hits > 0 {
+                damage_inflict_events.send(DamageInflictEvent {
+                    entity: damage_candidate.entity,
+                    damage: damage_candidate.damage,
+                });
+                hurt_box.max_hits -= 1;
+            } else {
+                break;
             }
         }
         if hurt_box.max_hits == 0 && hurt_box_despawner.is_some() {

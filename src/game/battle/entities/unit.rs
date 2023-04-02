@@ -4,10 +4,10 @@ use rand::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, CollisionShape, DamageKind, DamageReceiveEvent, DamageSystem,
-    DefenseKind, Depth, DepthLayer, EventSet, FramesToLive, Health, HealthDieEvent, HitBox,
-    HurtBox, HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Team, Transform2,
-    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, CollisionShape, DamageKind,
+    DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer, EventSet, FramesToLive,
+    Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner, Projectile, SpawnSet, SpineAttack,
+    SpineFx, Target, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -88,7 +88,7 @@ impl UnitKind {
                 cost: 1,
                 speed: 300.,
                 speed_slow: 100.,
-                health: 20.,
+                health: 10.,
                 attack: Attack::Claw,
                 defense_kind: DefenseKind::Flesh,
                 spawn_distance_min: 0.,
@@ -106,8 +106,8 @@ impl UnitKind {
             },
             UnitKind::Archer => UnitStats {
                 cost: 3,
-                speed: -10.,
-                speed_slow: -10.,
+                speed: 10.,
+                speed_slow: 10.,
                 health: 20.,
                 attack: Attack::Arrow,
                 defense_kind: DefenseKind::Flesh,
@@ -115,7 +115,7 @@ impl UnitKind {
                 spawn_distance_max: 500.,
             },
             UnitKind::Mage => UnitStats {
-                cost: 5,
+                cost: 10,
                 speed: 10.,
                 speed_slow: 100.,
                 health: 30.,
@@ -125,7 +125,7 @@ impl UnitKind {
                 spawn_distance_max: 800.,
             },
             UnitKind::Brute => UnitStats {
-                cost: 5,
+                cost: 15,
                 speed: 50.,
                 speed_slow: 30.,
                 health: 200.,
@@ -143,7 +143,7 @@ impl UnitKind {
             UnitKind::Warrior => "Warrior",
             UnitKind::Archer => "Archer",
             UnitKind::Mage => "Mage",
-            UnitKind::Brute => "Mage",
+            UnitKind::Brute => "Brute",
         }
     }
 
@@ -193,12 +193,12 @@ impl Attack {
     pub fn stats(&self) -> AttackStats {
         match self {
             Attack::Claw => AttackStats {
-                damage: 1.,
+                damage: 0.5,
                 damage_kind: DamageKind::Flesh,
                 hit_count: 1,
                 hurt_box_kind: AttackHurtBoxKind::OffsetRect {
                     offset: 100.,
-                    size: Vec2::new(100., 300.),
+                    size: Vec2::new(200., 300.),
                 },
             },
             Attack::Sword => AttackStats {
@@ -211,15 +211,15 @@ impl Attack {
                 },
             },
             Attack::Arrow => AttackStats {
-                damage: 1.,
+                damage: 2.,
                 damage_kind: DamageKind::Arrow,
                 hit_count: 1,
                 hurt_box_kind: AttackHurtBoxKind::Projectile,
             },
             Attack::Magic => AttackStats {
-                damage: 1.,
+                damage: 2.,
                 damage_kind: DamageKind::Magic,
-                hit_count: 5,
+                hit_count: 20,
                 hurt_box_kind: AttackHurtBoxKind::AreaOfEffect {
                     size: Vec2::new(400., 400.),
                 },
@@ -295,6 +295,7 @@ fn unit_spawn(
                 defense_kind: stats.defense_kind,
             },
             YOrder,
+            Target { team },
             Unit {
                 team,
                 stats,
@@ -387,6 +388,7 @@ fn unit_attack(
     mut spine_events: EventReader<SpineEvent>,
     unit_query: Query<(&Unit, &GlobalTransform)>,
     asset_library: Res<AssetLibrary>,
+    area_of_effect_targeting: Res<AreaOfEffectTargeting>,
 ) {
     for spine_event in spine_events.iter() {
         if let SpineEvent::Event {
@@ -426,26 +428,30 @@ fn unit_attack(
                             size: hurt_box_size,
                         } => {
                             let mut rng = thread_rng();
-                            commands.spawn((
-                                SpineBundle {
-                                    skeleton: asset_library.spine_attack_magic.clone(),
-                                    ..Default::default()
-                                },
-                                SpineAttack {
-                                    hurt_box: HurtBox {
-                                        flags: unit.team.hurt_flags(),
-                                        shape: CollisionShape::Rect(hurt_box_size),
-                                        damage: attack_stats.damage,
-                                        damage_kind: attack_stats.damage_kind,
-                                        max_hits: attack_stats.hit_count,
+                            if let Some(target_position) =
+                                area_of_effect_targeting.get_target(unit.team.opposite_team())
+                            {
+                                commands.spawn((
+                                    SpineBundle {
+                                        skeleton: asset_library.spine_attack_magic.clone(),
+                                        ..Default::default()
                                     },
-                                },
-                                SpineFx,
-                                Transform2::from_translation(Vec2::new(
-                                    rng.gen_range(-200.0..200.0),
-                                    -200.,
-                                )),
-                            ));
+                                    SpineAttack {
+                                        hurt_box: HurtBox {
+                                            flags: unit.team.hurt_flags(),
+                                            shape: CollisionShape::Rect(hurt_box_size),
+                                            damage: attack_stats.damage,
+                                            damage_kind: attack_stats.damage_kind,
+                                            max_hits: attack_stats.hit_count,
+                                        },
+                                    },
+                                    SpineFx,
+                                    Transform2::from_translation(
+                                        target_position
+                                            + Vec2::new(rng.gen_range(-200.0..200.0), 0.),
+                                    ),
+                                ));
+                            }
                         }
                         AttackHurtBoxKind::Projectile => {
                             commands.spawn((

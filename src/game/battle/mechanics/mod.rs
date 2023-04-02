@@ -1,9 +1,11 @@
+mod area_of_effect_targeting;
 mod damage;
 mod health;
 mod projectile;
 mod spine_attack;
 mod spine_fx;
 
+pub use area_of_effect_targeting::*;
 pub use damage::*;
 pub use health::*;
 pub use projectile::*;
