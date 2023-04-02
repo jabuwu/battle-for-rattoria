@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
+use strum::IntoEnumIterator;
 
-use crate::{AddFixedEvent, AppState, GameState};
+use crate::{AddFixedEvent, AppState, GameState, UnitKind};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum PlanningSystem {
@@ -95,30 +96,23 @@ fn planning_ui(
         egui::Window::new("Planning").show(contexts.ctx_mut(), |ui| {
             ui.label(format!("Food remaining: {}", game_state.food));
 
-            if ui
-                .button(format!(
-                    "Feed Peasant ({} available)",
-                    game_state.available_army.peasants
-                ))
-                .clicked()
-                && game_state.available_army.peasants > 0
-                && game_state.food > 0
-            {
-                game_state.fed_army.peasants += 1;
-                game_state.available_army.peasants -= 1;
-                game_state.food -= 1;
-            }
-
-            if ui
-                .button(format!(
-                    "Feed Warrior ({} available)",
-                    game_state.available_army.warriors
-                ))
-                .clicked()
-            {
-                game_state.fed_army.warriors += 1;
-                game_state.available_army.warriors -= 1;
-                game_state.food -= 1;
+            for unit_kind in UnitKind::iter() {
+                let unit_cost = unit_kind.stats().cost;
+                if ui
+                    .button(format!(
+                        "Feed {} ({} available, cost: {})",
+                        unit_kind.name(),
+                        game_state.available_army.get_count(unit_kind),
+                        unit_cost,
+                    ))
+                    .clicked()
+                    && game_state.available_army.get_count(unit_kind) > 0
+                    && game_state.food >= unit_cost
+                {
+                    game_state.fed_army.mutate_count(unit_kind, |i| i + 1);
+                    game_state.available_army.mutate_count(unit_kind, |i| i - 1);
+                    game_state.food -= unit_cost;
+                }
             }
 
             if game_state.fed_army.total_units() > 0 {

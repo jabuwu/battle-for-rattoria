@@ -54,6 +54,7 @@ pub struct HitBox {
 pub struct HurtBox {
     pub flags: DamageFlags,
     pub shape: CollisionShape,
+    pub damage: f32,
 }
 
 pub struct DamageInflictEvent {

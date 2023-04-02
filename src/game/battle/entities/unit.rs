@@ -5,13 +5,14 @@ use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AssetLibrary, CollisionShape, DamageReceiveEvent, Depth, DepthLayer, EventSet,
-    HitBox, HurtBox, Team, Transform2, YOrder,
+    Health, HealthDieEvent, HitBox, HurtBox, Team, Transform2, YOrder,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum UnitSystem {
     Spawn,
     Update,
+    Die,
 }
 
 pub struct UnitPlugin;
@@ -31,6 +32,12 @@ impl Plugin for UnitPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::Update)
                     .after(EventSet::<DamageReceiveEvent>::Sender),
+            )
+            .add_system(
+                unit_die
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::Die)
+                    .after(EventSet::<HealthDieEvent>::Sender),
             );
     }
 }
@@ -45,21 +52,37 @@ impl UnitKind {
     pub fn stats(&self) -> UnitStats {
         match self {
             UnitKind::Peasant => UnitStats {
+                cost: 1,
                 speed: 200.,
                 speed_slow: 80.,
+                health: 100.,
+                damage: 1.,
             },
             UnitKind::Warrior => UnitStats {
+                cost: 3,
                 speed: 100.,
                 speed_slow: 60.,
+                health: 150.,
+                damage: 3.,
             },
+        }
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            UnitKind::Peasant => "Peasant",
+            UnitKind::Warrior => "Warrior",
         }
     }
 }
 
 #[derive(Clone, Copy)]
 pub struct UnitStats {
+    pub cost: usize,
     pub speed: f32,
     pub speed_slow: f32,
+    pub health: f32,
+    pub damage: f32,
 }
 
 #[derive(Component)]
@@ -79,6 +102,7 @@ fn unit_spawn(
     asset_library: Res<AssetLibrary>,
 ) {
     for spawn_event in spawn_events.iter() {
+        let stats = spawn_event.kind.stats();
         commands.spawn((
             SpineBundle {
                 skeleton: if spawn_event.kind == UnitKind::Peasant {
@@ -97,6 +121,7 @@ fn unit_spawn(
                 0.3,
             )),
             Depth::from(DepthLayer::YOrder(0.)),
+            Health::new(stats.health),
             HitBox {
                 flags: spawn_event.team.hit_flags(),
                 shape: CollisionShape::Rect(Vec2::splat(100.)),
@@ -104,11 +129,10 @@ fn unit_spawn(
             HurtBox {
                 flags: spawn_event.team.hurt_flags(),
                 shape: CollisionShape::Rect(Vec2::splat(100.)),
+                damage: stats.damage,
             },
             YOrder,
-            Unit {
-                stats: spawn_event.kind.stats(),
-            },
+            Unit { stats },
         ));
     }
 }
@@ -149,5 +173,19 @@ fn unit_update(
         };
         unit_transform.translation.x +=
             time.period.as_secs_f32() * speed * unit_transform.scale.x.signum();
+    }
+}
+
+fn unit_die(
+    mut health_die_events: EventReader<HealthDieEvent>,
+    mut commands: Commands,
+    unit_query: Query<&Unit>,
+) {
+    for health_die_event in health_die_events.iter() {
+        if unit_query.contains(health_die_event.entity) {
+            if let Some(entity) = commands.get_entity(health_die_event.entity) {
+                entity.despawn_recursive();
+            }
+        }
     }
 }

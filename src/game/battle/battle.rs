@@ -45,7 +45,7 @@ pub struct BattleState {
 impl Default for BattleState {
     fn default() -> Self {
         Self {
-            battling: true,
+            battling: false,
             battle_time: 12.,
         }
     }
@@ -120,6 +120,7 @@ fn battle_start(
 ) {
     for start_event in start_events.iter() {
         *battle_state = BattleState::default();
+        battle_state.battling = true;
         commands.spawn((
             Text2dBundle {
                 text: Text::from_sections([
