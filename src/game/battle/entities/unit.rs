@@ -78,6 +78,7 @@ pub enum UnitKind {
     Warrior,
     Archer,
     Mage,
+    Brute,
 }
 
 impl UnitKind {
@@ -123,6 +124,16 @@ impl UnitKind {
                 spawn_distance_min: 600.,
                 spawn_distance_max: 800.,
             },
+            UnitKind::Brute => UnitStats {
+                cost: 5,
+                speed: 50.,
+                speed_slow: 30.,
+                health: 200.,
+                attack: Attack::Axe,
+                defense_kind: DefenseKind::Armor,
+                spawn_distance_min: 150.,
+                spawn_distance_max: 250.,
+            },
         }
     }
 
@@ -132,6 +143,7 @@ impl UnitKind {
             UnitKind::Warrior => "Warrior",
             UnitKind::Archer => "Archer",
             UnitKind::Mage => "Mage",
+            UnitKind::Brute => "Mage",
         }
     }
 
@@ -139,8 +151,9 @@ impl UnitKind {
         match self {
             UnitKind::Peasant => "Peasants",
             UnitKind::Warrior => "Warriors",
-            UnitKind::Archer => "Mages",
+            UnitKind::Archer => "Archers",
             UnitKind::Mage => "Mages",
+            UnitKind::Brute => "Brutes",
         }
     }
 
@@ -150,6 +163,7 @@ impl UnitKind {
             UnitKind::Warrior => asset_library.spine_rat_warrior.clone(),
             UnitKind::Archer => asset_library.spine_rat_archer.clone(),
             UnitKind::Mage => asset_library.spine_rat_mage.clone(),
+            UnitKind::Brute => asset_library.spine_rat_brute.clone(),
         }
     }
 }
@@ -172,6 +186,7 @@ pub enum Attack {
     Sword,
     Arrow,
     Magic,
+    Axe,
 }
 
 impl Attack {
@@ -207,6 +222,15 @@ impl Attack {
                 hit_count: 5,
                 hurt_box_kind: AttackHurtBoxKind::AreaOfEffect {
                     size: Vec2::new(400., 400.),
+                },
+            },
+            Attack::Axe => AttackStats {
+                damage: 15.,
+                damage_kind: DamageKind::Sword,
+                hit_count: 5,
+                hurt_box_kind: AttackHurtBoxKind::OffsetRect {
+                    offset: 180.,
+                    size: Vec2::new(300., 500.),
                 },
             },
         }

@@ -33,16 +33,18 @@ fn main() {
             start_battle: false,
             battle_config: BattleConfig {
                 friendly_units: UnitComposition {
-                    peasants: 10,
-                    warriors: 3,
-                    archers: 3,
-                    mages: 1,
+                    peasants: 0,
+                    warriors: 0,
+                    archers: 0,
+                    mages: 0,
+                    brutes: 0,
                 },
                 enemy_units: UnitComposition {
-                    peasants: 10,
-                    warriors: 3,
-                    archers: 3,
-                    mages: 1,
+                    peasants: 0,
+                    warriors: 0,
+                    archers: 0,
+                    mages: 0,
+                    brutes: 0,
                 },
             },
         })
@@ -100,7 +102,13 @@ fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
                 ui.horizontal(|ui| {
                     ui.label(unit_kind.name_plural());
                     let mut count = unit_composition.get_count(unit_kind);
+                    if ui.button("-").clicked() && count > 0 {
+                        count -= 1;
+                    }
                     ui.add(egui::DragValue::new(&mut count).clamp_range(0..=100));
+                    if ui.button("+").clicked() && count < 100 {
+                        count += 1;
+                    }
                     unit_composition.set_count(unit_kind, count);
                 });
             }

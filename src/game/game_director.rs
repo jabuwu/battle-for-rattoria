@@ -60,6 +60,7 @@ fn game_director_battle_enter(
                 warriors: 3,
                 archers: 3,
                 mages: 1,
+                brutes: 0,
             },
         },
     });

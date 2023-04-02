@@ -75,6 +75,7 @@ pub struct UnitComposition {
     pub warriors: usize,
     pub archers: usize,
     pub mages: usize,
+    pub brutes: usize,
 }
 
 impl UnitComposition {
@@ -88,6 +89,7 @@ impl UnitComposition {
             UnitKind::Warrior => self.warriors,
             UnitKind::Archer => self.archers,
             UnitKind::Mage => self.mages,
+            UnitKind::Brute => self.brutes,
         }
     }
 
@@ -97,6 +99,7 @@ impl UnitComposition {
             UnitKind::Warrior => self.warriors = i,
             UnitKind::Archer => self.archers = i,
             UnitKind::Mage => self.mages = i,
+            UnitKind::Brute => self.brutes = i,
         }
     }
 

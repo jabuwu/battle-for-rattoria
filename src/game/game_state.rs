@@ -20,6 +20,7 @@ impl Default for GameState {
                 warriors: 20,
                 archers: 20,
                 mages: 20,
+                brutes: 1,
             },
             fed_army: UnitComposition::empty(),
         }
