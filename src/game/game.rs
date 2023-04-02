@@ -1,13 +1,14 @@
 use bevy::prelude::*;
 
-use crate::{in_game_state, AppState};
+use crate::{in_game_state, AppState, GameState};
 
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         if app.world.contains_resource::<State<AppState>>() {
-            app.add_system(game_update.run_if(in_game_state()));
+            app.init_resource::<GameState>()
+                .add_system(game_update.run_if(in_game_state()));
         }
     }
 }

@@ -1,13 +1,14 @@
 use bevy::prelude::*;
+use bevy_egui::{egui, EguiContexts};
 
-use crate::{AddFixedEvent, AppState, AssetLibrary, FixedInput};
+use crate::{AddFixedEvent, AppState, GameState};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum PlanningSystem {
     Enter,
     Start,
     Update,
-    LeaveState,
+    Ui,
 }
 
 pub struct PlanningPlugin;
@@ -21,7 +22,8 @@ impl Plugin for PlanningPlugin {
                     .in_set(PlanningSystem::Enter),
             );
         }
-        app.add_fixed_event::<PlanningStartEvent>()
+        app.init_resource::<PlanningState>()
+            .add_fixed_event::<PlanningStartEvent>()
             .add_fixed_event::<PlanningEndedEvent>()
             .add_system(
                 planning_start
@@ -32,7 +34,23 @@ impl Plugin for PlanningPlugin {
                 planning_update
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(PlanningSystem::Update),
-            );
+            )
+            .add_system(planning_ui.in_set(PlanningSystem::Ui));
+    }
+}
+
+#[derive(Resource)]
+pub struct PlanningState {
+    planning: bool,
+    start: bool,
+}
+
+impl Default for PlanningState {
+    fn default() -> Self {
+        Self {
+            planning: false,
+            start: false,
+        }
     }
 }
 
@@ -50,31 +68,64 @@ fn planning_enter(mut start_events: EventWriter<PlanningStartEvent>) {
 
 fn planning_start(
     mut start_events: EventReader<PlanningStartEvent>,
-    mut commands: Commands,
-    asset_library: Res<AssetLibrary>,
+    mut planning_state: ResMut<PlanningState>,
 ) {
     for _ in start_events.iter() {
-        commands.spawn(Text2dBundle {
-            text: Text::from_section(
-                "Planning Phase\nPress space to battle",
-                TextStyle {
-                    font: asset_library.font_placeholder.clone(),
-                    font_size: 72.,
-                    color: Color::WHITE,
-                    ..Default::default()
-                },
-            )
-            .with_alignment(TextAlignment::Center),
-            ..Default::default()
-        });
+        planning_state.planning = true;
     }
 }
 
 fn planning_update(
+    mut planning_state: ResMut<PlanningState>,
     mut planning_ended_events: EventWriter<PlanningEndedEvent>,
-    keys: Res<FixedInput<KeyCode>>,
 ) {
-    if keys.just_pressed(KeyCode::Space) {
+    if planning_state.planning && planning_state.start {
         planning_ended_events.send(PlanningEndedEvent { _private: () });
+        planning_state.planning = false;
+        planning_state.start = false;
+    }
+}
+
+fn planning_ui(
+    mut contexts: EguiContexts,
+    mut game_state: ResMut<GameState>,
+    mut planning_state: ResMut<PlanningState>,
+) {
+    if planning_state.planning {
+        egui::Window::new("Planning").show(contexts.ctx_mut(), |ui| {
+            ui.label(format!("Food remaining: {}", game_state.food));
+
+            if ui
+                .button(format!(
+                    "Feed Peasant ({} available)",
+                    game_state.available_army.peasants
+                ))
+                .clicked()
+                && game_state.available_army.peasants > 0
+                && game_state.food > 0
+            {
+                game_state.fed_army.peasants += 1;
+                game_state.available_army.peasants -= 1;
+                game_state.food -= 1;
+            }
+
+            if ui
+                .button(format!(
+                    "Feed Warrior ({} available)",
+                    game_state.available_army.warriors
+                ))
+                .clicked()
+            {
+                game_state.fed_army.warriors += 1;
+                game_state.available_army.warriors -= 1;
+                game_state.food -= 1;
+            }
+
+            if game_state.fed_army.total_units() > 0 {
+                if ui.button("Start Battle").clicked() {
+                    planning_state.start = true;
+                }
+            }
+        });
     }
 }

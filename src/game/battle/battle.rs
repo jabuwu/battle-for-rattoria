@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 use rand::prelude::*;
+use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, AppState, AssetLibrary, Depth, EventSet, FixedInput, Team, Transform2, UnitKind,
+    AddFixedEvent, AssetLibrary, Depth, EventSet, FixedInput, Team, Transform2, UnitKind,
     UnitSpawnEvent, DEPTH_BATTLE_TEXT,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum BattleSystem {
-    Enter,
     Start,
     Update,
 }
@@ -17,13 +17,6 @@ pub struct BattlePlugin;
 
 impl Plugin for BattlePlugin {
     fn build(&self, app: &mut App) {
-        if app.world.contains_resource::<State<AppState>>() {
-            app.add_system(
-                battle_enter
-                    .in_schedule(OnEnter(AppState::GameBattle))
-                    .in_set(BattleSystem::Enter),
-            );
-        }
         app.init_resource::<BattleState>()
             .add_fixed_event::<BattleStartEvent>()
             .add_fixed_event::<BattleEndedEvent>()
@@ -64,10 +57,49 @@ pub struct BattleConfig {
     pub enemy_units: UnitComposition,
 }
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct UnitComposition {
     pub peasants: usize,
     pub warriors: usize,
+}
+
+impl UnitComposition {
+    pub fn empty() -> Self {
+        Self::default()
+    }
+
+    pub fn get_count(&self, unit_kind: UnitKind) -> usize {
+        match unit_kind {
+            UnitKind::Peasant => self.peasants,
+            UnitKind::Warrior => self.warriors,
+        }
+    }
+
+    pub fn set_count(&mut self, unit_kind: UnitKind, i: usize) {
+        match unit_kind {
+            UnitKind::Peasant => self.peasants = i,
+            UnitKind::Warrior => self.warriors = i,
+        }
+    }
+
+    pub fn mutate_count(&mut self, unit_kind: UnitKind, f: impl Fn(usize) -> usize) {
+        let new_count = f(self.get_count(unit_kind));
+        self.set_count(unit_kind, new_count);
+    }
+
+    pub fn add_units(&mut self, other: &UnitComposition) {
+        for unit_kind in UnitKind::iter() {
+            self.mutate_count(unit_kind, |i| i + other.get_count(unit_kind));
+        }
+    }
+
+    pub fn total_units(&self) -> usize {
+        let mut total = 0;
+        for unit_kind in UnitKind::iter() {
+            total += self.get_count(unit_kind);
+        }
+        total
+    }
 }
 
 pub struct BattleStartEvent {
@@ -79,43 +111,37 @@ pub struct BattleEndedEvent {
     _private: (),
 }
 
-fn battle_enter(
-    mut battle_state: ResMut<BattleState>,
-    mut start_events: EventWriter<BattleStartEvent>,
-) {
-    *battle_state = BattleState::default();
-    start_events.send(BattleStartEvent {
-        config: BattleConfig {
-            friendly_units: UnitComposition {
-                peasants: 10,
-                warriors: 3,
-            },
-            enemy_units: UnitComposition {
-                peasants: 10,
-                warriors: 3,
-            },
-        },
-    });
-}
-
 fn battle_start(
     mut start_events: EventReader<BattleStartEvent>,
+    mut battle_state: ResMut<BattleState>,
     mut unit_spawn_events: EventWriter<UnitSpawnEvent>,
     mut commands: Commands,
     asset_library: Res<AssetLibrary>,
 ) {
     for start_event in start_events.iter() {
+        *battle_state = BattleState::default();
         commands.spawn((
             Text2dBundle {
-                text: Text::from_section(
-                    "Battling!",
-                    TextStyle {
-                        font: asset_library.font_placeholder.clone(),
-                        font_size: 72.,
-                        color: Color::WHITE,
-                        ..Default::default()
+                text: Text::from_sections([
+                    TextSection {
+                        value: "Battling!".to_owned(),
+                        style: TextStyle {
+                            font: asset_library.font_placeholder.clone(),
+                            font_size: 72.,
+                            color: Color::WHITE,
+                            ..Default::default()
+                        },
                     },
-                )
+                    TextSection {
+                        value: "\nPress space to skip".to_owned(),
+                        style: TextStyle {
+                            font: asset_library.font_placeholder.clone(),
+                            font_size: 22.,
+                            color: Color::WHITE,
+                            ..Default::default()
+                        },
+                    },
+                ])
                 .with_alignment(TextAlignment::Center),
                 ..Default::default()
             },

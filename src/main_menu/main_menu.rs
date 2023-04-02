@@ -31,6 +31,6 @@ fn main_menu_enter(mut commands: Commands, asset_library: Res<AssetLibrary>) {
 
 fn main_menu_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::Space) {
-        next_state.set(AppState::GamePlanning);
+        next_state.set(AppState::GameStart);
     }
 }

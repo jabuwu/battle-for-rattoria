@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_spine::{Spine, SpineBundle, SpineReadyEvent, SpineSet};
 use rand::prelude::*;
+use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AssetLibrary, CollisionShape, DamageReceiveEvent, Depth, DepthLayer, EventSet,
@@ -34,7 +35,7 @@ impl Plugin for UnitPlugin {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum UnitKind {
     Peasant,
     Warrior,
