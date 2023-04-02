@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_spine::{Spine, SpineBundle, SpineReadyEvent, SpineSet};
 use rand::prelude::*;
 
-use crate::{AddFixedEvent, AssetLibrary, Depth, DepthLayer, EventSet, Transform2, YOrder};
+use crate::{
+    AddFixedEvent, AssetLibrary, CollisionShape, DamageReceiveEvent, Depth, DepthLayer, EventSet,
+    HitBox, HurtBox, Team, Transform2, YOrder,
+};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum UnitSystem {
@@ -25,18 +28,48 @@ impl Plugin for UnitPlugin {
             .add_system(
                 unit_update
                     .in_schedule(CoreSchedule::FixedUpdate)
-                    .in_set(UnitSystem::Update),
+                    .in_set(UnitSystem::Update)
+                    .after(EventSet::<DamageReceiveEvent>::Sender),
             );
     }
 }
 
-#[derive(Component)]
-pub struct Unit;
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum UnitKind {
+    Peasant,
+    Warrior,
+}
 
-#[derive(Default)]
+impl UnitKind {
+    pub fn stats(&self) -> UnitStats {
+        match self {
+            UnitKind::Peasant => UnitStats {
+                speed: 200.,
+                speed_slow: 80.,
+            },
+            UnitKind::Warrior => UnitStats {
+                speed: 100.,
+                speed_slow: 60.,
+            },
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct UnitStats {
+    pub speed: f32,
+    pub speed_slow: f32,
+}
+
+#[derive(Component)]
+pub struct Unit {
+    pub stats: UnitStats,
+}
+
 pub struct UnitSpawnEvent {
+    pub kind: UnitKind,
     pub position: Vec2,
-    pub moving_right: bool,
+    pub team: Team,
 }
 
 fn unit_spawn(
@@ -47,16 +80,34 @@ fn unit_spawn(
     for spawn_event in spawn_events.iter() {
         commands.spawn((
             SpineBundle {
-                skeleton: asset_library.spine_rat.clone(),
+                skeleton: if spawn_event.kind == UnitKind::Peasant {
+                    asset_library.spine_rat.clone()
+                } else {
+                    asset_library.spine_rat_warrior.clone()
+                },
                 ..Default::default()
             },
             Transform2::from_translation(spawn_event.position).with_scale(Vec2::new(
-                if spawn_event.moving_right { 0.3 } else { -0.3 },
+                if spawn_event.team == Team::Friendly {
+                    0.3
+                } else {
+                    -0.3
+                },
                 0.3,
             )),
             Depth::from(DepthLayer::YOrder(0.)),
+            HitBox {
+                flags: spawn_event.team.hit_flags(),
+                shape: CollisionShape::Rect(Vec2::splat(100.)),
+            },
+            HurtBox {
+                flags: spawn_event.team.hurt_flags(),
+                shape: CollisionShape::Rect(Vec2::splat(100.)),
+            },
             YOrder,
-            Unit,
+            Unit {
+                stats: spawn_event.kind.stats(),
+            },
         ));
     }
 }
@@ -78,9 +129,24 @@ fn unit_spine_ready(
     }
 }
 
-fn unit_update(mut unit_query: Query<&mut Transform2, With<Unit>>, time: Res<FixedTime>) {
-    for mut unit_transform in unit_query.iter_mut() {
+fn unit_update(
+    mut unit_query: Query<(Entity, &mut Transform2, &Unit)>,
+    mut damage_receive_events: EventReader<DamageReceiveEvent>,
+    time: Res<FixedTime>,
+) {
+    let mut slow_entities = vec![];
+    for damage_receive_event in damage_receive_events.iter() {
+        if unit_query.contains(damage_receive_event.entity) {
+            slow_entities.push(damage_receive_event.entity);
+        }
+    }
+    for (unit_entity, mut unit_transform, unit) in unit_query.iter_mut() {
+        let speed = if slow_entities.contains(&unit_entity) {
+            unit.stats.speed_slow
+        } else {
+            unit.stats.speed
+        };
         unit_transform.translation.x +=
-            time.period.as_secs_f32() * 200. * unit_transform.scale.x.signum();
+            time.period.as_secs_f32() * speed * unit_transform.scale.x.signum();
     }
 }

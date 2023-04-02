@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use rand::prelude::*;
 
 use crate::{
-    AddFixedEvent, AppState, AssetLibrary, Depth, EventSet, FixedInput, Transform2, UnitSpawnEvent,
-    DEPTH_BATTLE_TEXT,
+    AddFixedEvent, AppState, AssetLibrary, Depth, EventSet, FixedInput, Team, Transform2, UnitKind,
+    UnitSpawnEvent, DEPTH_BATTLE_TEXT,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -53,15 +53,21 @@ impl Default for BattleState {
     fn default() -> Self {
         Self {
             battling: true,
-            battle_time: 1.5,
+            battle_time: 12.,
         }
     }
 }
 
 #[derive(Clone)]
 pub struct BattleConfig {
-    pub friendly_units: usize,
-    pub enemy_units: usize,
+    pub friendly_units: UnitComposition,
+    pub enemy_units: UnitComposition,
+}
+
+#[derive(Clone)]
+pub struct UnitComposition {
+    pub peasants: usize,
+    pub warriors: usize,
 }
 
 pub struct BattleStartEvent {
@@ -80,8 +86,14 @@ fn battle_enter(
     *battle_state = BattleState::default();
     start_events.send(BattleStartEvent {
         config: BattleConfig {
-            friendly_units: 10,
-            enemy_units: 10,
+            friendly_units: UnitComposition {
+                peasants: 10,
+                warriors: 3,
+            },
+            enemy_units: UnitComposition {
+                peasants: 10,
+                warriors: 3,
+            },
         },
     });
 }
@@ -111,20 +123,40 @@ fn battle_start(
             Depth::from(DEPTH_BATTLE_TEXT),
         ));
         let mut rng = thread_rng();
-        for _ in 0..start_event.config.friendly_units {
+        for _ in 0..start_event.config.friendly_units.peasants {
             let x = rng.gen_range(-400.0..-160.0);
-            let y = rng.gen_range(-80.0..80.0);
+            let y = rng.gen_range(-40.0..40.0);
             unit_spawn_events.send(UnitSpawnEvent {
+                kind: UnitKind::Peasant,
                 position: Vec2::new(x, y),
-                moving_right: true,
+                team: Team::Friendly,
             });
         }
-        for _ in 0..start_event.config.enemy_units {
-            let x = rng.gen_range(160.0..400.0);
-            let y = rng.gen_range(-80.0..80.0);
+        for _ in 0..start_event.config.friendly_units.warriors {
+            let x = rng.gen_range(-700.0..-560.0);
+            let y = rng.gen_range(-40.0..40.0);
             unit_spawn_events.send(UnitSpawnEvent {
+                kind: UnitKind::Warrior,
                 position: Vec2::new(x, y),
-                moving_right: false,
+                team: Team::Friendly,
+            });
+        }
+        for _ in 0..start_event.config.enemy_units.peasants {
+            let x = rng.gen_range(160.0..400.0);
+            let y = rng.gen_range(-40.0..40.0);
+            unit_spawn_events.send(UnitSpawnEvent {
+                kind: UnitKind::Peasant,
+                position: Vec2::new(x, y),
+                team: Team::Enemy,
+            });
+        }
+        for _ in 0..start_event.config.enemy_units.warriors {
+            let x = rng.gen_range(560.0..700.0);
+            let y = rng.gen_range(-40.0..40.0);
+            unit_spawn_events.send(UnitSpawnEvent {
+                kind: UnitKind::Warrior,
+                position: Vec2::new(x, y),
+                team: Team::Enemy,
             });
         }
     }

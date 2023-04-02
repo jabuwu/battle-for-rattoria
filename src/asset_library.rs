@@ -8,6 +8,7 @@ pub struct AssetLibrary {
     pub sound_placeholder: Handle<AudioSource>,
     pub image_rat: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
+    pub spine_rat_warrior: Handle<SkeletonData>,
 }
 
 pub struct AssetLibraryPlugin;
@@ -34,5 +35,10 @@ fn asset_library_load(
     asset_library.spine_rat = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/rat_test/skeleton.skel"),
         asset_server.load("spines/rat_test/rat_test.atlas"),
+    ));
+
+    asset_library.spine_rat_warrior = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/rat_warrior/skeleton.skel"),
+        asset_server.load("spines/rat_warrior/rat_warrior.atlas"),
     ));
 }

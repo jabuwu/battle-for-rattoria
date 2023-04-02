@@ -572,6 +572,7 @@ dependencies = [
  "bevy_egui",
  "bevy_kira_audio",
  "bevy_spine",
+ "bitflags",
  "embed-resource",
  "image",
  "lerp",

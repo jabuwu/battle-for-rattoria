@@ -1,10 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{
+    egui::{self, Ui},
+    EguiContexts,
+};
 use bevy_game::{
     cleanup_non_persistent_entities, AssetLibraryPlugin, BattleConfig, BattleStartEvent,
-    CommonPlugins, EventSet, GamePlugins, Persistent,
+    CommonPlugins, EventSet, GamePlugins, Persistent, UnitComposition,
 };
 
 fn main() {
@@ -28,8 +31,14 @@ fn main() {
             cleanup: false,
             start_battle: false,
             battle_config: BattleConfig {
-                friendly_units: 10,
-                enemy_units: 10,
+                friendly_units: UnitComposition {
+                    peasants: 10,
+                    warriors: 3,
+                },
+                enemy_units: UnitComposition {
+                    peasants: 10,
+                    warriors: 3,
+                },
             },
         })
         .add_system(setup.in_schedule(CoreSchedule::Startup))
@@ -81,15 +90,27 @@ fn fixed_update(
 
 fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
     egui::Window::new("Battle").show(contexts.ctx_mut(), |ui| {
+        fn unit_composition_ui(ui: &mut Ui, unit_composition: &mut UnitComposition) {
+            ui.horizontal(|ui| {
+                ui.label("Peasants");
+                ui.add(egui::DragValue::new(&mut unit_composition.peasants).clamp_range(1..=100));
+            });
+            ui.horizontal(|ui| {
+                ui.label("Warriors");
+                ui.add(egui::DragValue::new(&mut unit_composition.warriors).clamp_range(1..=100));
+            });
+        }
+
         ui.label("Friendly Units");
-        ui.add(
-            egui::DragValue::new(&mut example_state.battle_config.friendly_units)
-                .clamp_range(1..=100),
-        );
+        unit_composition_ui(ui, &mut example_state.battle_config.friendly_units);
+
+        ui.add_space(16.);
+
         ui.label("Enemy Units");
-        ui.add(
-            egui::DragValue::new(&mut example_state.battle_config.enemy_units).clamp_range(1..=100),
-        );
+        unit_composition_ui(ui, &mut example_state.battle_config.enemy_units);
+
+        ui.add_space(16.);
+
         if ui.button("Start Battle").clicked() {
             example_state.cleanup = true;
             example_state.start_battle = true;
