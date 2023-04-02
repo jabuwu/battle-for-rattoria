@@ -33,6 +33,6 @@ pub fn projectile_update(
     for (mut projectile, mut projectile_transform) in projectile_query.iter_mut() {
         projectile_transform.translation += projectile.velocity * time.period.as_secs_f32();
         projectile_transform.rotation = Vec2::angle_between(Vec2::X, projectile.velocity);
-        projectile.velocity.y -= time.period.as_secs_f32() * 1200.;
+        projectile.velocity.y -= time.period.as_secs_f32() * 800.;
     }
 }

@@ -87,52 +87,57 @@ impl UnitKind {
             UnitKind::Peasant => UnitStats {
                 cost: 1,
                 speed: 300.,
-                speed_slow: 100.,
-                health: 10.,
+                speed_slow: 150.,
+                health: 15.,
                 attack: Attack::Claw,
                 defense_kind: DefenseKind::Flesh,
-                spawn_distance_min: 0.,
-                spawn_distance_max: 100.,
+                spawn_distance_min: 200.,
+                spawn_distance_max: 400.,
+                hit_box_size: Vec2::new(100., 400.),
             },
             UnitKind::Warrior => UnitStats {
                 cost: 5,
                 speed: 200.,
-                speed_slow: 30.,
-                health: 40.,
+                speed_slow: 70.,
+                health: 30.,
                 attack: Attack::Sword,
                 defense_kind: DefenseKind::Armor,
-                spawn_distance_min: 350.,
-                spawn_distance_max: 450.,
+                spawn_distance_min: 0.,
+                spawn_distance_max: 150.,
+                hit_box_size: Vec2::new(300., 400.),
             },
             UnitKind::Archer => UnitStats {
                 cost: 3,
                 speed: 10.,
                 speed_slow: 10.,
-                health: 20.,
+                health: 30.,
                 attack: Attack::Arrow,
                 defense_kind: DefenseKind::Flesh,
                 spawn_distance_min: 400.,
-                spawn_distance_max: 500.,
+                spawn_distance_max: 600.,
+                hit_box_size: Vec2::new(100., 400.),
             },
             UnitKind::Mage => UnitStats {
                 cost: 10,
                 speed: 10.,
                 speed_slow: 100.,
-                health: 30.,
+                health: 10.,
                 attack: Attack::Magic,
                 defense_kind: DefenseKind::Flesh,
                 spawn_distance_min: 600.,
                 spawn_distance_max: 800.,
+                hit_box_size: Vec2::new(100., 400.),
             },
             UnitKind::Brute => UnitStats {
                 cost: 15,
                 speed: 50.,
                 speed_slow: 30.,
-                health: 200.,
+                health: 300.,
                 attack: Attack::Axe,
                 defense_kind: DefenseKind::Armor,
                 spawn_distance_min: 150.,
                 spawn_distance_max: 250.,
+                hit_box_size: Vec2::new(400., 500.),
             },
         }
     }
@@ -178,6 +183,7 @@ pub struct UnitStats {
     pub defense_kind: DefenseKind,
     pub spawn_distance_min: f32,
     pub spawn_distance_max: f32,
+    pub hit_box_size: Vec2,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -195,7 +201,7 @@ impl Attack {
             Attack::Claw => AttackStats {
                 damage: 0.5,
                 damage_kind: DamageKind::Flesh,
-                hit_count: 1,
+                hit_count: 3,
                 hurt_box_kind: AttackHurtBoxKind::OffsetRect {
                     offset: 100.,
                     size: Vec2::new(200., 300.),
@@ -204,7 +210,7 @@ impl Attack {
             Attack::Sword => AttackStats {
                 damage: 5.,
                 damage_kind: DamageKind::Sword,
-                hit_count: 1,
+                hit_count: 5,
                 hurt_box_kind: AttackHurtBoxKind::OffsetRect {
                     offset: 150.,
                     size: Vec2::new(200., 150.),
@@ -217,7 +223,7 @@ impl Attack {
                 hurt_box_kind: AttackHurtBoxKind::Projectile,
             },
             Attack::Magic => AttackStats {
-                damage: 2.,
+                damage: 1.,
                 damage_kind: DamageKind::Magic,
                 hit_count: 20,
                 hurt_box_kind: AttackHurtBoxKind::AreaOfEffect {
@@ -291,7 +297,7 @@ fn unit_spawn(
             Health::new(stats.health),
             HitBox {
                 flags: team.hit_flags(),
-                shape: CollisionShape::Rect(Vec2::new(100., 300.)),
+                shape: CollisionShape::Rect(stats.hit_box_size),
                 defense_kind: stats.defense_kind,
             },
             YOrder,
@@ -475,9 +481,9 @@ fn unit_attack(
                                     unit_transform.translation().truncate(),
                                 ),
                                 Projectile {
-                                    velocity: Vec2::new(unit.team.move_direction() * 2000., 300.),
+                                    velocity: Vec2::new(unit.team.move_direction() * 2500., 300.),
                                 },
-                                FramesToLive::new(40),
+                                FramesToLive::new(60),
                                 Depth::from(DEPTH_PROJECTILE),
                             ));
                         }

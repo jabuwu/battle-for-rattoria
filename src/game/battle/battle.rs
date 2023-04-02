@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -54,7 +55,7 @@ impl Default for BattleState {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct BattleConfig {
     pub friendly_units: UnitComposition,
     pub enemy_units: UnitComposition,
@@ -69,7 +70,7 @@ impl BattleConfig {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct UnitComposition {
     pub peasants: usize,
     pub warriors: usize,
@@ -174,7 +175,7 @@ fn battle_start(
         battlefield_spawn_events.send_default();
 
         const X_DISTANCE: f32 = 400.;
-        const Y_MIN: f32 = -400.;
+        const Y_MIN: f32 = -300.;
         const Y_MAX: f32 = -100.;
         let mut rng = thread_rng();
         for team in Team::iter() {

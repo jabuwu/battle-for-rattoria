@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::fs::{read_to_string, write};
+
 use bevy::prelude::*;
 use bevy_egui::{
     egui::{self, Ui},
@@ -12,6 +14,18 @@ use bevy_game::{
 use strum::IntoEnumIterator;
 
 fn main() {
+    let battle_config: BattleConfig = if let Ok(file_contents) = read_to_string("sandbox.ron") {
+        ron::from_str(&file_contents).unwrap_or(BattleConfig {
+            friendly_units: UnitComposition::empty(),
+            enemy_units: UnitComposition::empty(),
+        })
+    } else {
+        BattleConfig {
+            friendly_units: UnitComposition::empty(),
+            enemy_units: UnitComposition::empty(),
+        }
+    };
+
     App::new()
         .insert_resource(Msaa::Off)
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
@@ -31,22 +45,7 @@ fn main() {
         .insert_resource(ExampleState {
             cleanup: false,
             start_battle: false,
-            battle_config: BattleConfig {
-                friendly_units: UnitComposition {
-                    peasants: 0,
-                    warriors: 0,
-                    archers: 0,
-                    mages: 0,
-                    brutes: 0,
-                },
-                enemy_units: UnitComposition {
-                    peasants: 0,
-                    warriors: 0,
-                    archers: 0,
-                    mages: 0,
-                    brutes: 0,
-                },
-            },
+            battle_config,
         })
         .add_system(setup.in_schedule(CoreSchedule::Startup))
         .add_system(pre_update.in_base_set(CoreSet::PreUpdate))
@@ -114,6 +113,15 @@ fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
             }
         }
 
+        if ui.button("Zero All").clicked() {
+            example_state.battle_config = BattleConfig {
+                friendly_units: UnitComposition::empty(),
+                enemy_units: UnitComposition::empty(),
+            };
+        }
+
+        ui.add_space(16.);
+
         ui.label("Friendly Units");
         unit_composition_ui(ui, &mut example_state.battle_config.friendly_units);
 
@@ -121,6 +129,16 @@ fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
 
         ui.label("Enemy Units");
         unit_composition_ui(ui, &mut example_state.battle_config.enemy_units);
+
+        ui.add_space(16.);
+
+        if ui.button("Save Composition").clicked() {
+            write(
+                "sandbox.ron",
+                ron::to_string(&example_state.battle_config).unwrap(),
+            )
+            .unwrap();
+        }
 
         ui.add_space(16.);
 

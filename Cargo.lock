@@ -577,6 +577,8 @@ dependencies = [
  "image",
  "lerp",
  "rand",
+ "ron",
+ "serde",
  "strum",
  "strum_macros",
  "winit",

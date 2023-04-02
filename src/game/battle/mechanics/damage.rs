@@ -42,7 +42,7 @@ impl DamageKind {
             },
             Self::Arrow => match defense_kind {
                 DefenseKind::Flesh => 1.,
-                DefenseKind::Armor => 3.,
+                DefenseKind::Armor => 2.5,
             },
             Self::Magic => match defense_kind {
                 DefenseKind::Flesh => 2.,

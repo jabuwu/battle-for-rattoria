@@ -49,10 +49,13 @@ pub fn area_of_effect_targeting_update(
 ) {
     let mut positions_map: HashMap<Team, Vec<Vec2>> = HashMap::new();
     for (target, target_transform) in target_query.iter() {
-        if let Some(positions) = positions_map.get_mut(&target.team) {
-            positions.push(target_transform.translation().truncate());
-        } else {
-            positions_map.insert(target.team, vec![target_transform.translation().truncate()]);
+        let position = target_transform.translation().truncate();
+        if position.x * -target.team.move_direction() < 500. {
+            if let Some(positions) = positions_map.get_mut(&target.team) {
+                positions.push(position);
+            } else {
+                positions_map.insert(target.team, vec![position]);
+            }
         }
     }
     area_of_effect_targeting.targets = HashMap::new();
