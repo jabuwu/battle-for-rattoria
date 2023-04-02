@@ -1,0 +1,7 @@
+rat_archer.png
+size:287,479
+filter:Nearest,Linear
+pma:true
+rat_archer
+bounds:2,2,283,475
+offsets:0,6,283,481
