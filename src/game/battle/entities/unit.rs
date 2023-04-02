@@ -6,7 +6,8 @@ use strum_macros::EnumIter;
 use crate::{
     AddFixedEvent, AssetLibrary, CollisionShape, DamageKind, DamageReceiveEvent, DamageSystem,
     DefenseKind, Depth, DepthLayer, EventSet, FramesToLive, Health, HealthDieEvent, HitBox,
-    HurtBox, SpawnSet, SpineAttack, SpineFx, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
+    HurtBox, HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Team, Transform2,
+    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -75,6 +76,7 @@ impl Plugin for UnitPlugin {
 pub enum UnitKind {
     Peasant,
     Warrior,
+    Archer,
     Mage,
 }
 
@@ -101,6 +103,16 @@ impl UnitKind {
                 spawn_distance_min: 350.,
                 spawn_distance_max: 450.,
             },
+            UnitKind::Archer => UnitStats {
+                cost: 3,
+                speed: -10.,
+                speed_slow: -10.,
+                health: 20.,
+                attack: Attack::Arrow,
+                defense_kind: DefenseKind::Flesh,
+                spawn_distance_min: 400.,
+                spawn_distance_max: 500.,
+            },
             UnitKind::Mage => UnitStats {
                 cost: 5,
                 speed: 10.,
@@ -118,6 +130,7 @@ impl UnitKind {
         match self {
             UnitKind::Peasant => "Peasant",
             UnitKind::Warrior => "Warrior",
+            UnitKind::Archer => "Archer",
             UnitKind::Mage => "Mage",
         }
     }
@@ -126,6 +139,7 @@ impl UnitKind {
         match self {
             UnitKind::Peasant => "Peasants",
             UnitKind::Warrior => "Warriors",
+            UnitKind::Archer => "Mages",
             UnitKind::Mage => "Mages",
         }
     }
@@ -134,6 +148,7 @@ impl UnitKind {
         match self {
             UnitKind::Peasant => asset_library.spine_rat.clone(),
             UnitKind::Warrior => asset_library.spine_rat_warrior.clone(),
+            UnitKind::Archer => asset_library.spine_rat_archer.clone(),
             UnitKind::Mage => asset_library.spine_rat_mage.clone(),
         }
     }
@@ -155,6 +170,7 @@ pub struct UnitStats {
 pub enum Attack {
     Claw,
     Sword,
+    Arrow,
     Magic,
 }
 
@@ -178,6 +194,12 @@ impl Attack {
                     offset: 150.,
                     size: Vec2::new(200., 150.),
                 },
+            },
+            Attack::Arrow => AttackStats {
+                damage: 1.,
+                damage_kind: DamageKind::Arrow,
+                hit_count: 1,
+                hurt_box_kind: AttackHurtBoxKind::Projectile,
             },
             Attack::Magic => AttackStats {
                 damage: 1.,
@@ -203,6 +225,7 @@ pub struct AttackStats {
 pub enum AttackHurtBoxKind {
     OffsetRect { offset: f32, size: Vec2 },
     AreaOfEffect { size: Vec2 },
+    Projectile,
 }
 
 #[derive(Component)]
@@ -398,6 +421,34 @@ fn unit_attack(
                                     rng.gen_range(-200.0..200.0),
                                     -200.,
                                 )),
+                            ));
+                        }
+                        AttackHurtBoxKind::Projectile => {
+                            commands.spawn((
+                                HurtBox {
+                                    flags: unit.team.hurt_flags(),
+                                    shape: CollisionShape::Rect(Vec2::new(60., 10.)),
+                                    damage: attack_stats.damage,
+                                    damage_kind: attack_stats.damage_kind,
+                                    max_hits: attack_stats.hit_count,
+                                },
+                                HurtBoxDespawner,
+                                SpriteBundle {
+                                    sprite: Sprite {
+                                        custom_size: Some(Vec2::new(60., 10.)),
+                                        color: Color::BLACK,
+                                        ..Default::default()
+                                    },
+                                    ..Default::default()
+                                },
+                                Transform2::from_translation(
+                                    unit_transform.translation().truncate(),
+                                ),
+                                Projectile {
+                                    velocity: Vec2::new(unit.team.move_direction() * 2000., 300.),
+                                },
+                                FramesToLive::new(40),
+                                Depth::from(DEPTH_PROJECTILE),
                             ));
                         }
                     }

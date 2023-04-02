@@ -73,6 +73,7 @@ impl BattleConfig {
 pub struct UnitComposition {
     pub peasants: usize,
     pub warriors: usize,
+    pub archers: usize,
     pub mages: usize,
 }
 
@@ -85,6 +86,7 @@ impl UnitComposition {
         match unit_kind {
             UnitKind::Peasant => self.peasants,
             UnitKind::Warrior => self.warriors,
+            UnitKind::Archer => self.archers,
             UnitKind::Mage => self.mages,
         }
     }
@@ -93,6 +95,7 @@ impl UnitComposition {
         match unit_kind {
             UnitKind::Peasant => self.peasants = i,
             UnitKind::Warrior => self.warriors = i,
+            UnitKind::Archer => self.archers = i,
             UnitKind::Mage => self.mages = i,
         }
     }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{DamageReceiveEvent, EventSet, UpdateSet};
+use crate::{AddFixedEvent, DamageReceiveEvent, EventSet, UpdateSet};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum HealthSystem {
@@ -11,7 +11,7 @@ pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<HealthDieEvent>().add_system(
+        app.add_fixed_event::<HealthDieEvent>().add_system(
             health_receive_damage
                 .in_schedule(CoreSchedule::FixedUpdate)
                 .in_set(HealthSystem::ReceiveDamage)

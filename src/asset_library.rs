@@ -9,6 +9,7 @@ pub struct AssetLibrary {
     pub image_background_bg: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
+    pub spine_rat_archer: Handle<SkeletonData>,
     pub spine_rat_mage: Handle<SkeletonData>,
     pub spine_attack_magic: Handle<SkeletonData>,
     pub spine_fx_blood_splat: Handle<SkeletonData>,
@@ -43,6 +44,11 @@ fn asset_library_load(
     asset_library.spine_rat_warrior = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/rat_warrior/skeleton.skel"),
         asset_server.load("spines/rat_warrior/rat_warrior.atlas"),
+    ));
+
+    asset_library.spine_rat_archer = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/rat_archer/skeleton.skel"),
+        asset_server.load("spines/rat_archer/rat_archer.atlas"),
     ));
 
     asset_library.spine_rat_mage = skeletons.add(SkeletonData::new_from_binary(

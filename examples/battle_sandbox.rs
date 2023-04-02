@@ -35,12 +35,14 @@ fn main() {
                 friendly_units: UnitComposition {
                     peasants: 10,
                     warriors: 3,
-                    mages: 3,
+                    archers: 3,
+                    mages: 1,
                 },
                 enemy_units: UnitComposition {
                     peasants: 10,
                     warriors: 3,
-                    mages: 3,
+                    archers: 3,
+                    mages: 1,
                 },
             },
         })
@@ -98,7 +100,7 @@ fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
                 ui.horizontal(|ui| {
                     ui.label(unit_kind.name_plural());
                     let mut count = unit_composition.get_count(unit_kind);
-                    ui.add(egui::DragValue::new(&mut count).clamp_range(1..=100));
+                    ui.add(egui::DragValue::new(&mut count).clamp_range(0..=100));
                     unit_composition.set_count(unit_kind, count);
                 });
             }

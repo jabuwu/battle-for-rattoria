@@ -58,6 +58,7 @@ fn game_director_battle_enter(
             enemy_units: UnitComposition {
                 peasants: 10,
                 warriors: 3,
+                archers: 3,
                 mages: 1,
             },
         },

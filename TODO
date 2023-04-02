@@ -1,0 +1,4 @@
+Spine events do not work with fixed update - potential jank
+Multiply blend mode is broken in wasm >:(
+Better y order for projectiles, fx?
+Move unit spines up so their feet is at y = 0

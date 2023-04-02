@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use bitflags::bitflags;
 
 use crate::{
-    CollisionShape, DebugDraw, DebugDrawSettings, DebugRectangle, EventSet, FramesToLiveSystem,
-    UpdateSet,
+    AddFixedEvent, CollisionShape, DebugDraw, DebugDrawSettings, DebugRectangle, EventSet,
+    FramesToLiveSystem, UpdateSet,
 };
 
 bitflags! {
@@ -24,6 +24,7 @@ pub enum DamageKind {
     #[default]
     Flesh,
     Sword,
+    Arrow,
     Magic,
 }
 
@@ -37,6 +38,10 @@ impl DamageKind {
             Self::Sword => match defense_kind {
                 DefenseKind::Flesh => 2.,
                 DefenseKind::Armor => 1.,
+            },
+            Self::Arrow => match defense_kind {
+                DefenseKind::Flesh => 1.,
+                DefenseKind::Armor => 2.,
             },
             Self::Magic => match defense_kind {
                 DefenseKind::Flesh => 1.,
@@ -64,8 +69,8 @@ pub struct DamagePlugin;
 
 impl Plugin for DamagePlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<DamageInflictEvent>()
-            .add_event::<DamageReceiveEvent>()
+        app.add_fixed_event::<DamageInflictEvent>()
+            .add_fixed_event::<DamageReceiveEvent>()
             .add_system(
                 damage_update
                     .in_schedule(CoreSchedule::FixedUpdate)
@@ -102,6 +107,9 @@ pub struct HurtBox {
     pub max_hits: usize,
 }
 
+#[derive(Clone, Copy, Default, Component)]
+pub struct HurtBoxDespawner;
+
 pub struct DamageInflictEvent {
     pub entity: Entity,
     pub damage: f32,
@@ -115,11 +123,12 @@ pub struct DamageReceiveEvent {
 
 pub fn damage_update(
     mut damage_inflict_events: EventWriter<DamageInflictEvent>,
-    mut hurt_box_query: Query<(Entity, &mut HurtBox)>,
+    mut hurt_box_query: Query<(Entity, &mut HurtBox, Option<&HurtBoxDespawner>)>,
+    mut commands: Commands,
     hit_box_query: Query<(Entity, &HitBox)>,
     transform_query: Query<&GlobalTransform>,
 ) {
-    for (hurt_box_entity, mut hurt_box) in hurt_box_query.iter_mut() {
+    for (hurt_box_entity, mut hurt_box, hurt_box_despawner) in hurt_box_query.iter_mut() {
         let Ok(hurt_box_transform) = transform_query.get(hurt_box_entity) else {
             continue;
         };
@@ -148,6 +157,11 @@ pub fn damage_update(
                     });
                     hurt_box.max_hits -= 1;
                 }
+            }
+        }
+        if hurt_box.max_hits == 0 && hurt_box_despawner.is_some() {
+            if let Some(entity_commands) = commands.get_entity(hurt_box_entity) {
+                entity_commands.despawn_recursive();
             }
         }
     }
