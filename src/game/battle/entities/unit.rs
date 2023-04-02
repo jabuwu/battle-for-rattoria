@@ -328,7 +328,7 @@ fn unit_attack(
                                     shape: CollisionShape::Rect(hurt_box_size),
                                     damage: attack_stats.damage,
                                     damage_kind: attack_stats.damage_kind,
-                                    max_hits: 1,
+                                    max_hits: attack_stats.hit_count,
                                 },
                                 TransformBundle::default(),
                                 Transform2::from_translation(
@@ -356,7 +356,7 @@ fn unit_attack(
                                         shape: CollisionShape::Rect(hurt_box_size),
                                         damage: attack_stats.damage,
                                         damage_kind: attack_stats.damage_kind,
-                                        max_hits: 1,
+                                        max_hits: attack_stats.hit_count,
                                     },
                                 },
                                 Transform2::from_translation(Vec2::new(
