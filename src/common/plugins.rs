@@ -5,7 +5,7 @@ use bevy_spine::SpinePlugin;
 
 use crate::{
     DebugDrawPlugin, DialoguePlugin, FixedTimestepPlugin, ForceRatioPlugin, FramesToLivePlugin,
-    SetsPlugin, Transform2Plugin, YOrderPlugin,
+    InteractionStackPlugin, SetsPlugin, Transform2Plugin, YOrderPlugin,
 };
 
 pub struct CommonPlugins;
@@ -27,6 +27,7 @@ impl PluginGroup for CommonPlugins {
         group = group.add(FramesToLivePlugin);
         group = group.add(DebugDrawPlugin);
         group = group.add(DialoguePlugin);
+        group = group.add(InteractionStackPlugin);
 
         group
     }

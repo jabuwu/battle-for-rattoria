@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
-use crate::{AddFixedEvent, AppState, GameState, SpawnSet, UnitKind, UpdateSet};
+use crate::{
+    AddFixedEvent, AppState, Dialogue, DialogueLine, GameState, InteractionMode, InteractionStack,
+    Script, SpawnSet, UnitKind, UpdateSet,
+};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum PlanningSystem {
@@ -93,8 +96,10 @@ fn planning_ui(
     mut contexts: EguiContexts,
     mut game_state: ResMut<GameState>,
     mut planning_state: ResMut<PlanningState>,
+    mut dialogue: ResMut<Dialogue>,
+    interaction_stack: Res<InteractionStack>,
 ) {
-    if planning_state.planning {
+    if planning_state.planning && interaction_stack.can_interact(InteractionMode::Game) {
         egui::Window::new("Planning").show(contexts.ctx_mut(), |ui| {
             ui.label(format!("Food remaining: {}", game_state.food));
 
@@ -117,9 +122,13 @@ fn planning_ui(
                 }
             }
 
-            if game_state.fed_army.total_units() > 0 {
-                if ui.button("Start Battle").clicked() {
+            if ui.button("Start Battle").clicked() {
+                if game_state.fed_army.total_units() > 0 {
                     planning_state.start = true;
+                } else {
+                    dialogue.queue(Script::new(vec![DialogueLine::message(
+                        "You must feed some units first",
+                    )]));
                 }
             }
         });

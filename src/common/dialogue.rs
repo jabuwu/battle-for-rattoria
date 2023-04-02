@@ -3,13 +3,15 @@ use std::{collections::VecDeque, hash::Hash};
 use bevy::{prelude::*, sprite::Anchor};
 
 use crate::{
-    AddFixedEvent, AssetLibrary, Depth, HashContext, Persistent, Transform2, DEPTH_DIALOGUE,
+    AddFixedEvent, AssetLibrary, Depth, HashContext, InteractionMode, InteractionSet,
+    InteractionStack, Persistent, Transform2, DEPTH_DIALOGUE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum DialogueSystem {
     Setup,
     Update,
+    UpdateInteraction,
 }
 
 pub struct DialoguePlugin;
@@ -19,7 +21,13 @@ impl Plugin for DialoguePlugin {
         app.init_resource::<Dialogue>()
             .add_fixed_event::<DialogueChoiceEvent>()
             .add_startup_system(dialogue_setup.in_set(DialogueSystem::Setup))
-            .add_system(dialogue_update.in_set(DialogueSystem::Update));
+            .add_system(dialogue_update.in_set(DialogueSystem::Update))
+            .add_system(
+                dialogue_update_interaction
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(DialogueSystem::UpdateInteraction)
+                    .before(InteractionSet),
+            );
     }
 }
 
@@ -204,6 +212,7 @@ fn dialogue_update(
     mut visibility_query: Query<&mut Visibility>,
     mut text_query: Query<&mut Text>,
     mut dialogue_choice_events: EventWriter<DialogueChoiceEvent>,
+    mut interaction_stack: ResMut<InteractionStack>,
     dialogue_text_query: Query<Entity, With<DialogueText>>,
     dialogue_option_query: Query<(Entity, &DialogueOption)>,
     keys: Res<Input<KeyCode>>,
@@ -218,6 +227,7 @@ fn dialogue_update(
         }
     }
     if let Some(dialogue_line) = &dialogue.line {
+        interaction_stack.set_wants_interaction(InteractionMode::Dialogue, true);
         for dialogue_entity in dialogue_text_query.iter() {
             if let Ok(mut dialogue_text) = text_query.get_mut(dialogue_entity) {
                 if let Some(section) = dialogue_text.sections.get_mut(0) {
@@ -260,5 +270,14 @@ fn dialogue_update(
                 }
             }
         }
+    } else {
+        interaction_stack.set_wants_interaction(InteractionMode::Dialogue, false);
     }
+}
+
+fn dialogue_update_interaction(
+    mut interaction_stack: ResMut<InteractionStack>,
+    dialogue: Res<Dialogue>,
+) {
+    interaction_stack.set_wants_interaction(InteractionMode::Dialogue, dialogue.line.is_some());
 }

@@ -12,6 +12,9 @@ pub struct SpawnSet;
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
 pub struct UpdateSet;
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct InteractionSet;
+
 #[derive(Copy, SystemSet)]
 pub enum EventSet<T: Send + Sync + 'static> {
     Sender,
