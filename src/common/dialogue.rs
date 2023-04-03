@@ -4,7 +4,7 @@ use bevy::{prelude::*, sprite::Anchor};
 
 use crate::{
     AddFixedEvent, AssetLibrary, Depth, HashContext, InteractionMode, InteractionSet,
-    InteractionStack, Persistent, Transform2, DEPTH_DIALOGUE,
+    InteractionStack, Persistent, Transform2, UnitKind, DEPTH_DIALOGUE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -19,7 +19,7 @@ pub struct DialoguePlugin;
 impl Plugin for DialoguePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Dialogue>()
-            .add_fixed_event::<DialogueChoiceEvent>()
+            .add_fixed_event::<DialogueEvent>()
             .add_startup_system(dialogue_setup.in_set(DialogueSystem::Setup))
             .add_system(dialogue_update.in_set(DialogueSystem::Update))
             .add_system(
@@ -37,11 +37,44 @@ pub struct Dialogue {
     scripts: VecDeque<Script>,
 }
 
-pub struct DialogueChoiceEvent(HashContext);
+#[derive(Clone)]
+pub enum DialogueEvent {
+    None,
+    Context(HashContext),
+    AddUnits(Vec<(UnitKind, usize)>),
+    Multiple(Vec<DialogueEvent>),
+}
 
-impl DialogueChoiceEvent {
+impl DialogueEvent {
     pub fn is(&self, context: impl Hash) -> bool {
-        self.0 == context.into()
+        if let DialogueEvent::Context(event_context) = &self {
+            *event_context == context.into()
+        } else {
+            false
+        }
+    }
+
+    pub fn send(&self, dialogue_events: &mut EventWriter<DialogueEvent>) {
+        match self.clone() {
+            Self::None => {}
+            Self::Multiple(vec) => {
+                for event in vec {
+                    event.send(dialogue_events);
+                }
+            }
+            x => dialogue_events.send(x),
+        }
+    }
+
+    pub fn and(self, other: DialogueEvent) -> DialogueEvent {
+        match self {
+            DialogueEvent::None => other,
+            DialogueEvent::Multiple(mut vec) => {
+                vec.push(other);
+                DialogueEvent::Multiple(vec)
+            }
+            _ => DialogueEvent::Multiple(vec![self, other]),
+        }
     }
 }
 
@@ -55,6 +88,10 @@ struct DialogueText;
 struct DialogueOption(usize);
 
 impl Dialogue {
+    pub fn active(&self) -> bool {
+        self.line.is_some()
+    }
+
     pub fn clear(&mut self) {
         self.line = None;
         self.scripts.clear();
@@ -90,20 +127,46 @@ impl Dialogue {
 #[derive(Clone)]
 pub struct DialogueLine {
     message: String,
-    choices: Vec<(HashContext, String, Vec<DialogueLine>)>,
+    event: Option<DialogueEvent>,
+    choices: Vec<(DialogueEvent, String, Vec<DialogueLine>)>,
 }
 
 impl DialogueLine {
     pub fn message(message: &str) -> Self {
         Self {
             message: message.to_owned(),
+            event: None,
             choices: vec![],
         }
     }
 
-    pub fn branch(message: &str, choices: Vec<(HashContext, &str, Vec<DialogueLine>)>) -> Self {
+    pub fn message_and(message: &str, event: DialogueEvent) -> Self {
         Self {
             message: message.to_owned(),
+            event: Some(event),
+            choices: vec![],
+        }
+    }
+
+    pub fn branch(message: &str, choices: Vec<(DialogueEvent, &str, Vec<DialogueLine>)>) -> Self {
+        Self {
+            message: message.to_owned(),
+            event: None,
+            choices: choices
+                .into_iter()
+                .map(|(context, str, lines)| (context, str.to_owned(), lines))
+                .collect(),
+        }
+    }
+
+    pub fn branch_and(
+        message: &str,
+        event: DialogueEvent,
+        choices: Vec<(DialogueEvent, &str, Vec<DialogueLine>)>,
+    ) -> Self {
+        Self {
+            message: message.to_owned(),
+            event: Some(event),
             choices: choices
                 .into_iter()
                 .map(|(context, str, lines)| (context, str.to_owned(), lines))
@@ -211,7 +274,7 @@ fn dialogue_update(
     mut dialogue_box_query: Query<Entity, With<DialogueBox>>,
     mut visibility_query: Query<&mut Visibility>,
     mut text_query: Query<&mut Text>,
-    mut dialogue_choice_events: EventWriter<DialogueChoiceEvent>,
+    mut dialogue_events: EventWriter<DialogueEvent>,
     mut interaction_stack: ResMut<InteractionStack>,
     dialogue_text_query: Query<Entity, With<DialogueText>>,
     dialogue_option_query: Query<(Entity, &DialogueOption)>,
@@ -226,7 +289,10 @@ fn dialogue_update(
             };
         }
     }
-    if let Some(dialogue_line) = &dialogue.line {
+    if let Some(dialogue_line) = &mut dialogue.line {
+        if let Some(event) = dialogue_line.event.take() {
+            event.send(&mut dialogue_events);
+        }
         interaction_stack.set_wants_interaction(InteractionMode::Dialogue, true);
         for dialogue_entity in dialogue_text_query.iter() {
             if let Ok(mut dialogue_text) = text_query.get_mut(dialogue_entity) {
@@ -263,7 +329,7 @@ fn dialogue_update(
             for (index, dialogue_key) in dialogue_keys.iter().enumerate() {
                 if let Some(dialogue_line_choice) = dialogue_line.choices.get(index) {
                     if keys.just_pressed(*dialogue_key) {
-                        dialogue_choice_events.send(DialogueChoiceEvent(dialogue_line_choice.0));
+                        dialogue_line_choice.0.send(&mut dialogue_events);
                         dialogue.next_line_with_choice(index);
                         break;
                     }

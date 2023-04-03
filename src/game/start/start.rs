@@ -5,9 +5,6 @@ use crate::{AppState, GameState};
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum StartSystem {
     Enter,
-    Start,
-    Update,
-    Ui,
 }
 
 pub struct StartPlugin;
@@ -25,5 +22,5 @@ impl Plugin for StartPlugin {
 }
 fn start_enter(mut game_state: ResMut<GameState>, mut next_state: ResMut<NextState<AppState>>) {
     *game_state = GameState::default();
-    next_state.set(AppState::GamePlanning);
+    next_state.set(AppState::GameIntermission);
 }

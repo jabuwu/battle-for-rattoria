@@ -91,8 +91,8 @@ impl UnitKind {
                 health: 15.,
                 attack: Attack::Claw,
                 defense_kind: DefenseKind::Flesh,
-                spawn_distance_min: 200.,
-                spawn_distance_max: 400.,
+                spawn_distance_min: 0.,
+                spawn_distance_max: 200.,
                 hit_box_size: Vec2::new(100., 400.),
             },
             UnitKind::Warrior => UnitStats {
@@ -102,15 +102,15 @@ impl UnitKind {
                 health: 30.,
                 attack: Attack::Sword,
                 defense_kind: DefenseKind::Armor,
-                spawn_distance_min: 0.,
-                spawn_distance_max: 150.,
+                spawn_distance_min: 200.,
+                spawn_distance_max: 400.,
                 hit_box_size: Vec2::new(300., 400.),
             },
             UnitKind::Archer => UnitStats {
-                cost: 3,
+                cost: 5,
                 speed: 10.,
                 speed_slow: 10.,
-                health: 30.,
+                health: 5.,
                 attack: Attack::Arrow,
                 defense_kind: DefenseKind::Flesh,
                 spawn_distance_min: 400.,
@@ -217,7 +217,7 @@ impl Attack {
                 },
             },
             Attack::Arrow => AttackStats {
-                damage: 2.,
+                damage: 1.,
                 damage_kind: DamageKind::Arrow,
                 hit_count: 1,
                 hurt_box_kind: AttackHurtBoxKind::Projectile,
@@ -483,7 +483,7 @@ fn unit_attack(
                                 Projectile {
                                     velocity: Vec2::new(unit.team.move_direction() * 2500., 300.),
                                 },
-                                FramesToLive::new(60),
+                                FramesToLive::new(100),
                                 Depth::from(DEPTH_PROJECTILE),
                             ));
                         }

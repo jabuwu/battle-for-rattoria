@@ -2,13 +2,14 @@ use std::mem::replace;
 
 use bevy::prelude::*;
 
-use crate::UnitComposition;
+use crate::{Quest, UnitComposition};
 
 #[derive(Resource)]
 pub struct GameState {
     pub food: usize,
     pub available_army: UnitComposition,
     pub fed_army: UnitComposition,
+    pub quest: Quest,
 }
 
 impl Default for GameState {
@@ -16,13 +17,14 @@ impl Default for GameState {
         Self {
             food: 0,
             available_army: UnitComposition {
-                peasants: 100,
-                warriors: 20,
-                archers: 20,
-                mages: 20,
-                brutes: 1,
+                peasants: 15,
+                warriors: 0,
+                archers: 0,
+                mages: 0,
+                brutes: 0,
             },
             fed_army: UnitComposition::empty(),
+            quest: Quest::default(),
         }
     }
 }

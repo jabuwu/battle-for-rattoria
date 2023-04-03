@@ -3,8 +3,8 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_game::{
-    AssetLibraryPlugin, CommonPlugins, Dialogue, DialogueChoiceEvent, DialogueLine, GamePlugins,
-    Persistent, Script,
+    AssetLibraryPlugin, CommonPlugins, Dialogue, DialogueEvent, DialogueLine, GamePlugins,
+    Persistent, Script, UnitKind,
 };
 
 fn main() {
@@ -27,6 +27,7 @@ fn main() {
         .add_startup_system(setup)
         .add_system(ui)
         .add_system(choices)
+        .add_system(events)
         .run();
 }
 
@@ -40,9 +41,6 @@ pub struct YesBlue;
 #[derive(Hash)]
 pub struct YesGreen;
 
-#[derive(Hash)]
-pub struct No;
-
 fn ui(mut contexts: EguiContexts, mut dialogue: ResMut<Dialogue>) {
     egui::Window::new("Dialogue").show(contexts.ctx_mut(), |ui| {
         if ui.button("queue test dialogue").clicked() {
@@ -53,17 +51,34 @@ fn ui(mut contexts: EguiContexts, mut dialogue: ResMut<Dialogue>) {
                     "change the background color?",
                     vec![
                         (
-                            YesBlue.into(),
+                            DialogueEvent::Context(YesBlue.into()),
                             "yes, blue",
                             vec![DialogueLine::message("done its blue!")],
                         ),
                         (
-                            YesGreen.into(),
+                            DialogueEvent::Context(YesGreen.into()),
                             "yes, green",
                             vec![DialogueLine::message("done its green!")],
                         ),
-                        (No.into(), "no", vec![]),
+                        (DialogueEvent::None, "no", vec![]),
                     ],
+                ),
+            ]));
+        }
+        if ui.button("queue events dialogue").clicked() {
+            dialogue.queue(Script::new(vec![
+                DialogueLine::message_and(
+                    "added 5 peasants",
+                    DialogueEvent::AddUnits(vec![(UnitKind::Peasant, 5)]),
+                ),
+                DialogueLine::message_and(
+                    "added 2 archors and 3 mages",
+                    DialogueEvent::AddUnits(vec![(UnitKind::Peasant, 2), (UnitKind::Mage, 3)]),
+                ),
+                DialogueLine::message_and(
+                    "added 1 brute and changed background color to green",
+                    DialogueEvent::AddUnits(vec![(UnitKind::Brute, 1)])
+                        .and(DialogueEvent::Context(YesGreen.into())),
                 ),
             ]));
         }
@@ -73,15 +88,27 @@ fn ui(mut contexts: EguiContexts, mut dialogue: ResMut<Dialogue>) {
     });
 }
 
-fn choices(
-    mut dialogue_choice_events: EventReader<DialogueChoiceEvent>,
-    mut clear_color: ResMut<ClearColor>,
-) {
-    for dialogue_choice_event in dialogue_choice_events.iter() {
-        if dialogue_choice_event.is(YesBlue) {
+fn choices(mut dialogue_events: EventReader<DialogueEvent>, mut clear_color: ResMut<ClearColor>) {
+    for dialogue_event in dialogue_events.iter() {
+        if dialogue_event.is(YesBlue) {
             clear_color.0 = Color::MIDNIGHT_BLUE;
-        } else if dialogue_choice_event.is(YesGreen) {
+        } else if dialogue_event.is(YesGreen) {
             clear_color.0 = Color::DARK_GREEN;
+        }
+    }
+}
+
+fn events(mut dialogue_events: EventReader<DialogueEvent>) {
+    for dialogue_event in dialogue_events.iter() {
+        match dialogue_event {
+            DialogueEvent::None => unreachable!(),
+            DialogueEvent::AddUnits(add_units) => {
+                for (unit_kind, amount) in add_units.iter() {
+                    println!("Add {} {} unit(s)", amount, unit_kind.name());
+                }
+            }
+            DialogueEvent::Context(_) => println!("Context Event"),
+            DialogueEvent::Multiple(_) => unreachable!(),
         }
     }
 }

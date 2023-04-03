@@ -29,7 +29,6 @@ fn main() {
         .add_plugins(GamePlugins)
         .add_system(setup.in_schedule(CoreSchedule::Startup))
         .add_system(set_window_icon.in_schedule(CoreSchedule::Startup))
-        .insert_resource(FixedTime::new_from_secs(1. / 120.))
         .run();
 }
 

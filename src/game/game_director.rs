@@ -57,9 +57,9 @@ fn game_director_battle_enter(
             friendly_units,
             enemy_units: UnitComposition {
                 peasants: 10,
-                warriors: 3,
-                archers: 3,
-                mages: 1,
+                warriors: 0,
+                archers: 0,
+                mages: 0,
                 brutes: 0,
             },
         },
@@ -70,11 +70,13 @@ fn game_director_change_state(
     mut battle_ended_events: EventReader<BattleEndedEvent>,
     mut planning_ended_events: EventReader<PlanningEndedEvent>,
     mut next_state: ResMut<NextState<AppState>>,
+    mut game_state: ResMut<GameState>,
     game_director: Query<&GameDirector>,
 ) {
     if game_director.get_single().is_ok() {
         for _ in battle_ended_events.iter() {
-            next_state.set(AppState::GamePlanning);
+            game_state.quest.battle += 1;
+            next_state.set(AppState::GameIntermission);
         }
         for _ in planning_ended_events.iter() {
             next_state.set(AppState::GameBattle);

@@ -7,6 +7,7 @@ pub enum AppState {
     #[default]
     MainMenu,
     GameStart,
+    GameIntermission,
     GamePlanning,
     GameBattle,
 }
@@ -16,6 +17,7 @@ impl AppState {
         match self {
             AppState::MainMenu => false,
             AppState::GameStart => true,
+            AppState::GameIntermission => true,
             AppState::GamePlanning => true,
             AppState::GameBattle => true,
         }

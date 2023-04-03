@@ -1,16 +1,20 @@
 mod battle;
+mod dialogues;
 mod game;
 mod game_director;
 mod game_state;
+mod intermission;
 mod planning;
 mod plugins;
 mod start;
 mod team;
 
 pub use battle::*;
+pub use dialogues::*;
 pub use game::*;
 pub use game_director::*;
 pub use game_state::*;
+pub use intermission::*;
 pub use planning::*;
 pub use plugins::*;
 pub use start::*;
