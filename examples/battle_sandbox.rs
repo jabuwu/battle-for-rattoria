@@ -8,22 +8,17 @@ use bevy_egui::{
     EguiContexts,
 };
 use bevy_game::{
-    cleanup_non_persistent_entities, AssetLibraryPlugin, BattleConfig, BattleStartEvent,
-    CommonPlugins, EventSet, GamePlugins, Persistent, UnitComposition, UnitKind,
+    cleanup_non_persistent_entities, AssetLibraryPlugin, BattleConfig, BattleModifier,
+    BattleModifiers, BattleStartEvent, CommonPlugins, EventSet, GamePlugins, Persistent,
+    UnitComposition, UnitKind,
 };
 use strum::IntoEnumIterator;
 
 fn main() {
     let battle_config: BattleConfig = if let Ok(file_contents) = read_to_string("sandbox.ron") {
-        ron::from_str(&file_contents).unwrap_or(BattleConfig {
-            friendly_units: UnitComposition::empty(),
-            enemy_units: UnitComposition::empty(),
-        })
+        ron::from_str(&file_contents).unwrap_or(BattleConfig::default())
     } else {
-        BattleConfig {
-            friendly_units: UnitComposition::empty(),
-            enemy_units: UnitComposition::empty(),
-        }
+        BattleConfig::default()
     };
 
     App::new()
@@ -99,7 +94,6 @@ fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
         fn unit_composition_ui(ui: &mut Ui, unit_composition: &mut UnitComposition) {
             for unit_kind in UnitKind::iter() {
                 ui.horizontal(|ui| {
-                    ui.label(unit_kind.name_plural());
                     let mut count = unit_composition.get_count(unit_kind);
                     if ui.button("-").clicked() && count > 0 {
                         count -= 1;
@@ -109,39 +103,58 @@ fn ui(mut contexts: EguiContexts, mut example_state: ResMut<ExampleState>) {
                         count += 1;
                     }
                     unit_composition.set_count(unit_kind, count);
+                    ui.label(unit_kind.name_plural());
                 });
             }
         }
-
-        if ui.button("Zero All").clicked() {
-            example_state.battle_config = BattleConfig {
-                friendly_units: UnitComposition::empty(),
-                enemy_units: UnitComposition::empty(),
-            };
+        fn battle_modifiers_ui(ui: &mut Ui, battle_modifiers: &mut BattleModifiers) {
+            for battle_modifier in BattleModifier::iter() {
+                let mut checked = battle_modifiers[battle_modifier];
+                ui.checkbox(&mut checked, battle_modifier.name());
+                battle_modifiers[battle_modifier] = checked;
+            }
         }
 
         ui.add_space(16.);
 
-        ui.label("Friendly Units");
-        unit_composition_ui(ui, &mut example_state.battle_config.friendly_units);
+        ui.allocate_space(egui::Vec2::new(550., 0.));
+        ui.horizontal(|ui| {
+            ui.vertical(|ui| {
+                ui.label("Friendly Units");
+                unit_composition_ui(ui, &mut example_state.battle_config.friendly_units);
+            });
+            ui.vertical(|ui| {
+                ui.label("Friendly Modifiers");
+                battle_modifiers_ui(ui, &mut example_state.battle_config.friendly_modifiers);
+            });
+
+            ui.vertical(|ui| {
+                ui.label("Enemy Units");
+                unit_composition_ui(ui, &mut example_state.battle_config.enemy_units);
+            });
+            ui.vertical(|ui| {
+                ui.label("Enemy Modifiers");
+                battle_modifiers_ui(ui, &mut example_state.battle_config.enemy_modifiers);
+            });
+        });
 
         ui.add_space(16.);
 
-        ui.label("Enemy Units");
-        unit_composition_ui(ui, &mut example_state.battle_config.enemy_units);
+        ui.horizontal(|ui| {
+            if ui.button("Save").clicked() {
+                write(
+                    "sandbox.ron",
+                    ron::to_string(&example_state.battle_config).unwrap(),
+                )
+                .unwrap();
+            }
 
-        ui.add_space(16.);
-
-        if ui.button("Save Composition").clicked() {
-            write(
-                "sandbox.ron",
-                ron::to_string(&example_state.battle_config).unwrap(),
-            )
-            .unwrap();
-        }
-
-        ui.add_space(16.);
-
+            if ui.button("Reset").clicked() {
+                example_state.battle_config = BattleConfig::default();
+            }
+        });
+    });
+    egui::Window::new("Start").show(contexts.ctx_mut(), |ui| {
         if ui.button("Start Battle").clicked() {
             example_state.cleanup = true;
             example_state.start_battle = true;

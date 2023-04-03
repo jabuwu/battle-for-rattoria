@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    AppState, BattleConfig, BattleEndedEvent, BattleStartEvent, GameState, Intel,
+    AppState, BattleConfig, BattleEndedEvent, BattleModifiers, BattleStartEvent, GameState, Intel,
     PlanningEndedEvent, PlanningStartEvent,
 };
 
@@ -55,7 +55,9 @@ fn game_director_battle_enter(
     battle_start_events.send(BattleStartEvent {
         config: BattleConfig {
             friendly_units,
+            friendly_modifiers: BattleModifiers::default(),
             enemy_units: game_state.quest.enemy_unit_comp(),
+            enemy_modifiers: BattleModifiers::default(),
         },
     });
     game_state.intel = Intel::default();

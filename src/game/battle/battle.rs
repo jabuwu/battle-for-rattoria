@@ -1,9 +1,11 @@
 use std::mem::take;
 
 use bevy::prelude::*;
+use enum_map::{Enum, EnumMap};
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, DamageReceiveEvent, Depth, EventSet,
@@ -78,10 +80,12 @@ pub struct BattleReport {
     pub dead_units: UnitComposition,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct BattleConfig {
     pub friendly_units: UnitComposition,
+    pub friendly_modifiers: BattleModifiers,
     pub enemy_units: UnitComposition,
+    pub enemy_modifiers: BattleModifiers,
 }
 
 impl BattleConfig {
@@ -156,6 +160,43 @@ impl UnitComposition {
             total += self.get_count(unit_kind);
         }
         total
+    }
+}
+
+pub type BattleModifiers = EnumMap<BattleModifier, bool>;
+
+#[derive(Clone, Copy, PartialEq, Eq, Enum, EnumIter, Serialize, Deserialize)]
+pub enum BattleModifier {
+    ExtraDefense,
+    ExtraAttack,
+    ExtraSpeed,
+    Fire,
+    Ice,
+    Wet,
+    FriendlyFire,
+    Cowardly,
+    Sickness,
+    Explosive,
+    Combustion,
+    Blindness,
+}
+
+impl BattleModifier {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::ExtraDefense => "Extra Defense",
+            Self::ExtraAttack => "Extra Attack",
+            Self::ExtraSpeed => "Extra Speed",
+            Self::Fire => "Fire",
+            Self::Ice => "Ice",
+            Self::Wet => "Wet",
+            Self::FriendlyFire => "Friendly Fire",
+            Self::Cowardly => "Cowardly",
+            Self::Sickness => "Sickness",
+            Self::Explosive => "Explosive",
+            Self::Combustion => "Combustion",
+            Self::Blindness => "Blindness",
+        }
     }
 }
 

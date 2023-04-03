@@ -1613,6 +1613,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "988f0d17a0fa38291e5f41f71ea8d46a5d5497b9054d5a759fae2cbb819f2356"
 dependencies = [
  "enum-map-derive",
+ "serde",
 ]
 
 [[package]]

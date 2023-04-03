@@ -166,8 +166,8 @@ impl UnitKind {
             },
             UnitKind::Mage => UnitStats {
                 cost: 10,
-                speed: 10.,
-                speed_slow: 100.,
+                speed: 0.,
+                speed_slow: 0.,
                 health: 10.,
                 attack: Attack::Magic,
                 defense_kind: DefenseKind::Flesh,
