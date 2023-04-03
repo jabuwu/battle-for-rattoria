@@ -2,7 +2,7 @@ use std::mem::replace;
 
 use bevy::prelude::*;
 
-use crate::{Quest, UnitComposition};
+use crate::{Intel, Quest, UnitComposition};
 
 #[derive(Resource)]
 pub struct GameState {
@@ -10,6 +10,7 @@ pub struct GameState {
     pub available_army: UnitComposition,
     pub fed_army: UnitComposition,
     pub quest: Quest,
+    pub intel: Intel,
 }
 
 impl Default for GameState {
@@ -25,6 +26,7 @@ impl Default for GameState {
             },
             fed_army: UnitComposition::empty(),
             quest: Quest::default(),
+            intel: Intel::default(),
         }
     }
 }

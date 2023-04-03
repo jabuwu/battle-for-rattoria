@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::{
-    AppState, BattleConfig, BattleEndedEvent, BattleStartEvent, GameState, PlanningEndedEvent,
-    PlanningStartEvent,
+    AppState, BattleConfig, BattleEndedEvent, BattleStartEvent, GameState, Intel,
+    PlanningEndedEvent, PlanningStartEvent,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -43,7 +43,7 @@ fn game_director_planning_enter(
     mut game_state: ResMut<GameState>,
     mut planning_start_events: EventWriter<PlanningStartEvent>,
 ) {
-    game_state.food += 30;
+    game_state.food += 15;
     planning_start_events.send_default();
 }
 
@@ -58,6 +58,7 @@ fn game_director_battle_enter(
             enemy_units: game_state.quest.enemy_unit_comp(),
         },
     });
+    game_state.intel = Intel::default();
 }
 
 fn game_director_change_state(
@@ -68,7 +69,10 @@ fn game_director_change_state(
     game_director: Query<&GameDirector>,
 ) {
     if game_director.get_single().is_ok() {
-        for _ in battle_ended_events.iter() {
+        for battle_ended_event in battle_ended_events.iter() {
+            game_state
+                .available_army
+                .subtract_units(&battle_ended_event.report.dead_units);
             game_state.quest.battle += 1;
             next_state.set(AppState::GameIntermission);
         }

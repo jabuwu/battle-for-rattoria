@@ -69,15 +69,16 @@ fn ui(mut contexts: EguiContexts, mut dialogue: ResMut<Dialogue>) {
             dialogue.queue(Script::new(vec![
                 DialogueLine::message_and(
                     "added 5 peasants",
-                    DialogueEvent::AddUnits(vec![(UnitKind::Peasant, 5)]),
+                    DialogueEvent::AddUnits(UnitKind::Peasant, 5),
                 ),
                 DialogueLine::message_and(
                     "added 2 archors and 3 mages",
-                    DialogueEvent::AddUnits(vec![(UnitKind::Peasant, 2), (UnitKind::Mage, 3)]),
+                    DialogueEvent::AddUnits(UnitKind::Peasant, 2)
+                        .and(DialogueEvent::AddUnits(UnitKind::Mage, 3)),
                 ),
                 DialogueLine::message_and(
                     "added 1 brute and changed background color to green",
-                    DialogueEvent::AddUnits(vec![(UnitKind::Brute, 1)])
+                    DialogueEvent::AddUnits(UnitKind::Brute, 1)
                         .and(DialogueEvent::Context(YesGreen.into())),
                 ),
             ]));
@@ -102,11 +103,10 @@ fn events(mut dialogue_events: EventReader<DialogueEvent>) {
     for dialogue_event in dialogue_events.iter() {
         match dialogue_event {
             DialogueEvent::None => unreachable!(),
-            DialogueEvent::AddUnits(add_units) => {
-                for (unit_kind, amount) in add_units.iter() {
-                    println!("Add {} {} unit(s)", amount, unit_kind.name());
-                }
+            DialogueEvent::AddUnits(unit_kind, amount) => {
+                println!("Add {} {} unit(s)", amount, unit_kind.name());
             }
+            DialogueEvent::GainIntel(unit_kind) => println!("Gained intel on {}", unit_kind.name()),
             DialogueEvent::Context(_) => println!("Context Event"),
             DialogueEvent::Multiple(_) => unreachable!(),
         }

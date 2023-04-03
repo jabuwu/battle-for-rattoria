@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_spine::{SkeletonData, Spine, SpineBundle, SpineEvent, SpineReadyEvent, SpineSet};
+use enum_map::Enum;
 use rand::prelude::*;
 use strum_macros::EnumIter;
 
@@ -72,7 +73,7 @@ impl Plugin for UnitPlugin {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, Enum, EnumIter)]
 pub enum UnitKind {
     Peasant,
     Warrior,
@@ -107,7 +108,7 @@ impl UnitKind {
                 hit_box_size: Vec2::new(300., 400.),
             },
             UnitKind::Archer => UnitStats {
-                cost: 5,
+                cost: 3,
                 speed: 10.,
                 speed_slow: 10.,
                 health: 5.,
@@ -217,7 +218,7 @@ impl Attack {
                 },
             },
             Attack::Arrow => AttackStats {
-                damage: 1.,
+                damage: 2.,
                 damage_kind: DamageKind::Arrow,
                 hit_count: 1,
                 hurt_box_kind: AttackHurtBoxKind::Projectile,
@@ -261,6 +262,7 @@ pub enum AttackHurtBoxKind {
 #[derive(Component)]
 pub struct Unit {
     pub team: Team,
+    pub kind: UnitKind,
     pub stats: UnitStats,
     pub slow_timer: f32,
 }
@@ -304,6 +306,7 @@ fn unit_spawn(
             Target { team },
             Unit {
                 team,
+                kind: spawn_event.kind,
                 stats,
                 slow_timer: 0.,
             },

@@ -1,17 +1,21 @@
+use std::mem::take;
+
 use bevy::prelude::*;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, Depth, EventSet, SpawnSet, Team,
-    Transform2, UnitKind, UnitSpawnEvent, UpdateSet, DEPTH_BATTLE_TEXT,
+    AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, DamageReceiveEvent, Depth, EventSet,
+    HealthDieEvent, SpawnSet, Team, Transform2, Unit, UnitKind, UnitSpawnEvent, UpdateSet,
+    DEPTH_BATTLE_TEXT,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum BattleSystem {
     Start,
-    Update,
+    UnitDie,
+    EndDetection,
 }
 
 pub struct BattlePlugin;
@@ -31,11 +35,19 @@ impl Plugin for BattlePlugin {
                     .after(EventSet::<BattleStartEvent>::Sender),
             )
             .add_system(
-                battle_update
+                battle_unit_die
                     .in_schedule(CoreSchedule::FixedUpdate)
-                    .in_set(BattleSystem::Update)
+                    .in_set(BattleSystem::UnitDie)
                     .in_set(UpdateSet)
-                    .in_set(EventSet::<BattleEndedEvent>::Sender),
+                    .after(EventSet::<HealthDieEvent>::Sender),
+            )
+            .add_system(
+                battle_end_detection
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(BattleSystem::EndDetection)
+                    .in_set(UpdateSet)
+                    .in_set(EventSet::<BattleEndedEvent>::Sender)
+                    .after(EventSet::<DamageReceiveEvent>::Sender),
             );
     }
 }
@@ -43,16 +55,27 @@ impl Plugin for BattlePlugin {
 #[derive(Resource)]
 pub struct BattleState {
     battling: bool,
-    battle_time: f32,
+    report: BattleReport,
+    end_timer: f32,
+    damage_inflicted: bool,
+    time_since_last_damage: f32,
 }
 
 impl Default for BattleState {
     fn default() -> Self {
         Self {
             battling: false,
-            battle_time: 10.,
+            report: BattleReport::default(),
+            end_timer: 0.,
+            damage_inflicted: false,
+            time_since_last_damage: 0.,
         }
     }
+}
+
+#[derive(Default)]
+pub struct BattleReport {
+    pub dead_units: UnitComposition,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -115,6 +138,18 @@ impl UnitComposition {
         }
     }
 
+    pub fn subtract_units(&mut self, other: &UnitComposition) {
+        for unit_kind in UnitKind::iter() {
+            self.mutate_count(unit_kind, |i| {
+                if other.get_count(unit_kind) > i {
+                    0
+                } else {
+                    i - other.get_count(unit_kind)
+                }
+            });
+        }
+    }
+
     pub fn total_units(&self) -> usize {
         let mut total = 0;
         for unit_kind in UnitKind::iter() {
@@ -130,6 +165,7 @@ pub struct BattleStartEvent {
 
 #[derive(Default)]
 pub struct BattleEndedEvent {
+    pub report: BattleReport,
     _private: (),
 }
 
@@ -188,17 +224,63 @@ fn battle_start(
     }
 }
 
-fn battle_update(
+fn battle_unit_die(
+    mut health_die_events: EventReader<HealthDieEvent>,
+    mut battle_state: ResMut<BattleState>,
+    unit_query: Query<&Unit>,
+) {
+    if !battle_state.battling {
+        return;
+    }
+    for health_die_event in health_die_events.iter() {
+        if let Ok(unit) = unit_query.get(health_die_event.entity) {
+            if unit.team == Team::Friendly {
+                battle_state
+                    .report
+                    .dead_units
+                    .mutate_count(unit.kind, |i| i + 1);
+            }
+        }
+    }
+}
+
+fn battle_end_detection(
     mut battle_state: ResMut<BattleState>,
     mut battle_ended_events: EventWriter<BattleEndedEvent>,
+    mut damage_receive_events: EventReader<DamageReceiveEvent>,
+    unit_query: Query<&Unit>,
     time: Res<FixedTime>,
 ) {
     if !battle_state.battling {
         return;
     }
-    battle_state.battle_time -= time.period.as_secs_f32();
-    if battle_state.battle_time < 0. {
-        battle_ended_events.send(BattleEndedEvent { _private: () });
+    let mut friendly_exists = false;
+    let mut enemy_exists = false;
+    for unit in unit_query.iter() {
+        if unit.team == Team::Friendly {
+            friendly_exists = true;
+        } else if unit.team == Team::Enemy {
+            enemy_exists = true;
+        }
+    }
+    for _ in damage_receive_events.iter() {
+        battle_state.damage_inflicted = true;
+        battle_state.time_since_last_damage = 0.;
+    }
+    battle_state.time_since_last_damage += time.period.as_secs_f32();
+    if !friendly_exists || !enemy_exists {
+        battle_state.end_timer += time.period.as_secs_f32();
+    } else {
+        battle_state.end_timer = 0.;
+    }
+    if battle_state.end_timer > 2.
+        || (battle_state.damage_inflicted && battle_state.time_since_last_damage > 4.)
+        || (!battle_state.damage_inflicted && battle_state.time_since_last_damage > 8.)
+    {
+        battle_ended_events.send(BattleEndedEvent {
+            report: take(&mut battle_state.report),
+            _private: (),
+        });
         battle_state.battling = false;
     }
 }

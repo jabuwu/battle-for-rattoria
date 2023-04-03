@@ -20,12 +20,13 @@ fn game_dialogue_events(
 ) {
     for dialogue_event in dialogue_events.iter() {
         match dialogue_event {
-            DialogueEvent::AddUnits(units) => {
-                for (unit_kind, count) in units.iter() {
-                    game_state
-                        .available_army
-                        .mutate_count(*unit_kind, |i| i + *count);
-                }
+            DialogueEvent::AddUnits(unit_kind, count) => {
+                game_state
+                    .available_army
+                    .mutate_count(*unit_kind, |i| i + *count);
+            }
+            DialogueEvent::GainIntel(unit_kind) => {
+                game_state.intel.can_see[*unit_kind] = true;
             }
             _ => {}
         }

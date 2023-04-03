@@ -41,7 +41,8 @@ pub struct Dialogue {
 pub enum DialogueEvent {
     None,
     Context(HashContext),
-    AddUnits(Vec<(UnitKind, usize)>),
+    AddUnits(UnitKind, usize),
+    GainIntel(UnitKind),
     Multiple(Vec<DialogueEvent>),
 }
 

@@ -54,7 +54,11 @@ pub fn wc1_preplanning2() -> Script {
         DialogueLine::message("War Chef 1: Preplanning 2"),
         DialogueLine::message_and(
             "You gained 3 warriors",
-            DialogueEvent::AddUnits(vec![(UnitKind::Warrior, 3)]),
+            DialogueEvent::AddUnits(UnitKind::Warrior, 3),
+        ),
+        DialogueLine::message_and(
+            "Gained intel on enemy warrior count",
+            DialogueEvent::GainIntel(UnitKind::Warrior),
         ),
     ])
 }
@@ -63,8 +67,8 @@ pub fn wc1_preplanning3() -> Script {
     Script::new(vec![
         DialogueLine::message("War Chef 1: Preplanning 3"),
         DialogueLine::message_and(
-            "You gained 3 archers",
-            DialogueEvent::AddUnits(vec![(UnitKind::Archer, 3)]),
+            "You gained 5 archers",
+            DialogueEvent::AddUnits(UnitKind::Archer, 5),
         ),
     ])
 }

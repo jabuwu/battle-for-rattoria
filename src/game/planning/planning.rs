@@ -132,5 +132,20 @@ fn planning_ui(
                 }
             }
         });
+        egui::Window::new("Intel").show(contexts.ctx_mut(), |ui| {
+            ui.label("Enemy's Army");
+            let enemy_comp = game_state.quest.enemy_unit_comp();
+            for unit_kind in UnitKind::iter() {
+                if game_state.intel.can_see[unit_kind] {
+                    ui.label(format!(
+                        "{}: {}",
+                        unit_kind.name_plural(),
+                        enemy_comp.get_count(unit_kind)
+                    ));
+                } else {
+                    ui.label(format!("{}: ???", unit_kind.name_plural()));
+                }
+            }
+        });
     }
 }
