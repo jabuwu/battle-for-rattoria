@@ -6,11 +6,11 @@ use rand::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{
-    AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, CollisionShape, DamageKind,
-    DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer, EventSet, Feeler, FixedInput,
-    FramesToLive, Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner, Projectile, SpawnSet,
-    SpineAttack, SpineFx, Target, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
-    DEPTH_PROJECTILE,
+    AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, BattleModifier, BattleState,
+    CollisionShape, DamageKind, DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer,
+    EventSet, Feeler, FixedInput, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
+    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2,
+    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -136,6 +136,7 @@ impl UnitKind {
                 spawn_distance_max: 200.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(200., 400.),
+                retreat_chance: 0.01,
                 attributes: Attributes::empty(),
             },
             UnitKind::Warrior => UnitStats {
@@ -149,6 +150,7 @@ impl UnitKind {
                 spawn_distance_max: 400.,
                 hit_box_size: Vec2::new(300., 400.),
                 feeler_size: Vec2::new(400., 400.),
+                retreat_chance: 0.1,
                 attributes: Attributes::empty(),
             },
             UnitKind::Archer => UnitStats {
@@ -162,7 +164,8 @@ impl UnitKind {
                 spawn_distance_max: 600.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(2200., 400.),
-                attributes: Attributes::COWARDLY,
+                retreat_chance: 0.33,
+                attributes: Attributes::MAY_RETREAT,
             },
             UnitKind::Mage => UnitStats {
                 cost: 10,
@@ -175,6 +178,7 @@ impl UnitKind {
                 spawn_distance_max: 800.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(1400., 400.),
+                retreat_chance: 1.,
                 attributes: Attributes::empty(),
             },
             UnitKind::Brute => UnitStats {
@@ -188,7 +192,8 @@ impl UnitKind {
                 spawn_distance_max: 250.,
                 hit_box_size: Vec2::new(300., 500.),
                 feeler_size: Vec2::new(400., 400.),
-                attributes: Attributes::empty(),
+                retreat_chance: 0.01,
+                attributes: Attributes::MAY_FRIENDLY_FIRE,
             },
         }
     }
@@ -236,6 +241,7 @@ pub struct UnitStats {
     pub spawn_distance_max: f32,
     pub hit_box_size: Vec2,
     pub feeler_size: Vec2,
+    pub retreat_chance: f32,
     pub attributes: Attributes,
 }
 
@@ -318,6 +324,7 @@ pub struct Unit {
     pub stats: UnitStats,
     pub slow_timer: f32,
     pub retreating: bool,
+    pub blind: bool,
     pub attributes: Attributes,
 }
 
@@ -347,7 +354,8 @@ impl Unit {
 
 bitflags! {
     pub struct Attributes: u32 {
-        const COWARDLY = 0b00000001;
+        const MAY_RETREAT = 0b00000001;
+        const MAY_FRIENDLY_FIRE = 0b00000010;
     }
 }
 
@@ -360,11 +368,22 @@ pub struct UnitSpawnEvent {
 fn unit_spawn(
     mut commands: Commands,
     mut spawn_events: EventReader<UnitSpawnEvent>,
+    battle_state: Res<BattleState>,
     asset_library: Res<AssetLibrary>,
 ) {
+    let mut rng = thread_rng();
     for spawn_event in spawn_events.iter() {
         let team = spawn_event.team;
-        let stats = spawn_event.kind.stats();
+        let team_modifiers = battle_state.get_modifiers(team);
+        let mut stats = spawn_event.kind.stats();
+        if team_modifiers[BattleModifier::ExtraSpeed] {
+            stats.speed *= 3.;
+            stats.speed_slow *= 1.5;
+        }
+        if team_modifiers[BattleModifier::Slowness] {
+            stats.speed *= 0.3;
+            stats.speed_slow *= 0.3;
+        }
         commands.spawn((
             SpineBundle {
                 skeleton: spawn_event.kind.skeleton(asset_library.as_ref()),
@@ -386,6 +405,11 @@ fn unit_spawn(
                     offset: Vec2::ZERO,
                     size: stats.hit_box_size,
                 },
+                defense: if team_modifiers[BattleModifier::ExtraDefense] {
+                    2.
+                } else {
+                    1.
+                },
                 defense_kind: stats.defense_kind,
             },
             YOrder,
@@ -401,6 +425,7 @@ fn unit_spawn(
                 stats,
                 slow_timer: 0.,
                 retreating: false,
+                blind: team_modifiers[BattleModifier::Blindness] && rng.gen_bool(0.5),
                 attributes: stats.attributes,
             },
         ));
@@ -409,24 +434,21 @@ fn unit_spawn(
 
 fn unit_spine_ready(
     mut spine_ready_events: EventReader<SpineReadyEvent>,
-    mut spine_query: Query<&mut Spine, With<Unit>>,
+    mut spine_query: Query<(&mut Spine, &Unit)>,
+    battle_state: Res<BattleState>,
 ) {
     let mut rng = thread_rng();
     for spine_ready_event in spine_ready_events.iter() {
-        if let Ok(mut spine) = spine_query.get_mut(spine_ready_event.entity) {
+        if let Ok((mut spine, unit)) = spine_query.get_mut(spine_ready_event.entity) {
             if let Ok(mut track) = spine.animation_state.set_animation_by_name(
                 UNIT_TRACK_WALK as i32,
                 "animation",
                 true,
             ) {
                 track.set_track_time(rng.gen_range(0.0..1.0));
-            }
-            if let Ok(mut track) = spine.animation_state.set_animation_by_name(
-                UNIT_TRACK_ATTACK as i32,
-                "attack",
-                true,
-            ) {
-                track.set_track_time(rng.gen_range(0.0..1.0));
+                if battle_state.get_modifiers(unit.team)[BattleModifier::Slowness] {
+                    track.set_timescale(0.5);
+                }
             }
         }
     }
@@ -485,10 +507,12 @@ fn unit_update(mut unit_query: Query<(&mut Transform2, &Unit)>, time: Res<FixedT
 fn unit_attack(
     mut commands: Commands,
     mut spine_events: EventReader<SpineEvent>,
-    unit_query: Query<(&Unit, &GlobalTransform)>,
+    battle_state: Res<BattleState>,
+    unit_query: Query<(Entity, &Unit, &GlobalTransform)>,
     asset_library: Res<AssetLibrary>,
     area_of_effect_targeting: Res<AreaOfEffectTargeting>,
 ) {
+    let mut rng = thread_rng();
     for spine_event in spine_events.iter() {
         if let SpineEvent::Event {
             entity: spine_event_entity,
@@ -497,8 +521,27 @@ fn unit_attack(
         } = spine_event
         {
             if spine_event_name == "attack" {
-                if let Ok((unit, unit_transform)) = unit_query.get(*spine_event_entity) {
+                if let Ok((unit_entity, unit, unit_transform)) = unit_query.get(*spine_event_entity)
+                {
+                    let team_modifiers = battle_state.get_modifiers(unit.team);
+                    let damage_multiplier = if team_modifiers[BattleModifier::ExtraAttack] {
+                        1.5
+                    } else {
+                        1.
+                    };
+                    let friendly_fire = if (team_modifiers[BattleModifier::FriendlyFire]
+                        || unit.attributes.contains(Attributes::MAY_FRIENDLY_FIRE))
+                        && rng.gen_bool(0.25)
+                    {
+                        true
+                    } else {
+                        false
+                    };
                     let attack_stats = unit.stats.attack.stats();
+                    let mut hurt_flags = unit.team.hurt_flags();
+                    if friendly_fire {
+                        hurt_flags |= unit.team.hit_flags();
+                    }
                     match attack_stats.hurt_box_kind {
                         AttackHurtBoxKind::OffsetRect {
                             offset: hurt_box_offset,
@@ -506,14 +549,15 @@ fn unit_attack(
                         } => {
                             commands.spawn((
                                 HurtBox {
-                                    flags: unit.team.hurt_flags(),
+                                    flags: hurt_flags,
                                     shape: CollisionShape::Rect {
                                         offset: Vec2::ZERO,
                                         size: hurt_box_size,
                                     },
-                                    damage: attack_stats.damage,
+                                    damage: attack_stats.damage * damage_multiplier,
                                     damage_kind: attack_stats.damage_kind,
                                     max_hits: attack_stats.hit_count,
+                                    ignore_entity: unit_entity,
                                 },
                                 TransformBundle::default(),
                                 Transform2::from_translation(
@@ -526,7 +570,6 @@ fn unit_attack(
                         AttackHurtBoxKind::AreaOfEffect {
                             size: hurt_box_size,
                         } => {
-                            let mut rng = thread_rng();
                             if let Some(target_position) =
                                 area_of_effect_targeting.get_target(unit.team.opposite_team())
                             {
@@ -537,14 +580,15 @@ fn unit_attack(
                                     },
                                     SpineAttack {
                                         hurt_box: HurtBox {
-                                            flags: unit.team.hurt_flags(),
+                                            flags: hurt_flags,
                                             shape: CollisionShape::Rect {
                                                 offset: Vec2::ZERO,
                                                 size: hurt_box_size,
                                             },
-                                            damage: attack_stats.damage,
+                                            damage: attack_stats.damage * damage_multiplier,
                                             damage_kind: attack_stats.damage_kind,
                                             max_hits: attack_stats.hit_count,
+                                            ignore_entity: unit_entity,
                                         },
                                     },
                                     SpineFx,
@@ -558,14 +602,15 @@ fn unit_attack(
                         AttackHurtBoxKind::Projectile => {
                             commands.spawn((
                                 HurtBox {
-                                    flags: unit.team.hurt_flags(),
+                                    flags: hurt_flags,
                                     shape: CollisionShape::Rect {
                                         offset: Vec2::ZERO,
                                         size: Vec2::new(60., 10.),
                                     },
-                                    damage: attack_stats.damage,
+                                    damage: attack_stats.damage * damage_multiplier,
                                     damage_kind: attack_stats.damage_kind,
                                     max_hits: attack_stats.hit_count,
+                                    ignore_entity: unit_entity,
                                 },
                                 HurtBoxDespawner,
                                 SpriteBundle {
@@ -610,11 +655,15 @@ fn unit_die(
 fn unit_cowardly(
     mut unit_query: Query<&mut Unit>,
     mut damage_receive_events: EventReader<DamageReceiveEvent>,
+    battle_state: Res<BattleState>,
 ) {
     let mut rng = thread_rng();
     for damage_receive_event in damage_receive_events.iter() {
         if let Ok(mut unit) = unit_query.get_mut(damage_receive_event.entity) {
-            if rng.gen_bool(0.333) && unit.attributes.contains(Attributes::COWARDLY) {
+            if rng.gen_bool(unit.stats.retreat_chance as f64)
+                && (unit.attributes.contains(Attributes::MAY_RETREAT)
+                    || battle_state.get_modifiers(unit.team)[BattleModifier::Cowardly])
+            {
                 unit.retreating = true;
             }
         }
@@ -627,19 +676,26 @@ fn unit_update_sprite_direction(mut unit_query: Query<(&mut Transform2, &Unit)>)
     }
 }
 
-fn unit_update_attack_animation(mut unit_query: Query<(&mut Spine, &Unit, &Feeler)>) {
+fn unit_update_attack_animation(
+    mut unit_query: Query<(&mut Spine, &Unit, &Feeler)>,
+    battle_state: Res<BattleState>,
+) {
     for (mut unit_spine, unit, unit_feeler) in unit_query.iter_mut() {
-        if unit.can_attack() && unit_feeler.feeling {
+        if (unit.can_attack() && unit_feeler.feeling) || unit.blind {
             if unit_spine
                 .animation_state
                 .track_at_index(UNIT_TRACK_ATTACK)
                 .is_none()
             {
-                let _ = unit_spine.animation_state.set_animation_by_name(
+                if let Ok(mut track) = unit_spine.animation_state.set_animation_by_name(
                     UNIT_TRACK_ATTACK as i32,
                     "attack",
                     true,
-                );
+                ) {
+                    if battle_state.get_modifiers(unit.team)[BattleModifier::Slowness] {
+                        track.set_timescale(0.5);
+                    }
+                }
             }
         } else {
             if unit_spine

@@ -96,16 +96,18 @@ impl Plugin for DamagePlugin {
 pub struct HitBox {
     pub flags: DamageFlags,
     pub shape: CollisionShape,
+    pub defense: f32,
     pub defense_kind: DefenseKind,
 }
 
-#[derive(Clone, Copy, Default, Component)]
+#[derive(Clone, Copy, Component)]
 pub struct HurtBox {
     pub flags: DamageFlags,
     pub shape: CollisionShape,
     pub damage: f32,
     pub damage_kind: DamageKind,
     pub max_hits: usize,
+    pub ignore_entity: Entity,
 }
 
 #[derive(Clone, Copy, Default, Component)]
@@ -146,6 +148,9 @@ pub fn damage_update(
             if hurt_box_entity == hit_box_entity {
                 continue;
             }
+            if hurt_box.ignore_entity == hit_box_entity {
+                continue;
+            }
             let Ok(hit_box_transform) = transform_query.get(hit_box_entity) else {
                 continue;
             };
@@ -155,8 +160,9 @@ pub fn damage_update(
                 .overlaps(hit_box.shape.at(hit_box_transform.translation().truncate()))
                 && hurt_box.flags & hit_box.flags != DamageFlags::empty()
             {
-                let damage =
+                let mut damage =
                     hurt_box.damage * hurt_box.damage_kind.damage_multiplier(hit_box.defense_kind);
+                damage /= hit_box.defense;
                 if damage > 0. {
                     damage_candidates.push(DamageCandidate {
                         entity: hit_box_entity,

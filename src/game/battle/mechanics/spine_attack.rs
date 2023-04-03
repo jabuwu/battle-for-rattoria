@@ -22,7 +22,7 @@ impl Plugin for SpineAttackPlugin {
     }
 }
 
-#[derive(Default, Component)]
+#[derive(Component)]
 pub struct SpineAttack {
     pub hurt_box: HurtBox,
 }

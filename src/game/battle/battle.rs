@@ -61,6 +61,8 @@ pub struct BattleState {
     end_timer: f32,
     damage_inflicted: bool,
     time_since_last_damage: f32,
+    friendly_modifiers: BattleModifiers,
+    enemy_modifiers: BattleModifiers,
 }
 
 impl Default for BattleState {
@@ -71,6 +73,17 @@ impl Default for BattleState {
             end_timer: 0.,
             damage_inflicted: false,
             time_since_last_damage: 0.,
+            friendly_modifiers: BattleModifiers::default(),
+            enemy_modifiers: BattleModifiers::default(),
+        }
+    }
+}
+
+impl BattleState {
+    pub fn get_modifiers(&self, team: Team) -> &BattleModifiers {
+        match team {
+            Team::Friendly => &self.friendly_modifiers,
+            Team::Enemy => &self.enemy_modifiers,
         }
     }
 }
@@ -169,16 +182,18 @@ pub type BattleModifiers = EnumMap<BattleModifier, bool>;
 pub enum BattleModifier {
     ExtraDefense,
     ExtraAttack,
+    QuickAttack, // TODO
     ExtraSpeed,
-    Fire,
-    Ice,
-    Wet,
+    Fire, // TODO
+    Ice,  // TODO
+    Wet,  // TODO
     FriendlyFire,
     Cowardly,
-    Sickness,
-    Explosive,
-    Combustion,
+    Sickness,   // TODO
+    Explosive,  // TODO
+    Combustion, // TODO
     Blindness,
+    Slowness,
 }
 
 impl BattleModifier {
@@ -186,6 +201,7 @@ impl BattleModifier {
         match self {
             Self::ExtraDefense => "Extra Defense",
             Self::ExtraAttack => "Extra Attack",
+            Self::QuickAttack => "Quick Attack",
             Self::ExtraSpeed => "Extra Speed",
             Self::Fire => "Fire",
             Self::Ice => "Ice",
@@ -196,6 +212,7 @@ impl BattleModifier {
             Self::Explosive => "Explosive",
             Self::Combustion => "Combustion",
             Self::Blindness => "Blindness",
+            Self::Slowness => "Slowness",
         }
     }
 }
@@ -221,6 +238,8 @@ fn battle_start(
     for start_event in start_events.iter() {
         *battle_state = BattleState::default();
         battle_state.battling = true;
+        battle_state.friendly_modifiers = start_event.config.friendly_modifiers;
+        battle_state.enemy_modifiers = start_event.config.enemy_modifiers;
         commands.spawn((
             Text2dBundle {
                 text: Text::from_sections([TextSection {
