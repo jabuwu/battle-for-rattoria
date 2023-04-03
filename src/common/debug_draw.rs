@@ -31,6 +31,7 @@ impl Plugin for DebugDrawPlugin {
 pub struct DebugDrawSettings {
     pub draw_hit_boxes: bool,
     pub draw_hurt_boxes: bool,
+    pub draw_feelers: bool,
 }
 
 #[derive(Resource, Default)]
@@ -89,6 +90,7 @@ fn debug_draw_ui(mut contexts: EguiContexts, mut debug_draw_settings: ResMut<Deb
     egui::Window::new("Debug Draw").show(contexts.ctx_mut(), |ui| {
         ui.checkbox(&mut debug_draw_settings.draw_hit_boxes, "Draw Hitboxes");
         ui.checkbox(&mut debug_draw_settings.draw_hurt_boxes, "Draw Hurtboxes");
+        ui.checkbox(&mut debug_draw_settings.draw_feelers, "Draw Feelers");
     });
 }
 

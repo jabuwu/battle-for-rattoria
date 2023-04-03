@@ -7,7 +7,7 @@ use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, CollisionShape, DamageKind,
-    DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer, EventSet, FixedInput,
+    DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer, EventSet, Feeler, FixedInput,
     FramesToLive, Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner, Projectile, SpawnSet,
     SpineAttack, SpineFx, Target, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
     DEPTH_PROJECTILE,
@@ -28,6 +28,7 @@ pub enum UnitSystem {
     Cowardly,
     UpdateSpriteDirection,
     UpdateAttackAnimation,
+    UpdateFeeler,
 }
 
 pub struct UnitPlugin;
@@ -84,19 +85,29 @@ impl Plugin for UnitPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::Cowardly)
                     .in_set(UpdateSet)
-                    .after(EventSet::<DamageReceiveEvent>::Sender),
+                    .after(EventSet::<DamageReceiveEvent>::Sender)
+                    .before(UnitSystem::Update),
             )
             .add_system(
                 unit_update_sprite_direction
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::UpdateSpriteDirection)
-                    .in_set(UpdateSet),
+                    .in_set(UpdateSet)
+                    .before(UnitSystem::Update),
             )
             .add_system(
                 unit_update_attack_animation
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::UpdateAttackAnimation)
-                    .in_set(UpdateSet),
+                    .in_set(UpdateSet)
+                    .before(UnitSystem::Update),
+            )
+            .add_system(
+                unit_update_feeler
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::UpdateFeeler)
+                    .in_set(UpdateSet)
+                    .before(UnitSystem::Update),
             )
             .add_system(unit_debug_keys.in_schedule(CoreSchedule::FixedUpdate));
     }
@@ -124,6 +135,7 @@ impl UnitKind {
                 spawn_distance_min: 0.,
                 spawn_distance_max: 200.,
                 hit_box_size: Vec2::new(100., 400.),
+                feeler_size: Vec2::new(200., 400.),
                 attributes: Attributes::empty(),
             },
             UnitKind::Warrior => UnitStats {
@@ -136,6 +148,7 @@ impl UnitKind {
                 spawn_distance_min: 200.,
                 spawn_distance_max: 400.,
                 hit_box_size: Vec2::new(300., 400.),
+                feeler_size: Vec2::new(400., 400.),
                 attributes: Attributes::empty(),
             },
             UnitKind::Archer => UnitStats {
@@ -148,6 +161,7 @@ impl UnitKind {
                 spawn_distance_min: 400.,
                 spawn_distance_max: 600.,
                 hit_box_size: Vec2::new(100., 400.),
+                feeler_size: Vec2::new(2200., 400.),
                 attributes: Attributes::COWARDLY,
             },
             UnitKind::Mage => UnitStats {
@@ -160,6 +174,7 @@ impl UnitKind {
                 spawn_distance_min: 600.,
                 spawn_distance_max: 800.,
                 hit_box_size: Vec2::new(100., 400.),
+                feeler_size: Vec2::new(1400., 400.),
                 attributes: Attributes::empty(),
             },
             UnitKind::Brute => UnitStats {
@@ -172,6 +187,7 @@ impl UnitKind {
                 spawn_distance_min: 150.,
                 spawn_distance_max: 250.,
                 hit_box_size: Vec2::new(300., 500.),
+                feeler_size: Vec2::new(400., 400.),
                 attributes: Attributes::empty(),
             },
         }
@@ -219,6 +235,7 @@ pub struct UnitStats {
     pub spawn_distance_min: f32,
     pub spawn_distance_max: f32,
     pub hit_box_size: Vec2,
+    pub feeler_size: Vec2,
     pub attributes: Attributes,
 }
 
@@ -321,9 +338,9 @@ impl Unit {
         if self.retreating {
             300.
         } else if self.slow_timer > 0. {
-            self.stats.speed
-        } else {
             self.stats.speed_slow
+        } else {
+            self.stats.speed
         }
     }
 }
@@ -365,11 +382,19 @@ fn unit_spawn(
             Health::new(stats.health),
             HitBox {
                 flags: team.hit_flags(),
-                shape: CollisionShape::Rect(stats.hit_box_size),
+                shape: CollisionShape::Rect {
+                    offset: Vec2::ZERO,
+                    size: stats.hit_box_size,
+                },
                 defense_kind: stats.defense_kind,
             },
             YOrder,
             Target { team },
+            Feeler {
+                shape: CollisionShape::None,
+                flags: team.hurt_flags(),
+                ..Default::default()
+            },
             Unit {
                 team,
                 kind: spawn_event.kind,
@@ -482,7 +507,10 @@ fn unit_attack(
                             commands.spawn((
                                 HurtBox {
                                     flags: unit.team.hurt_flags(),
-                                    shape: CollisionShape::Rect(hurt_box_size),
+                                    shape: CollisionShape::Rect {
+                                        offset: Vec2::ZERO,
+                                        size: hurt_box_size,
+                                    },
                                     damage: attack_stats.damage,
                                     damage_kind: attack_stats.damage_kind,
                                     max_hits: attack_stats.hit_count,
@@ -510,7 +538,10 @@ fn unit_attack(
                                     SpineAttack {
                                         hurt_box: HurtBox {
                                             flags: unit.team.hurt_flags(),
-                                            shape: CollisionShape::Rect(hurt_box_size),
+                                            shape: CollisionShape::Rect {
+                                                offset: Vec2::ZERO,
+                                                size: hurt_box_size,
+                                            },
                                             damage: attack_stats.damage,
                                             damage_kind: attack_stats.damage_kind,
                                             max_hits: attack_stats.hit_count,
@@ -528,7 +559,10 @@ fn unit_attack(
                             commands.spawn((
                                 HurtBox {
                                     flags: unit.team.hurt_flags(),
-                                    shape: CollisionShape::Rect(Vec2::new(60., 10.)),
+                                    shape: CollisionShape::Rect {
+                                        offset: Vec2::ZERO,
+                                        size: Vec2::new(60., 10.),
+                                    },
                                     damage: attack_stats.damage,
                                     damage_kind: attack_stats.damage_kind,
                                     max_hits: attack_stats.hit_count,
@@ -593,9 +627,9 @@ fn unit_update_sprite_direction(mut unit_query: Query<(&mut Transform2, &Unit)>)
     }
 }
 
-fn unit_update_attack_animation(mut unit_query: Query<(&mut Spine, &Unit)>) {
-    for (mut unit_spine, unit) in unit_query.iter_mut() {
-        if unit.can_attack() {
+fn unit_update_attack_animation(mut unit_query: Query<(&mut Spine, &Unit, &Feeler)>) {
+    for (mut unit_spine, unit, unit_feeler) in unit_query.iter_mut() {
+        if unit.can_attack() && unit_feeler.feeling {
             if unit_spine
                 .animation_state
                 .track_at_index(UNIT_TRACK_ATTACK)
@@ -618,6 +652,15 @@ fn unit_update_attack_animation(mut unit_query: Query<(&mut Spine, &Unit)>) {
                     .clear_track(UNIT_TRACK_ATTACK as i32);
             }
         }
+    }
+}
+
+fn unit_update_feeler(mut unit_query: Query<(&mut Feeler, &Unit)>) {
+    for (mut unit_feeler, unit) in unit_query.iter_mut() {
+        unit_feeler.shape = CollisionShape::Rect {
+            offset: Vec2::new(unit.stats.feeler_size.x * 0.5 * unit.move_direction(), 0.),
+            size: unit.stats.feeler_size,
+        };
     }
 }
 

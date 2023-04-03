@@ -206,12 +206,12 @@ pub fn damage_debug_draw(
 ) {
     if debug_draw_settings.draw_hit_boxes {
         for (hit_box, hit_box_transform) in hit_box_query.iter() {
-            let size = match hit_box.shape {
-                CollisionShape::None => Vec2::ZERO,
-                CollisionShape::Rect(size) => size,
+            let (offset, size) = match hit_box.shape {
+                CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {
-                position: hit_box_transform.translation().truncate(),
+                position: hit_box_transform.translation().truncate() + offset,
                 size,
                 color: Color::rgba(0., 1., 0., 0.1),
                 ..Default::default()
@@ -221,12 +221,12 @@ pub fn damage_debug_draw(
 
     if debug_draw_settings.draw_hurt_boxes {
         for (hurt_box, hurt_box_transform) in hurt_box_query.iter() {
-            let size = match hurt_box.shape {
-                CollisionShape::None => Vec2::ZERO,
-                CollisionShape::Rect(size) => size,
+            let (offset, size) = match hurt_box.shape {
+                CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {
-                position: hurt_box_transform.translation().truncate(),
+                position: hurt_box_transform.translation().truncate() + offset,
                 size,
                 color: Color::rgba(1., 0., 0., 0.2),
                 ..Default::default()
