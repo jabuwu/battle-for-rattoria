@@ -37,7 +37,8 @@ impl Plugin for FixedTimestepPlugin {
                 .configure_set(FixedSet::Update.before(FixedSet::UpdateFlush))
                 .configure_set(FixedSet::UpdateFlush.before(FixedSet::PostUpdate));
         }
-        app.add_fixed_input::<KeyCode>()
+        app.insert_resource(FixedTime::new_from_secs(1. / 120.))
+            .add_fixed_input::<KeyCode>()
             .add_fixed_input::<ScanCode>()
             .add_fixed_input::<MouseButton>()
             .add_fixed_input::<GamepadButton>()

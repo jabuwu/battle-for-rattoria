@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, Depth, EventSet, FixedInput, SpawnSet,
-    Team, Transform2, UnitKind, UnitSpawnEvent, UpdateSet, DEPTH_BATTLE_TEXT,
+    AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, Depth, EventSet, SpawnSet, Team,
+    Transform2, UnitKind, UnitSpawnEvent, UpdateSet, DEPTH_BATTLE_TEXT,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -50,7 +50,7 @@ impl Default for BattleState {
     fn default() -> Self {
         Self {
             battling: false,
-            battle_time: 12.,
+            battle_time: 10.,
         }
     }
 }
@@ -146,26 +146,15 @@ fn battle_start(
         battle_state.battling = true;
         commands.spawn((
             Text2dBundle {
-                text: Text::from_sections([
-                    TextSection {
-                        value: "Battling!".to_owned(),
-                        style: TextStyle {
-                            font: asset_library.font_placeholder.clone(),
-                            font_size: 128.,
-                            color: Color::WHITE,
-                            ..Default::default()
-                        },
+                text: Text::from_sections([TextSection {
+                    value: "Battling!".to_owned(),
+                    style: TextStyle {
+                        font: asset_library.font_placeholder.clone(),
+                        font_size: 128.,
+                        color: Color::WHITE,
+                        ..Default::default()
                     },
-                    TextSection {
-                        value: "\nPress space to skip".to_owned(),
-                        style: TextStyle {
-                            font: asset_library.font_placeholder.clone(),
-                            font_size: 42.,
-                            color: Color::WHITE,
-                            ..Default::default()
-                        },
-                    },
-                ])
+                }])
                 .with_alignment(TextAlignment::Center),
                 ..Default::default()
             },
@@ -203,13 +192,12 @@ fn battle_update(
     mut battle_state: ResMut<BattleState>,
     mut battle_ended_events: EventWriter<BattleEndedEvent>,
     time: Res<FixedTime>,
-    keys: Res<FixedInput<KeyCode>>,
 ) {
     if !battle_state.battling {
         return;
     }
     battle_state.battle_time -= time.period.as_secs_f32();
-    if battle_state.battle_time < 0. || keys.just_pressed(KeyCode::Space) {
+    if battle_state.battle_time < 0. {
         battle_ended_events.send(BattleEndedEvent { _private: () });
         battle_state.battling = false;
     }

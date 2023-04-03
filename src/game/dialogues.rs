@@ -1,10 +1,4 @@
-use crate::{DialogueEvent, DialogueLine, Script, UnitKind};
-
-#[derive(Default)]
-pub struct Quest {
-    pub war_chef: usize,
-    pub battle: usize,
-}
+use crate::{DialogueEvent, DialogueLine, Quest, Script, UnitKind};
 
 impl Quest {
     pub fn preplanning_script(&self) -> Option<Script> {
@@ -66,7 +60,13 @@ pub fn wc1_preplanning2() -> Script {
 }
 
 pub fn wc1_preplanning3() -> Script {
-    Script::new(vec![DialogueLine::message("War Chef 1: Preplanning 3")])
+    Script::new(vec![
+        DialogueLine::message("War Chef 1: Preplanning 3"),
+        DialogueLine::message_and(
+            "You gained 3 archers",
+            DialogueEvent::AddUnits(vec![(UnitKind::Archer, 3)]),
+        ),
+    ])
 }
 
 pub fn wc1_preplanning4() -> Script {

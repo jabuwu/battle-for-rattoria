@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     AppState, BattleConfig, BattleEndedEvent, BattleStartEvent, GameState, PlanningEndedEvent,
-    PlanningStartEvent, UnitComposition,
+    PlanningStartEvent,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -55,13 +55,7 @@ fn game_director_battle_enter(
     battle_start_events.send(BattleStartEvent {
         config: BattleConfig {
             friendly_units,
-            enemy_units: UnitComposition {
-                peasants: 10,
-                warriors: 0,
-                archers: 0,
-                mages: 0,
-                brutes: 0,
-            },
+            enemy_units: game_state.quest.enemy_unit_comp(),
         },
     });
 }

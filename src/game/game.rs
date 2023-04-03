@@ -7,7 +7,6 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GameState>()
-            .insert_resource(FixedTime::new_from_secs(1. / 120.))
             .add_system(game_dialogue_events);
         if app.world.contains_resource::<State<AppState>>() {
             app.add_system(game_update.run_if(in_game_state()));

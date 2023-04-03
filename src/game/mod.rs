@@ -6,6 +6,7 @@ mod game_state;
 mod intermission;
 mod planning;
 mod plugins;
+mod quest;
 mod start;
 mod team;
 
@@ -17,5 +18,6 @@ pub use game_state::*;
 pub use intermission::*;
 pub use planning::*;
 pub use plugins::*;
+pub use quest::*;
 pub use start::*;
 pub use team::*;
