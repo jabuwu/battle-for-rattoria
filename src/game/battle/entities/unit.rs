@@ -1,15 +1,21 @@
 use bevy::prelude::*;
 use bevy_spine::{SkeletonData, Spine, SpineBundle, SpineEvent, SpineReadyEvent, SpineSet};
+use bitflags::bitflags;
 use enum_map::Enum;
 use rand::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, CollisionShape, DamageKind,
-    DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer, EventSet, FramesToLive,
-    Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner, Projectile, SpawnSet, SpineAttack,
-    SpineFx, Target, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer, EventSet, FixedInput,
+    FramesToLive, Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner, Projectile, SpawnSet,
+    SpineAttack, SpineFx, Target, Team, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
+    DEPTH_PROJECTILE,
 };
+
+const UNIT_SCALE: f32 = 0.7;
+const UNIT_TRACK_WALK: usize = 0;
+const UNIT_TRACK_ATTACK: usize = 1;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum UnitSystem {
@@ -19,6 +25,9 @@ pub enum UnitSystem {
     Update,
     Attack,
     Die,
+    Cowardly,
+    UpdateSpriteDirection,
+    UpdateAttackAnimation,
 }
 
 pub struct UnitPlugin;
@@ -69,7 +78,27 @@ impl Plugin for UnitPlugin {
                     .in_set(UnitSystem::Die)
                     .in_set(UpdateSet)
                     .after(EventSet::<HealthDieEvent>::Sender),
-            );
+            )
+            .add_system(
+                unit_cowardly
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::Cowardly)
+                    .in_set(UpdateSet)
+                    .after(EventSet::<DamageReceiveEvent>::Sender),
+            )
+            .add_system(
+                unit_update_sprite_direction
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::UpdateSpriteDirection)
+                    .in_set(UpdateSet),
+            )
+            .add_system(
+                unit_update_attack_animation
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::UpdateAttackAnimation)
+                    .in_set(UpdateSet),
+            )
+            .add_system(unit_debug_keys.in_schedule(CoreSchedule::FixedUpdate));
     }
 }
 
@@ -95,6 +124,7 @@ impl UnitKind {
                 spawn_distance_min: 0.,
                 spawn_distance_max: 200.,
                 hit_box_size: Vec2::new(100., 400.),
+                attributes: Attributes::empty(),
             },
             UnitKind::Warrior => UnitStats {
                 cost: 5,
@@ -106,6 +136,7 @@ impl UnitKind {
                 spawn_distance_min: 200.,
                 spawn_distance_max: 400.,
                 hit_box_size: Vec2::new(300., 400.),
+                attributes: Attributes::empty(),
             },
             UnitKind::Archer => UnitStats {
                 cost: 3,
@@ -117,6 +148,7 @@ impl UnitKind {
                 spawn_distance_min: 400.,
                 spawn_distance_max: 600.,
                 hit_box_size: Vec2::new(100., 400.),
+                attributes: Attributes::COWARDLY,
             },
             UnitKind::Mage => UnitStats {
                 cost: 10,
@@ -128,6 +160,7 @@ impl UnitKind {
                 spawn_distance_min: 600.,
                 spawn_distance_max: 800.,
                 hit_box_size: Vec2::new(100., 400.),
+                attributes: Attributes::empty(),
             },
             UnitKind::Brute => UnitStats {
                 cost: 15,
@@ -139,6 +172,7 @@ impl UnitKind {
                 spawn_distance_min: 150.,
                 spawn_distance_max: 250.,
                 hit_box_size: Vec2::new(300., 500.),
+                attributes: Attributes::empty(),
             },
         }
     }
@@ -185,6 +219,7 @@ pub struct UnitStats {
     pub spawn_distance_min: f32,
     pub spawn_distance_max: f32,
     pub hit_box_size: Vec2,
+    pub attributes: Attributes,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -265,6 +300,38 @@ pub struct Unit {
     pub kind: UnitKind,
     pub stats: UnitStats,
     pub slow_timer: f32,
+    pub retreating: bool,
+    pub attributes: Attributes,
+}
+
+impl Unit {
+    pub fn can_attack(&self) -> bool {
+        !self.retreating
+    }
+
+    pub fn move_direction(&self) -> f32 {
+        let mut move_dir = self.team.move_direction();
+        if self.retreating {
+            move_dir *= -1.;
+        }
+        move_dir
+    }
+
+    pub fn speed(&self) -> f32 {
+        if self.retreating {
+            300.
+        } else if self.slow_timer > 0. {
+            self.stats.speed
+        } else {
+            self.stats.speed_slow
+        }
+    }
+}
+
+bitflags! {
+    pub struct Attributes: u32 {
+        const COWARDLY = 0b00000001;
+    }
 }
 
 pub struct UnitSpawnEvent {
@@ -278,7 +345,6 @@ fn unit_spawn(
     mut spawn_events: EventReader<UnitSpawnEvent>,
     asset_library: Res<AssetLibrary>,
 ) {
-    const UNIT_SCALE: f32 = 0.7;
     for spawn_event in spawn_events.iter() {
         let team = spawn_event.team;
         let stats = spawn_event.kind.stats();
@@ -309,6 +375,8 @@ fn unit_spawn(
                 kind: spawn_event.kind,
                 stats,
                 slow_timer: 0.,
+                retreating: false,
+                attributes: stats.attributes,
             },
         ));
     }
@@ -321,16 +389,18 @@ fn unit_spine_ready(
     let mut rng = thread_rng();
     for spine_ready_event in spine_ready_events.iter() {
         if let Ok(mut spine) = spine_query.get_mut(spine_ready_event.entity) {
-            if let Ok(mut track) = spine
-                .animation_state
-                .set_animation_by_name(0, "animation", true)
-            {
+            if let Ok(mut track) = spine.animation_state.set_animation_by_name(
+                UNIT_TRACK_WALK as i32,
+                "animation",
+                true,
+            ) {
                 track.set_track_time(rng.gen_range(0.0..1.0));
             }
-            if let Ok(mut track) = spine
-                .animation_state
-                .set_animation_by_name(1, "attack", true)
-            {
+            if let Ok(mut track) = spine.animation_state.set_animation_by_name(
+                UNIT_TRACK_ATTACK as i32,
+                "attack",
+                true,
+            ) {
                 track.set_track_time(rng.gen_range(0.0..1.0));
             }
         }
@@ -382,13 +452,8 @@ fn unit_damage_fx(
 
 fn unit_update(mut unit_query: Query<(&mut Transform2, &Unit)>, time: Res<FixedTime>) {
     for (mut unit_transform, unit) in unit_query.iter_mut() {
-        let speed = if unit.slow_timer > 0. {
-            unit.stats.speed_slow
-        } else {
-            unit.stats.speed
-        };
         unit_transform.translation.x +=
-            time.period.as_secs_f32() * speed * unit_transform.scale.x.signum();
+            time.period.as_secs_f32() * unit.speed() * unit_transform.scale.x.signum();
     }
 }
 
@@ -425,10 +490,7 @@ fn unit_attack(
                                 TransformBundle::default(),
                                 Transform2::from_translation(
                                     unit_transform.translation().truncate()
-                                        + Vec2::new(
-                                            hurt_box_offset * unit.team.move_direction(),
-                                            0.,
-                                        ),
+                                        + Vec2::new(hurt_box_offset * unit.move_direction(), 0.),
                                 ),
                                 FramesToLive::new(2),
                             ));
@@ -484,7 +546,7 @@ fn unit_attack(
                                     unit_transform.translation().truncate(),
                                 ),
                                 Projectile {
-                                    velocity: Vec2::new(unit.team.move_direction() * 2500., 300.),
+                                    velocity: Vec2::new(unit.move_direction() * 2500., 300.),
                                 },
                                 FramesToLive::new(100),
                                 Depth::from(DEPTH_PROJECTILE),
@@ -507,6 +569,62 @@ fn unit_die(
             if let Some(entity) = commands.get_entity(health_die_event.entity) {
                 entity.despawn_recursive();
             }
+        }
+    }
+}
+
+fn unit_cowardly(
+    mut unit_query: Query<&mut Unit>,
+    mut damage_receive_events: EventReader<DamageReceiveEvent>,
+) {
+    let mut rng = thread_rng();
+    for damage_receive_event in damage_receive_events.iter() {
+        if let Ok(mut unit) = unit_query.get_mut(damage_receive_event.entity) {
+            if rng.gen_bool(0.333) && unit.attributes.contains(Attributes::COWARDLY) {
+                unit.retreating = true;
+            }
+        }
+    }
+}
+
+fn unit_update_sprite_direction(mut unit_query: Query<(&mut Transform2, &Unit)>) {
+    for (mut unit_transform, unit) in unit_query.iter_mut() {
+        unit_transform.scale.x = UNIT_SCALE * unit.move_direction();
+    }
+}
+
+fn unit_update_attack_animation(mut unit_query: Query<(&mut Spine, &Unit)>) {
+    for (mut unit_spine, unit) in unit_query.iter_mut() {
+        if unit.can_attack() {
+            if unit_spine
+                .animation_state
+                .track_at_index(UNIT_TRACK_ATTACK)
+                .is_none()
+            {
+                let _ = unit_spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_ATTACK as i32,
+                    "attack",
+                    true,
+                );
+            }
+        } else {
+            if unit_spine
+                .animation_state
+                .track_at_index(UNIT_TRACK_ATTACK)
+                .is_some()
+            {
+                unit_spine
+                    .animation_state
+                    .clear_track(UNIT_TRACK_ATTACK as i32);
+            }
+        }
+    }
+}
+
+fn unit_debug_keys(mut unit_query: Query<&mut Unit>, keys: Res<FixedInput<KeyCode>>) {
+    for mut unit in unit_query.iter_mut() {
+        if keys.just_pressed(KeyCode::R) {
+            unit.retreating = true;
         }
     }
 }
