@@ -80,6 +80,14 @@ impl Default for BattleState {
 }
 
 impl BattleState {
+    pub fn stop(&mut self) {
+        self.battling = false;
+    }
+
+    pub fn battling(&self) -> bool {
+        self.battling
+    }
+
     pub fn get_modifiers(&self, team: Team) -> &BattleModifiers {
         match team {
             Team::Friendly => &self.friendly_modifiers,
@@ -201,16 +209,16 @@ impl BattleModifier {
         match self {
             Self::ExtraDefense => "Extra Defense",
             Self::ExtraAttack => "Extra Attack",
-            Self::QuickAttack => "Quick Attack",
+            Self::QuickAttack => "Quick Attack (TODO)",
             Self::ExtraSpeed => "Extra Speed",
-            Self::Fire => "Fire",
-            Self::Ice => "Ice",
-            Self::Wet => "Wet",
+            Self::Fire => "Fire (TODO)",
+            Self::Ice => "Ice (TODO)",
+            Self::Wet => "Wet (TODO)",
             Self::FriendlyFire => "Friendly Fire",
             Self::Cowardly => "Cowardly",
-            Self::Sickness => "Sickness",
-            Self::Explosive => "Explosive",
-            Self::Combustion => "Combustion",
+            Self::Sickness => "Sickness (TODO)",
+            Self::Explosive => "Explosive (TODO)",
+            Self::Combustion => "Combustion (TODO)",
             Self::Blindness => "Blindness",
             Self::Slowness => "Slowness",
         }

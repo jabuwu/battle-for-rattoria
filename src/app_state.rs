@@ -10,6 +10,7 @@ pub enum AppState {
     GameIntermission,
     GamePlanning,
     GameBattle,
+    Sandbox,
 }
 
 impl AppState {
@@ -20,12 +21,13 @@ impl AppState {
             AppState::GameIntermission => true,
             AppState::GamePlanning => true,
             AppState::GameBattle => true,
+            AppState::Sandbox => false,
         }
     }
 }
 
-pub fn in_game_state() -> impl FnMut(Res<State<AppState>>) -> bool + Clone {
-    move |current_state: Res<State<AppState>>| current_state.0.is_game_state()
+pub fn in_game_state(current_state: Res<State<AppState>>) -> bool {
+    current_state.0.is_game_state()
 }
 
 pub struct AppStatePlugin;

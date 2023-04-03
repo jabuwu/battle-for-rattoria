@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::{
-    AppState, BattleConfig, BattleEndedEvent, BattleModifiers, BattleStartEvent, GameState, Intel,
-    PlanningEndedEvent, PlanningStartEvent,
+    in_game_state, AppState, BattleConfig, BattleEndedEvent, BattleModifiers, BattleStartEvent,
+    GameState, Intel, PlanningEndedEvent, PlanningStartEvent,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -19,16 +19,19 @@ impl Plugin for GameDirectorPlugin {
         if app.world.contains_resource::<State<AppState>>() {
             app.add_system(
                 game_director_planning_enter
+                    .run_if(in_game_state)
                     .in_schedule(OnEnter(AppState::GamePlanning))
                     .in_set(GameDirectorSystem::PlanningEnter),
             )
             .add_system(
                 game_director_battle_enter
+                    .run_if(in_game_state)
                     .in_schedule(OnEnter(AppState::GameBattle))
                     .in_set(GameDirectorSystem::BattleEnter),
             )
             .add_system(
                 game_director_change_state
+                    .run_if(in_game_state)
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(GameDirectorSystem::ChangeState),
             );

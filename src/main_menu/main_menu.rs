@@ -16,7 +16,7 @@ impl Plugin for MainMenuPlugin {
 fn main_menu_enter(mut commands: Commands, asset_library: Res<AssetLibrary>) {
     commands.spawn(Text2dBundle {
         text: Text::from_section(
-            "Main Menu\nPress space to play",
+            "War Chef: Battle for Rattoria\n\nPress space to play\n\nPress S to enter Sandbox",
             TextStyle {
                 font: asset_library.font_placeholder.clone(),
                 font_size: 72.,
@@ -32,5 +32,7 @@ fn main_menu_enter(mut commands: Commands, asset_library: Res<AssetLibrary>) {
 fn main_menu_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::Space) {
         next_state.set(AppState::GameStart);
+    } else if keys.just_pressed(KeyCode::S) {
+        next_state.set(AppState::Sandbox);
     }
 }

@@ -41,13 +41,11 @@ strum = "0.24"
 strum_macros = "0.24"
 serde = "1"
 enum-map = { version = "2.5.0", features = [ "serde" ] }
+ron = "0.8"
 
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.28", default-features = false }
 image = { version = "0.24", default-features = false }
-
-[dev-dependencies]
-ron = "0.8"
 
 [build-dependencies]
 embed-resource = "1.4"

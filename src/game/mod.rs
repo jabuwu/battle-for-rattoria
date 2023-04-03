@@ -8,6 +8,7 @@ mod intermission;
 mod planning;
 mod plugins;
 mod quest;
+mod sandbox;
 mod start;
 mod team;
 
@@ -21,5 +22,6 @@ pub use intermission::*;
 pub use planning::*;
 pub use plugins::*;
 pub use quest::*;
+pub use sandbox::*;
 pub use start::*;
 pub use team::*;

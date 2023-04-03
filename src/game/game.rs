@@ -9,7 +9,7 @@ impl Plugin for GamePlugin {
         app.init_resource::<GameState>()
             .add_system(game_dialogue_events);
         if app.world.contains_resource::<State<AppState>>() {
-            app.add_system(game_update.run_if(in_game_state()));
+            app.add_system(game_update.run_if(in_game_state));
         }
     }
 }
