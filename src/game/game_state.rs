@@ -1,4 +1,4 @@
-use std::mem::replace;
+use std::{collections::HashMap, mem::replace};
 
 use bevy::prelude::*;
 
@@ -11,6 +11,7 @@ pub struct GameState {
     pub fed_army: UnitComposition,
     pub quest: Quest,
     pub intel: Intel,
+    pub global_variables: HashMap<String, bool>,
 }
 
 impl Default for GameState {
@@ -18,7 +19,7 @@ impl Default for GameState {
         Self {
             food: 0,
             available_army: UnitComposition {
-                peasants: 15,
+                peasants: 0,
                 warriors: 0,
                 archers: 0,
                 mages: 0,
@@ -27,6 +28,7 @@ impl Default for GameState {
             fed_army: UnitComposition::empty(),
             quest: Quest::default(),
             intel: Intel::default(),
+            global_variables: HashMap::new(),
         }
     }
 }

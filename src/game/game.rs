@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{in_game_state, AppState, DialogueEvent, GameState};
+use crate::{in_game_state, AppState, ArticyDialogueInstruction, DialogueEvent, GameState};
 
 pub struct GamePlugin;
 
@@ -19,16 +19,24 @@ fn game_dialogue_events(
     mut game_state: ResMut<GameState>,
 ) {
     for dialogue_event in dialogue_events.iter() {
-        match dialogue_event {
-            DialogueEvent::AddUnits(unit_kind, count) => {
+        match &dialogue_event.instruction {
+            ArticyDialogueInstruction::AddUnits(unit_kind, count) => {
                 game_state
                     .available_army
                     .mutate_count(*unit_kind, |i| i + *count);
             }
-            DialogueEvent::GainIntel(unit_kind) => {
-                game_state.intel.can_see[*unit_kind] = true;
+            ArticyDialogueInstruction::AddFood(count) => {
+                game_state.food += count;
             }
-            _ => {}
+            ArticyDialogueInstruction::AddItem(name) => {
+                println!("ADD ITEM {}", name);
+            }
+            ArticyDialogueInstruction::SetGlobalVariable(name, value) => {
+                game_state.global_variables.insert(name.clone(), *value);
+            } /*DialogueEvent::GainIntel(unit_kind) => {
+
+                  game_state.intel.can_see[*unit_kind] = true;
+              }*/
         }
     }
 }

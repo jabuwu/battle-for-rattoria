@@ -1,0 +1,38 @@
+WAR CHEF 1 (Glut Rattan, TUTORIAL)
+- BATTLE 1: Player and enemy only have peasants
+  - Force the player to use the peasants in the tutorial
+- BATTLE 2: Introduce Warriors to player, enemy only has peasants
+  - Force the player to use the warriors in the tutorial
+- BATTLE 3: Introduce Spices to player (Firemander Salts), enemy only has peasants
+  - Force the player to use the Firemander Salts in the tutorial
+  - Hint at side effects of spices
+
+WAR CHEF 2 (Field Marshal Toothsy)
+- BATTLE 1: Enemy has lots of warriors, player will probably not do well in the battle
+  - Gain lots of peasants from defeating the previous War Chef
+  - Limit the amount of food the player has here to avoid them losing all units in the first battle
+- BATTLE 2: Dialogue gives player an advantage (Bog Hard-Weeds), and more food
+  - Hint at side effects
+- BATTLE 3: If used, part of army becomes sick from Bog Hard-Weeds, indicate the enemy war chef is weak and may be defeated easily
+  - If the player loses this battle, game over
+  - This is a good opportunity for some branching dialogue
+    - Obtain more Bog Hard-Weeds, food, or another warrior (based on dialogue)
+
+WAR CHEF 3 (Rattin Hood)
+- BATTLE 1: Introduce "Spy" mechanic (spend food to get intel) to see that the enemy has lots of archers
+  - Gain lots of peasants and food from defeating the previous War Chef
+  - Tell the player that warriors are weak to archers, should use peasants
+- BATTLE 2: Player receives either Crackling Moss or Celery Quartz (based on dialogue)
+  - If Crackling Moss, indicate it may not be useful against archers
+  - If Celery Quartz, indicate that it will be useful against archers
+  - Maybe a third option that yields nothing but the player is unlikely to choose (the player is rude or something)
+- BATTLE 3: Player receives some archers that abandoned the enemy camp for your camp
+  - Dialogue indicates the archers can train some of your men to become more archers
+    - Receive more archers next turn, some this turn
+  - Dialogue to dismiss these archers and insist you'll learn archery without them (a bad option, but an option)
+    - Receive more archers next turn, none this turn
+  - Dialogue insisting your troops should learn to use a sword instead
+    - Receive more warriors next turn
+- BATTLE 4: Gain more archers or warriors based on previous dialogue
+  - Enemy will use a Bigg Rat - archers counter Bigg Rat
+  - If the player loses this battle, game over

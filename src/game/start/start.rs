@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AppState, GameState};
+use crate::{AppState, Articy, GameState};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum StartSystem {
@@ -20,7 +20,14 @@ impl Plugin for StartPlugin {
         }
     }
 }
-fn start_enter(mut game_state: ResMut<GameState>, mut next_state: ResMut<NextState<AppState>>) {
+fn start_enter(
+    mut game_state: ResMut<GameState>,
+    mut next_state: ResMut<NextState<AppState>>,
+    articy: Res<Articy>,
+) {
     *game_state = GameState::default();
+    for (name, value) in articy.global_variables.iter() {
+        game_state.global_variables.insert(name.clone(), *value);
+    }
     next_state.set(AppState::GameIntermission);
 }

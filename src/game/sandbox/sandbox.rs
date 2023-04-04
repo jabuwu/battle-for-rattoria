@@ -23,24 +23,26 @@ impl Plugin for SandboxPlugin {
             BattleConfig::default()
         };
 
-        app.insert_resource(SandboxState {
-            cleanup: false,
-            start_battle: false,
-            battle_config,
-        })
-        .add_system(sandbox_pre_update.in_base_set(CoreSet::PreUpdate))
-        .add_system(
-            sandbox_fixed_update
-                .in_schedule(CoreSchedule::FixedUpdate)
-                .in_set(EventSet::<BattleStartEvent>::Sender),
-        )
-        .add_system(sandbox_ui.run_if(in_state(AppState::Sandbox)))
-        .add_system(
-            cleanup_non_persistent_entities
-                .in_base_set(CoreSet::First)
-                .run_if(sandbox_should_cleanup),
-        )
-        .add_system(sandbox_exit.run_if(in_state(AppState::Sandbox)));
+        if app.world.contains_resource::<State<AppState>>() {
+            app.insert_resource(SandboxState {
+                cleanup: false,
+                start_battle: false,
+                battle_config,
+            })
+            .add_system(sandbox_pre_update.in_base_set(CoreSet::PreUpdate))
+            .add_system(
+                sandbox_fixed_update
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(EventSet::<BattleStartEvent>::Sender),
+            )
+            .add_system(sandbox_ui.run_if(in_state(AppState::Sandbox)))
+            .add_system(
+                cleanup_non_persistent_entities
+                    .in_base_set(CoreSet::First)
+                    .run_if(sandbox_should_cleanup),
+            )
+            .add_system(sandbox_exit.run_if(in_state(AppState::Sandbox)));
+        }
     }
 }
 

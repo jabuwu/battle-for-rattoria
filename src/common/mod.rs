@@ -1,3 +1,4 @@
+mod articy;
 mod cleanup;
 mod collision;
 mod debug_draw;
@@ -12,6 +13,7 @@ mod plugins;
 mod transform2;
 mod y_order;
 
+pub use articy::*;
 pub use cleanup::*;
 pub use collision::*;
 pub use debug_draw::*;

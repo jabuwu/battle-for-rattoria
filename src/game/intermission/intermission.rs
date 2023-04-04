@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AppState, Dialogue, GameState};
+use crate::{AppState, Articy, Dialogue, GameState};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum IntermissionSystem {
@@ -27,9 +27,13 @@ impl Plugin for IntermissionPlugin {
     }
 }
 
-fn intermission_enter(mut dialogue: ResMut<Dialogue>, game_state: Res<GameState>) {
-    if let Some(script) = game_state.quest.preplanning_script() {
-        dialogue.queue(script);
+fn intermission_enter(
+    mut dialogue: ResMut<Dialogue>,
+    mut game_state: ResMut<GameState>,
+    articy: Res<Articy>,
+) {
+    if let Some(script) = game_state.quest.preplanning_script(articy.as_ref()) {
+        dialogue.queue(script, game_state.as_mut());
     }
 }
 

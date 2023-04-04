@@ -42,6 +42,8 @@ strum_macros = "0.24"
 serde = "1"
 enum-map = { version = "2.5.0", features = [ "serde" ] }
 ron = "0.8"
+serde_json = "1.0.95"
+anyhow = "1.0"
 
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.28", default-features = false }
@@ -49,3 +51,9 @@ image = { version = "0.24", default-features = false }
 
 [build-dependencies]
 embed-resource = "1.4"
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/articy"
+]

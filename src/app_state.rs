@@ -30,6 +30,10 @@ pub fn in_game_state(current_state: Res<State<AppState>>) -> bool {
     current_state.0.is_game_state()
 }
 
+pub fn not_in_game_state_or_sandbox(current_state: Res<State<AppState>>) -> bool {
+    !current_state.0.is_game_state() && current_state.0 != AppState::Sandbox
+}
+
 pub struct AppStatePlugin;
 
 impl Plugin for AppStatePlugin {

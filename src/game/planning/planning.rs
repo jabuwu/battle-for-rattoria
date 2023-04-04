@@ -3,8 +3,8 @@ use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, AppState, Dialogue, DialogueLine, GameState, InteractionMode, InteractionStack,
-    Script, SpawnSet, UnitKind, UpdateSet,
+    AddFixedEvent, AppState, GameState, InteractionMode, InteractionStack, SpawnSet, UnitKind,
+    UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -49,6 +49,12 @@ impl Plugin for PlanningPlugin {
 pub struct PlanningState {
     planning: bool,
     start: bool,
+}
+
+impl PlanningState {
+    pub fn stop(&mut self) {
+        self.planning = false;
+    }
 }
 
 impl Default for PlanningState {
@@ -96,7 +102,6 @@ fn planning_ui(
     mut contexts: EguiContexts,
     mut game_state: ResMut<GameState>,
     mut planning_state: ResMut<PlanningState>,
-    mut dialogue: ResMut<Dialogue>,
     interaction_stack: Res<InteractionStack>,
 ) {
     if planning_state.planning && interaction_stack.can_interact(InteractionMode::Game) {
@@ -122,13 +127,9 @@ fn planning_ui(
                 }
             }
 
-            if ui.button("Start Battle").clicked() {
-                if game_state.fed_army.total_units() > 0 {
+            if game_state.fed_army.total_units() > 0 {
+                if ui.button("Start Battle").clicked() {
                     planning_state.start = true;
-                } else {
-                    dialogue.queue(Script::new(vec![DialogueLine::message(
-                        "You must feed some units first",
-                    )]));
                 }
             }
         });

@@ -3,8 +3,8 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_game::{
-    AssetLibraryPlugin, CommonPlugins, Dialogue, DialogueEvent, DialogueLine, GamePlugins,
-    Persistent, Script, UnitKind,
+    Articy, ArticyDialogueInstruction, AssetLibraryPlugin, CommonPlugins, Dialogue, DialogueEvent,
+    GamePlugins, GameState, Persistent, Script,
 };
 
 fn main() {
@@ -26,12 +26,14 @@ fn main() {
         .add_plugins(GamePlugins)
         .add_startup_system(setup)
         .add_system(ui)
-        .add_system(choices)
         .add_system(events)
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, mut game_state: ResMut<GameState>, articy: Res<Articy>) {
+    for (name, value) in articy.global_variables.iter() {
+        game_state.global_variables.insert(name.clone(), *value);
+    }
     commands.spawn((Camera2dBundle::default(), Persistent));
 }
 
@@ -41,47 +43,20 @@ pub struct YesBlue;
 #[derive(Hash)]
 pub struct YesGreen;
 
-fn ui(mut contexts: EguiContexts, mut dialogue: ResMut<Dialogue>) {
+fn ui(
+    mut contexts: EguiContexts,
+    mut dialogue: ResMut<Dialogue>,
+    mut game_state: ResMut<GameState>,
+    articy: Res<Articy>,
+) {
     egui::Window::new("Dialogue").show(contexts.ctx_mut(), |ui| {
-        if ui.button("queue test dialogue").clicked() {
-            dialogue.queue(Script::new(vec![
-                DialogueLine::message("hello"),
-                DialogueLine::message("world"),
-                DialogueLine::branch(
-                    "change the background color?",
-                    vec![
-                        (
-                            DialogueEvent::Context(YesBlue.into()),
-                            "yes, blue",
-                            vec![DialogueLine::message("done its blue!")],
-                        ),
-                        (
-                            DialogueEvent::Context(YesGreen.into()),
-                            "yes, green",
-                            vec![DialogueLine::message("done its green!")],
-                        ),
-                        (DialogueEvent::None, "no", vec![]),
-                    ],
-                ),
-            ]));
-        }
-        if ui.button("queue events dialogue").clicked() {
-            dialogue.queue(Script::new(vec![
-                DialogueLine::message_and(
-                    "added 5 peasants",
-                    DialogueEvent::AddUnits(UnitKind::Peasant, 5),
-                ),
-                DialogueLine::message_and(
-                    "added 2 archors and 3 mages",
-                    DialogueEvent::AddUnits(UnitKind::Peasant, 2)
-                        .and(DialogueEvent::AddUnits(UnitKind::Mage, 3)),
-                ),
-                DialogueLine::message_and(
-                    "added 1 brute and changed background color to green",
-                    DialogueEvent::AddUnits(UnitKind::Brute, 1)
-                        .and(DialogueEvent::Context(YesGreen.into())),
-                ),
-            ]));
+        for dialogue_str in ["WC1B1", "WC1B2", "WC1B3", "WC2B1", "WC2B2", "WC2B3"] {
+            if ui.button(dialogue_str).clicked() {
+                dialogue.queue(
+                    Script::new(articy.dialogues[dialogue_str].clone()),
+                    game_state.as_mut(),
+                );
+            }
         }
         if ui.button("clear dialogue").clicked() {
             dialogue.clear();
@@ -89,26 +64,21 @@ fn ui(mut contexts: EguiContexts, mut dialogue: ResMut<Dialogue>) {
     });
 }
 
-fn choices(mut dialogue_events: EventReader<DialogueEvent>, mut clear_color: ResMut<ClearColor>) {
-    for dialogue_event in dialogue_events.iter() {
-        if dialogue_event.is(YesBlue) {
-            clear_color.0 = Color::MIDNIGHT_BLUE;
-        } else if dialogue_event.is(YesGreen) {
-            clear_color.0 = Color::DARK_GREEN;
-        }
-    }
-}
-
 fn events(mut dialogue_events: EventReader<DialogueEvent>) {
     for dialogue_event in dialogue_events.iter() {
-        match dialogue_event {
-            DialogueEvent::None => unreachable!(),
-            DialogueEvent::AddUnits(unit_kind, amount) => {
+        match &dialogue_event.instruction {
+            ArticyDialogueInstruction::AddUnits(unit_kind, amount) => {
                 println!("Add {} {} unit(s)", amount, unit_kind.name());
             }
-            DialogueEvent::GainIntel(unit_kind) => println!("Gained intel on {}", unit_kind.name()),
-            DialogueEvent::Context(_) => println!("Context Event"),
-            DialogueEvent::Multiple(_) => unreachable!(),
+            ArticyDialogueInstruction::AddFood(amount) => {
+                println!("Add {} food", amount);
+            }
+            ArticyDialogueInstruction::AddItem(name) => {
+                println!("Add item: {}", name);
+            }
+            ArticyDialogueInstruction::SetGlobalVariable(name, value) => {
+                println!("Set global variable: {} {:?}", name, value);
+            }
         }
     }
 }

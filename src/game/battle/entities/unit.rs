@@ -179,7 +179,7 @@ impl UnitKind {
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(1400., 400.),
                 retreat_chance: 1.,
-                attributes: Attributes::empty(),
+                attributes: Attributes::MAY_RETREAT,
             },
             UnitKind::Brute => UnitStats {
                 cost: 15,
@@ -292,7 +292,7 @@ impl Attack {
             Attack::Axe => AttackStats {
                 damage: 15.,
                 damage_kind: DamageKind::Sword,
-                hit_count: 5,
+                hit_count: 3,
                 hurt_box_kind: AttackHurtBoxKind::OffsetRect {
                     offset: 180.,
                     size: Vec2::new(300., 500.),

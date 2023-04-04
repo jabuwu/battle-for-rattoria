@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{
-    in_game_state, AppState, BattleConfig, BattleEndedEvent, BattleModifiers, BattleStartEvent,
-    GameState, Intel, PlanningEndedEvent, PlanningStartEvent,
+    in_game_state, not_in_game_state_or_sandbox, AppState, BattleConfig, BattleEndedEvent,
+    BattleModifiers, BattleStartEvent, BattleState, GameState, Intel, PlanningEndedEvent,
+    PlanningStartEvent, PlanningState,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -10,6 +11,7 @@ pub enum GameDirectorSystem {
     PlanningEnter,
     BattleEnter,
     ChangeState,
+    NotInGame,
 }
 
 pub struct GameDirectorPlugin;
@@ -34,6 +36,12 @@ impl Plugin for GameDirectorPlugin {
                     .run_if(in_game_state)
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(GameDirectorSystem::ChangeState),
+            )
+            .add_system(
+                game_director_not_in_game
+                    .run_if(not_in_game_state_or_sandbox)
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(GameDirectorSystem::NotInGame),
             );
         }
     }
@@ -42,11 +50,7 @@ impl Plugin for GameDirectorPlugin {
 #[derive(Component)]
 pub struct GameDirector;
 
-fn game_director_planning_enter(
-    mut game_state: ResMut<GameState>,
-    mut planning_start_events: EventWriter<PlanningStartEvent>,
-) {
-    game_state.food += 15;
+fn game_director_planning_enter(mut planning_start_events: EventWriter<PlanningStartEvent>) {
     planning_start_events.send_default();
 }
 
@@ -85,4 +89,12 @@ fn game_director_change_state(
             next_state.set(AppState::GameBattle);
         }
     }
+}
+
+fn game_director_not_in_game(
+    mut battle_state: ResMut<BattleState>,
+    mut planning_state: ResMut<PlanningState>,
+) {
+    battle_state.stop();
+    planning_state.stop();
 }

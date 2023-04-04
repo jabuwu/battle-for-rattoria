@@ -4,8 +4,8 @@ use bevy_egui::EguiPlugin;
 use bevy_spine::SpinePlugin;
 
 use crate::{
-    DebugDrawPlugin, DialoguePlugin, FixedTimestepPlugin, ForceRatioPlugin, FramesToLivePlugin,
-    InteractionStackPlugin, SetsPlugin, Transform2Plugin, YOrderPlugin,
+    ArticyPlugin, DebugDrawPlugin, DialoguePlugin, FixedTimestepPlugin, ForceRatioPlugin,
+    FramesToLivePlugin, InteractionStackPlugin, SetsPlugin, Transform2Plugin, YOrderPlugin,
 };
 
 pub struct CommonPlugins;
@@ -28,6 +28,7 @@ impl PluginGroup for CommonPlugins {
         group = group.add(DebugDrawPlugin);
         group = group.add(DialoguePlugin);
         group = group.add(InteractionStackPlugin);
+        group = group.add(ArticyPlugin);
 
         group
     }
