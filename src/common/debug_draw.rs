@@ -5,7 +5,6 @@ use bevy::{
     render::{mesh::Indices, render_resource::PrimitiveTopology},
     sprite::Mesh2dHandle,
 };
-use bevy_egui::{egui, EguiContexts};
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
 #[system_set(base)]
@@ -22,7 +21,6 @@ impl Plugin for DebugDrawPlugin {
                     .after(CoreSet::Update)
                     .before(CoreSet::UpdateFlush),
             )
-            .add_system(debug_draw_ui)
             .add_system(debug_renderer.in_base_set(DebugDrawSystem));
     }
 }
@@ -85,14 +83,6 @@ pub struct DebugDrawVertex {
 
 #[derive(Component)]
 struct DebugDrawObject;
-
-fn debug_draw_ui(mut contexts: EguiContexts, mut debug_draw_settings: ResMut<DebugDrawSettings>) {
-    egui::Window::new("Debug Draw").show(contexts.ctx_mut(), |ui| {
-        ui.checkbox(&mut debug_draw_settings.draw_hit_boxes, "Draw Hitboxes");
-        ui.checkbox(&mut debug_draw_settings.draw_hurt_boxes, "Draw Hurtboxes");
-        ui.checkbox(&mut debug_draw_settings.draw_feelers, "Draw Feelers");
-    });
-}
 
 fn debug_renderer(
     mut commands: Commands,

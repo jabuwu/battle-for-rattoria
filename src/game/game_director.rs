@@ -82,11 +82,16 @@ fn game_director_change_state(
             game_state
                 .available_army
                 .subtract_units(&battle_ended_event.report.dead_units);
-            game_state.quest.battle += 1;
+            game_state.quest.next();
             next_state.set(AppState::GameIntermission);
         }
-        for _ in planning_ended_events.iter() {
-            next_state.set(AppState::GameBattle);
+        for planning_ended_event in planning_ended_events.iter() {
+            if planning_ended_event.skip {
+                game_state.quest.next();
+                next_state.set(AppState::GameIntermission);
+            } else {
+                next_state.set(AppState::GameBattle);
+            }
         }
     }
 }

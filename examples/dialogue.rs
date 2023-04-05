@@ -50,7 +50,10 @@ fn ui(
     articy: Res<Articy>,
 ) {
     egui::Window::new("Dialogue").show(contexts.ctx_mut(), |ui| {
-        for dialogue_str in ["WC1B1", "WC1B2", "WC1B3", "WC2B1", "WC2B2", "WC2B3"] {
+        for dialogue_str in [
+            "WC1B1", "WC1B2", "WC1B3", "WC2B1", "WC2B2", "WC2B3", "WC3B1", "WC3B2", "WC3B3",
+            "WC3B4",
+        ] {
             if ui.button(dialogue_str).clicked() {
                 dialogue.queue(
                     Script::new(articy.dialogues[dialogue_str].clone()),

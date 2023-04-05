@@ -49,6 +49,7 @@ impl Plugin for PlanningPlugin {
 pub struct PlanningState {
     planning: bool,
     start: bool,
+    skip: bool,
 }
 
 impl PlanningState {
@@ -62,6 +63,7 @@ impl Default for PlanningState {
         Self {
             planning: false,
             start: false,
+            skip: false,
         }
     }
 }
@@ -71,6 +73,7 @@ pub struct PlanningStartEvent;
 
 #[derive(Default)]
 pub struct PlanningEndedEvent {
+    pub skip: bool,
     _private: (),
 }
 
@@ -91,10 +94,14 @@ fn planning_update(
     mut planning_state: ResMut<PlanningState>,
     mut planning_ended_events: EventWriter<PlanningEndedEvent>,
 ) {
-    if planning_state.planning && planning_state.start {
-        planning_ended_events.send(PlanningEndedEvent { _private: () });
+    if planning_state.planning && (planning_state.start || planning_state.skip) {
+        planning_ended_events.send(PlanningEndedEvent {
+            skip: planning_state.skip,
+            _private: (),
+        });
         planning_state.planning = false;
         planning_state.start = false;
+        planning_state.skip = false;
     }
 }
 
@@ -131,6 +138,12 @@ fn planning_ui(
                 if ui.button("Start Battle").clicked() {
                     planning_state.start = true;
                 }
+            }
+
+            ui.add_space(32.);
+
+            if ui.button("Skip Battle").clicked() {
+                planning_state.skip = true;
             }
         });
         egui::Window::new("Intel").show(contexts.ctx_mut(), |ui| {
