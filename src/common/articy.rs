@@ -53,6 +53,7 @@ pub enum ArticyDialogueKind {
         variable: String,
         equals: bool,
     },
+    Noop,
 }
 
 #[derive(Clone)]
@@ -162,6 +163,7 @@ fn parse_dialogue_nodes(
         let model = models
             .get(&id)
             .context(format!("expected model to exist: {:?}", &id))?;
+        let mut children = vec![];
         let dialogue_kind = match model.model_type.as_str() {
             "DialogueFragment" => {
                 let dialogue_fragment = serde_json::from_value::<json::DialogueFragment>(
@@ -186,6 +188,13 @@ fn parse_dialogue_nodes(
                 let (variable, equals) = parse_condition(&condition.expression);
                 ArticyDialogueKind::Condition { variable, equals }
             }
+            "Hub" => ArticyDialogueKind::Noop,
+            "Jump" => {
+                let jump =
+                    serde_json::from_value::<json::Jump>(Value::Object(model.properties.clone()))?;
+                children.push(ArticyId::from(jump.target));
+                ArticyDialogueKind::Noop
+            }
             model_type => {
                 bail!("unknown articy type: {}", model_type);
             }
@@ -195,16 +204,17 @@ fn parse_dialogue_nodes(
         let properties_output_pins = serde_json::from_value::<json::PropertiesOutputPins>(
             Value::Object(model.properties.clone()),
         )?;
-        let mut children = vec![];
-        for output_pin in properties_output_pins.output_pins.iter() {
-            if let Some(connections) = output_pin.connections.as_ref() {
-                for connection in connections {
-                    children.push(ArticyId::from(connection.target.clone()));
-                    parse_dialogue_nodes(
-                        dialogue,
-                        ArticyId::from(connection.target.clone()),
-                        models,
-                    )?;
+        if let Some(output_pins) = properties_output_pins.output_pins.as_ref() {
+            for output_pin in output_pins.iter() {
+                if let Some(connections) = output_pin.connections.as_ref() {
+                    for connection in connections {
+                        children.push(ArticyId::from(connection.target.clone()));
+                        parse_dialogue_nodes(
+                            dialogue,
+                            ArticyId::from(connection.target.clone()),
+                            models,
+                        )?;
+                    }
                 }
             }
         }
@@ -334,8 +344,8 @@ fn parse_condition(str: &str) -> (String, bool) {
             (Some(variable), Some(value)) => (
                 variable.to_owned(),
                 match value {
-                    "true" => true,
-                    "false" => false,
+                    "true" | "true;" => true,
+                    "false" | "false;" => false,
                     _ => panic!("invalid condition: {}", str),
                 },
             ),
@@ -385,7 +395,7 @@ mod json {
     #[derive(Deserialize)]
     pub struct PropertiesOutputPins {
         #[serde(rename = "OutputPins")]
-        pub output_pins: Vec<OutputPin>,
+        pub output_pins: Option<Vec<OutputPin>>,
     }
 
     #[derive(Deserialize)]
@@ -420,6 +430,14 @@ mod json {
         pub id: String,
         #[serde(rename = "Expression")]
         pub expression: String,
+    }
+
+    #[derive(Deserialize)]
+    pub struct Jump {
+        #[serde(rename = "Id")]
+        pub id: String,
+        #[serde(rename = "Target")]
+        pub target: String,
     }
 
     #[derive(Deserialize)]

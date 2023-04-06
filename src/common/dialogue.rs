@@ -118,6 +118,9 @@ impl Dialogue {
                             self.show(vec![], game_state);
                         }
                     }
+                    ArticyDialogueKind::Noop => {
+                        self.show(node.children.clone(), game_state);
+                    }
                 }
             } else {
                 self.scripts.remove(0);
