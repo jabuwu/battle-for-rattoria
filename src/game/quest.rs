@@ -1,4 +1,4 @@
-use crate::UnitComposition;
+use crate::{BattleModifiers, UnitComposition};
 
 #[derive(Default)]
 pub struct Quest {
@@ -7,7 +7,7 @@ pub struct Quest {
 }
 
 impl Quest {
-    pub fn enemy_unit_comp(&self) -> UnitComposition {
+    pub fn enemy_unit_composition(&self) -> UnitComposition {
         match self.war_chef {
             0 => match self.battle {
                 0 => UnitComposition {
@@ -18,8 +18,8 @@ impl Quest {
                     brutes: 0,
                 },
                 1 => UnitComposition {
-                    peasants: 5,
-                    warriors: 2,
+                    peasants: 4,
+                    warriors: 1,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
@@ -59,5 +59,9 @@ impl Quest {
             },
             _ => UnitComposition::empty(),
         }
+    }
+
+    pub fn enemy_modifiers(&self) -> BattleModifiers {
+        BattleModifiers::default()
     }
 }

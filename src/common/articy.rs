@@ -4,7 +4,7 @@ use anyhow::{bail, Context, Result};
 use bevy::prelude::*;
 use serde_json::Value;
 
-use crate::UnitKind;
+use crate::{Item, UnitKind};
 
 pub struct ArticyPlugin;
 
@@ -59,7 +59,7 @@ pub enum ArticyDialogueKind {
 pub enum ArticyDialogueInstruction {
     AddUnits(UnitKind, usize),
     AddFood(usize),
-    AddItem(String),
+    AddItem(Item),
     SetGlobalVariable(String, bool),
 }
 
@@ -275,8 +275,17 @@ fn parse_instructions(str: &str) -> Vec<ArticyDialogueInstruction> {
                     },
                     "AddItem" => match params.get(0) {
                         Some(Param::String(name)) => {
-                            // TODO: validate name
-                            instructions.push(ArticyDialogueInstruction::AddItem(name.clone()));
+                            let item = match name.as_str() {
+                                "Crackling Moss" => Item::CracklingMoss,
+                                "Squirt Blop-Berries" => Item::SquirtBlopBerries,
+                                "Firemander Salts" => Item::FiremanderSalts,
+                                "Axe Shrooms" => Item::AxeShrooms,
+                                "Bog Hard-Weeds" => Item::BogHardWeeds,
+                                "Celery Quartz" => Item::CeleryQuartz,
+                                "Frosty Web-Strands" => Item::FrostyWebStrands,
+                                _ => panic!("unknown AddItem() name: {}", name),
+                            };
+                            instructions.push(ArticyDialogueInstruction::AddItem(item));
                         }
                         _ => panic!(
                             "wrong parameters to articy function: {} {:?}",

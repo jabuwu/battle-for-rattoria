@@ -1,3 +1,5 @@
+use std::mem::take;
+
 use bevy::prelude::*;
 
 use crate::{
@@ -59,12 +61,18 @@ fn game_director_battle_enter(
     mut game_state: ResMut<GameState>,
 ) {
     let friendly_units = game_state.get_and_reset_fed_army();
+    let mut friendly_modifiers = BattleModifiers::default();
+    for item in take(&mut game_state.consumed_items) {
+        for modifier in item.modifiers() {
+            friendly_modifiers[modifier] = true;
+        }
+    }
     battle_start_events.send(BattleStartEvent {
         config: BattleConfig {
             friendly_units,
-            friendly_modifiers: BattleModifiers::default(),
-            enemy_units: game_state.quest.enemy_unit_comp(),
-            enemy_modifiers: BattleModifiers::default(),
+            friendly_modifiers,
+            enemy_units: game_state.quest.enemy_unit_composition(),
+            enemy_modifiers: game_state.quest.enemy_modifiers(),
         },
     });
     game_state.intel = Intel::default();

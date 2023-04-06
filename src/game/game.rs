@@ -32,8 +32,8 @@ fn game_dialogue_events(
             ArticyDialogueInstruction::AddFood(count) => {
                 game_state.food += count;
             }
-            ArticyDialogueInstruction::AddItem(name) => {
-                println!("ADD ITEM {}", name);
+            ArticyDialogueInstruction::AddItem(item) => {
+                game_state.inventory.add(*item);
             }
             ArticyDialogueInstruction::SetGlobalVariable(name, value) => {
                 game_state.global_variables.insert(name.clone(), *value);

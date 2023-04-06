@@ -76,8 +76,8 @@ fn events(mut dialogue_events: EventReader<DialogueEvent>) {
             ArticyDialogueInstruction::AddFood(amount) => {
                 println!("Add {} food", amount);
             }
-            ArticyDialogueInstruction::AddItem(name) => {
-                println!("Add item: {}", name);
+            ArticyDialogueInstruction::AddItem(item) => {
+                println!("Add item: {}", item.name());
             }
             ArticyDialogueInstruction::SetGlobalVariable(name, value) => {
                 println!("Set global variable: {} {:?}", name, value);

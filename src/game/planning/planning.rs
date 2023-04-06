@@ -134,6 +134,28 @@ fn planning_ui(
                 }
             }
 
+            ui.add_space(16.);
+
+            ui.label("Inventory");
+            if game_state.inventory.is_empty() {
+                ui.label("NO ITEMS");
+            } else {
+                let mut remove_item = None;
+                for (item_index, item) in
+                    game_state.inventory.items().clone().into_iter().enumerate()
+                {
+                    if ui.button(format!("Use {}", item.name())).clicked() {
+                        game_state.consumed_items.push(item);
+                        remove_item = Some(item_index);
+                    }
+                }
+                if let Some(remove_item) = remove_item {
+                    game_state.inventory.remove(remove_item);
+                }
+            }
+
+            ui.add_space(16.);
+
             if game_state.fed_army.total_units() > 0 {
                 if ui.button("Start Battle").clicked() {
                     planning_state.start = true;
@@ -148,7 +170,7 @@ fn planning_ui(
         });
         egui::Window::new("Intel").show(contexts.ctx_mut(), |ui| {
             ui.label("Enemy's Army");
-            let enemy_comp = game_state.quest.enemy_unit_comp();
+            let enemy_comp = game_state.quest.enemy_unit_composition();
             for unit_kind in UnitKind::iter() {
                 if game_state.intel.can_see[unit_kind] {
                     ui.label(format!(
