@@ -214,6 +214,7 @@ pub fn damage_debug_draw(
         for (hit_box, hit_box_transform) in hit_box_query.iter() {
             let (offset, size) = match hit_box.shape {
                 CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Point { .. } => (Vec2::ZERO, Vec2::ZERO),
                 CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {
@@ -229,6 +230,7 @@ pub fn damage_debug_draw(
         for (hurt_box, hurt_box_transform) in hurt_box_query.iter() {
             let (offset, size) = match hurt_box.shape {
                 CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Point { .. } => (Vec2::ZERO, Vec2::ZERO),
                 CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {

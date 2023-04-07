@@ -164,7 +164,21 @@ fn planning_ui(
 
             ui.add_space(32.);
 
-            if ui.button("Skip Battle").clicked() {
+            if ui.button("Skip Battle (Win)").clicked() {
+                if let Some(player_won_last_battle) =
+                    game_state.global_variables.get_mut("PlayerWonLastBattle")
+                {
+                    *player_won_last_battle = true;
+                }
+                planning_state.skip = true;
+            }
+
+            if ui.button("Skip Battle (Lose)").clicked() {
+                if let Some(player_won_last_battle) =
+                    game_state.global_variables.get_mut("PlayerWonLastBattle")
+                {
+                    *player_won_last_battle = false;
+                }
                 planning_state.skip = true;
             }
         });

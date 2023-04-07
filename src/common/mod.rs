@@ -1,6 +1,8 @@
 mod articy;
 mod cleanup;
+mod clickable;
 mod collision;
+mod cursor;
 mod debug_draw;
 mod depths;
 mod dialogue;
@@ -15,7 +17,9 @@ mod y_order;
 
 pub use articy::*;
 pub use cleanup::*;
+pub use clickable::*;
 pub use collision::*;
+pub use cursor::*;
 pub use debug_draw::*;
 pub use depths::*;
 pub use dialogue::*;

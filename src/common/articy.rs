@@ -4,7 +4,7 @@ use anyhow::{bail, Context, Result};
 use bevy::prelude::*;
 use serde_json::Value;
 
-use crate::{Item, UnitKind};
+use crate::{Item, Speaker, UnitKind};
 
 pub struct ArticyPlugin;
 
@@ -44,6 +44,7 @@ pub struct ArticyDialogueNode {
 #[derive(Clone)]
 pub enum ArticyDialogueKind {
     Message {
+        speaker: Speaker,
         text: String,
     },
     Instruction {
@@ -169,7 +170,28 @@ fn parse_dialogue_nodes(
                 let dialogue_fragment = serde_json::from_value::<json::DialogueFragment>(
                     Value::Object(model.properties.clone()),
                 )?;
+                let speaker = if &dialogue_fragment.speaker == "0x0000000000000000" {
+                    Speaker::NoOne
+                } else {
+                    let speaker_model = models
+                        .get(&ArticyId::from(dialogue_fragment.speaker.clone()))
+                        .expect("expected speaker to exist");
+                    let character =
+                        serde_json::from_value::<json::DefaultSupportingCharacterTemplate>(
+                            Value::Object(speaker_model.properties.clone()),
+                        )?;
+                    match character.display_name.as_str() {
+                        "War Chef" => Speaker::Player,
+                        "General Ratso" => Speaker::General,
+                        "Glut Rattan" => Speaker::WarChef1,
+                        "Field Marshal Toothsy" => Speaker::WarChef2,
+                        "Mobling" => Speaker::Mobling,
+                        "Stabby-Rat" => Speaker::StabbyRat,
+                        _ => panic!("Unknown speaker: {}", character.display_name),
+                    }
+                };
                 ArticyDialogueKind::Message {
+                    speaker,
                     text: dialogue_fragment.text.clone(),
                 }
             }
@@ -410,6 +432,8 @@ mod json {
     pub struct DialogueFragment {
         #[serde(rename = "Id")]
         pub id: String,
+        #[serde(rename = "Speaker")]
+        pub speaker: String,
         #[serde(rename = "Text")]
         pub text: String,
     }
@@ -438,6 +462,12 @@ mod json {
         pub id: String,
         #[serde(rename = "Target")]
         pub target: String,
+    }
+
+    #[derive(Deserialize)]
+    pub struct DefaultSupportingCharacterTemplate {
+        #[serde(rename = "DisplayName")]
+        pub display_name: String,
     }
 
     #[derive(Deserialize)]
