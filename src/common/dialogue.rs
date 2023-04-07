@@ -362,7 +362,7 @@ fn dialogue_spine_ready(
                                 parent.spawn((
                                     SpriteBundle {
                                         sprite: Sprite {
-                                            color: Color::WHITE,
+                                            color: Color::rgba(0., 0., 0., 0.),
                                             custom_size: Some(Vec2::splat(1.)),
                                             ..Default::default()
                                         },
@@ -481,7 +481,7 @@ fn dialogue_spine_events(
 
 fn dialogue_update(
     mut dialogue: ResMut<Dialogue>,
-    mut dialogue_root_query: Query<Entity, With<DialogueRoot>>,
+    mut _dialogue_root_query: Query<Entity, With<DialogueRoot>>,
     mut dialogue_spine_query: Query<(&mut Spine, &mut DialogueSpine)>,
     mut visibility_query: Query<&mut Visibility>,
     mut text_query: Query<&mut Text>,
@@ -556,7 +556,8 @@ fn dialogue_update(
         }
     }
 
-    for dialogue_root_entity in dialogue_root_query.iter_mut() {
+    // visibility causes wasm crash ;;
+    /*for dialogue_root_entity in dialogue_root_query.iter_mut() {
         if let Ok(mut dialogue_root_visibility) = visibility_query.get_mut(dialogue_root_entity) {
             *dialogue_root_visibility = if dialogue.action.is_some() || transitioning {
                 Visibility::Inherited
@@ -564,7 +565,7 @@ fn dialogue_update(
                 Visibility::Hidden
             };
         }
-    }
+    }*/
     if let Some(dialogue_action) = &dialogue.action.clone() {
         dialogue.chars += time.delta_seconds() * 50.;
         if matches!(dialogue_action, DialogueAction::Choice { .. }) {
