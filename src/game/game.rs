@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
+use strum::IntoEnumIterator;
 
 use crate::{
-    in_game_state, AppState, ArticyDialogueInstruction, DebugDrawSettings, DialogueEvent, GameState,
+    in_game_state, AppState, ArticyDialogueInstruction, DebugDrawSettings, DialogueEvent,
+    GameState, UnitKind,
 };
 
 pub struct GamePlugin;
@@ -54,7 +56,7 @@ fn game_update(mut next_app_state: ResMut<NextState<AppState>>, keys: Res<Input<
 fn game_debug(
     mut contexts: EguiContexts,
     mut debug_draw_settings: ResMut<DebugDrawSettings>,
-    game_state: Res<GameState>,
+    mut game_state: ResMut<GameState>,
 ) {
     egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
         ui.checkbox(&mut debug_draw_settings.draw_hit_boxes, "Draw Hitboxes");
@@ -63,6 +65,26 @@ fn game_debug(
         ui.collapsing("Variables", |ui| {
             for (name, value) in game_state.global_variables.iter() {
                 ui.label(format!("{}: {}", name, *value));
+            }
+        });
+        ui.collapsing("Quest", |ui| {
+            ui.label(format!("War Chef: {}", game_state.quest.war_chef));
+            ui.label(format!("Battle: {}", game_state.quest.battle));
+        });
+        ui.collapsing("Units", |ui| {
+            for unit_kind in UnitKind::iter() {
+                ui.horizontal(|ui| {
+                    let mut count = game_state.available_army.get_count(unit_kind);
+                    if ui.button("-").clicked() && count > 0 {
+                        count -= 1;
+                    }
+                    ui.add(egui::DragValue::new(&mut count).clamp_range(0..=100));
+                    if ui.button("+").clicked() && count < 100 {
+                        count += 1;
+                    }
+                    game_state.available_army.set_count(unit_kind, count);
+                    ui.label(unit_kind.name_plural());
+                });
             }
         });
     });

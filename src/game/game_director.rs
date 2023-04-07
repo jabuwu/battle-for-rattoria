@@ -87,15 +87,26 @@ fn game_director_change_state(
 ) {
     if game_director.get_single().is_ok() {
         for battle_ended_event in battle_ended_events.iter() {
-            game_state
-                .available_army
-                .subtract_units(&battle_ended_event.report.dead_units);
-            game_state.quest.next();
+            if battle_ended_event.report.victory {
+                game_state
+                    .available_army
+                    .subtract_units(&battle_ended_event.report.dead_units);
+                game_state.quest.next();
+                game_state.checkpoint();
+            } else {
+                game_state.load_checkpoint();
+                game_state.checkpoint();
+            }
             next_state.set(AppState::GameIntermission);
         }
         for planning_ended_event in planning_ended_events.iter() {
-            if planning_ended_event.skip {
+            if planning_ended_event.rewind {
+                game_state.rewind();
+                game_state.checkpoint();
+                next_state.set(AppState::GameIntermission);
+            } else if planning_ended_event.skip {
                 game_state.quest.next();
+                game_state.checkpoint();
                 next_state.set(AppState::GameIntermission);
             } else {
                 next_state.set(AppState::GameBattle);

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::{Intel, Inventory, Item, Quest, UnitComposition};
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct GameState {
     pub food: usize,
     pub available_army: UnitComposition,
@@ -14,6 +14,7 @@ pub struct GameState {
     pub global_variables: HashMap<String, bool>,
     pub inventory: Inventory,
     pub consumed_items: Vec<Item>,
+    checkpoint: Option<Box<GameState>>,
 }
 
 impl Default for GameState {
@@ -33,6 +34,7 @@ impl Default for GameState {
             global_variables: HashMap::new(),
             inventory: Inventory::default(),
             consumed_items: vec![],
+            checkpoint: None,
         }
     }
 }
@@ -42,5 +44,30 @@ impl GameState {
         let fed_army = replace(&mut self.fed_army, UnitComposition::empty());
         self.available_army.add_units(&fed_army);
         fed_army
+    }
+
+    pub fn checkpoint(&mut self) {
+        self.checkpoint = Some(Box::new(self.clone()));
+    }
+
+    pub fn load_checkpoint(&mut self) {
+        if let Some(checkpoint) = self.checkpoint.take() {
+            *self = *checkpoint;
+        }
+    }
+
+    pub fn can_rewind(&self) -> bool {
+        self.checkpoint
+            .as_ref()
+            .map(|checkpoint| checkpoint.checkpoint.is_some())
+            .unwrap_or(false)
+    }
+
+    pub fn rewind(&mut self) {
+        if let Some(mut checkpoint) = self.checkpoint.take() {
+            if let Some(checkpoint2) = checkpoint.checkpoint.take() {
+                *self = *checkpoint2;
+            }
+        }
     }
 }

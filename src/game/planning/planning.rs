@@ -50,6 +50,7 @@ pub struct PlanningState {
     planning: bool,
     start: bool,
     skip: bool,
+    rewind: bool,
 }
 
 impl PlanningState {
@@ -64,6 +65,7 @@ impl Default for PlanningState {
             planning: false,
             start: false,
             skip: false,
+            rewind: false,
         }
     }
 }
@@ -74,6 +76,7 @@ pub struct PlanningStartEvent;
 #[derive(Default)]
 pub struct PlanningEndedEvent {
     pub skip: bool,
+    pub rewind: bool,
     _private: (),
 }
 
@@ -94,14 +97,18 @@ fn planning_update(
     mut planning_state: ResMut<PlanningState>,
     mut planning_ended_events: EventWriter<PlanningEndedEvent>,
 ) {
-    if planning_state.planning && (planning_state.start || planning_state.skip) {
+    if planning_state.planning
+        && (planning_state.start || planning_state.skip || planning_state.rewind)
+    {
         planning_ended_events.send(PlanningEndedEvent {
-            skip: planning_state.skip,
+            skip: planning_state.skip && !planning_state.rewind,
+            rewind: planning_state.rewind,
             _private: (),
         });
         planning_state.planning = false;
         planning_state.start = false;
         planning_state.skip = false;
+        planning_state.rewind = false;
     }
 }
 
@@ -164,22 +171,15 @@ fn planning_ui(
 
             ui.add_space(32.);
 
-            if ui.button("Skip Battle (Win)").clicked() {
-                if let Some(player_won_last_battle) =
-                    game_state.global_variables.get_mut("PlayerWonLastBattle")
-                {
-                    *player_won_last_battle = true;
-                }
+            if ui.button("Skip Battle").clicked() {
                 planning_state.skip = true;
             }
 
-            if ui.button("Skip Battle (Lose)").clicked() {
-                if let Some(player_won_last_battle) =
-                    game_state.global_variables.get_mut("PlayerWonLastBattle")
-                {
-                    *player_won_last_battle = false;
+            if game_state.can_rewind() {
+                ui.add_space(32.);
+                if ui.button("Rewind to Previous Battle").clicked() {
+                    planning_state.rewind = true;
                 }
-                planning_state.skip = true;
             }
         });
         egui::Window::new("Intel").show(contexts.ctx_mut(), |ui| {

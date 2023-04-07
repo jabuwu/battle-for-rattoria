@@ -2701,20 +2701,7 @@
               {
                 "Text": "",
                 "Id": "0x010000010000022E",
-                "Owner": "0x010000010000022B",
-                "Connections": [
-                  {
-                    "Color": {
-                      "a": 1.0,
-                      "r": 0.5764706,
-                      "g": 0.75686276,
-                      "b": 0.8
-                    },
-                    "Label": "",
-                    "TargetPin": "0x010000010000024C",
-                    "Target": "0x0100000100000249"
-                  }
-                ]
+                "Owner": "0x010000010000022B"
               }
             ],
             "OutputPins": [
@@ -9897,62 +9884,6 @@
         {
           "Type": "DialogueFragment",
           "Properties": {
-            "TechnicalName": "DFr_AEB78445",
-            "Id": "0x0100000100000249",
-            "Parent": "0x010000010000022B",
-            "MenuText": "",
-            "StageDirections": "",
-            "Speaker": "0x0000000000000000",
-            "SplitHeight": 64.0,
-            "Color": {
-              "r": 0.5764706,
-              "g": 0.75686276,
-              "b": 0.8
-            },
-            "Text": "War Chef 3: Battle 1",
-            "ExternalId": "",
-            "Position": {
-              "x": 400.0,
-              "y": 0.0
-            },
-            "ZIndex": 1.0,
-            "Size": {
-              "w": 225.0,
-              "h": 200.0
-            },
-            "ShortId": 2931262533,
-            "InputPins": [
-              {
-                "Text": "",
-                "Id": "0x010000010000024C",
-                "Owner": "0x0100000100000249"
-              }
-            ],
-            "OutputPins": [
-              {
-                "Text": "",
-                "Id": "0x010000010000024D",
-                "Owner": "0x0100000100000249",
-                "Connections": [
-                  {
-                    "Color": {
-                      "a": 1.0,
-                      "r": 0.5764706,
-                      "g": 0.75686276,
-                      "b": 0.8
-                    },
-                    "Label": "",
-                    "TargetPin": "0x0100000100000253",
-                    "Target": "0x0100000100000251"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "Type": "DialogueFragment",
-          "Properties": {
             "TechnicalName": "DFr_74905270",
             "Id": "0x0100000100000256",
             "Parent": "0x0100000100000231",
@@ -13348,7 +13279,7 @@
               "h": 100.0
             },
             "ShortId": 1194032366,
-            "Expression": "AddUnits(\"Warrior\", 3);\nAddFood(10);",
+            "Expression": "AddUnits(\"Warrior\", 3);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -13510,7 +13441,7 @@
               "h": 100.0
             },
             "ShortId": 573768105,
-            "Expression": "AddItem(\"Bog Hard-Weeds\");\nAddFood(10);",
+            "Expression": "AddItem(\"Bog Hard-Weeds\");",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -13564,7 +13495,7 @@
               "h": 100.0
             },
             "ShortId": 2684821940,
-            "Expression": "AddUnits(\"Peasant\", 10);\nAddFood(15);",
+            "Expression": "AddUnits(\"Peasant\", 10);\nAddFood(5);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -13646,7 +13577,7 @@
             "TechnicalName": "Ins_582BC6AA",
             "Id": "0x010000010000019D",
             "Parent": "0x0100000100000177",
-            "DisplayName": "AddUnits(\"Warrior\", 3);",
+            "DisplayName": "AddUnits(\"Warrior\", 2);",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -13659,7 +13590,7 @@
               "h": 100.0
             },
             "ShortId": 1479263914,
-            "Expression": "AddUnits(\"Warrior\", 3);\nAddFood(40);",
+            "Expression": "AddUnits(\"Warrior\", 2);\nAddFood(10);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -14119,7 +14050,7 @@
             "TechnicalName": "Ins_563624F2",
             "Id": "0x01000003000006B6",
             "Parent": "0x01000001000001CD",
-            "DisplayName": "AddFood(10);",
+            "DisplayName": "AddFood(20);",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -14132,7 +14063,7 @@
               "h": 100.0
             },
             "ShortId": 1446388978,
-            "Expression": "AddFood(10);",
+            "Expression": "AddFood(20);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -14249,52 +14180,25 @@
           }
         },
         {
-          "Type": "Comment",
+          "Type": "DefaultMainCharacterTemplate",
           "Properties": {
-            "TechnicalName": "CMT_72057606922831561",
-            "Id": "0x01000003000006C9",
-            "Parent": "0x01000001000001CD",
-            "CreatedBy": "silk",
-            "CreatedOn": "2023-04-06T18:52:04.8108086",
-            "Color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 0.0
-            },
-            "Text": "These are all provisional numbers, subject to change. Feel free to change them.",
-            "ExternalId": "",
-            "Position": {
-              "x": 7768.4453427988537,
-              "y": 39.108926148253104
-            },
-            "ZIndex": 83.0,
-            "Size": {
-              "w": 378.939393939394,
-              "h": 844.24242424242425
-            },
-            "ShortId": 1875421937
-          }
-        },
-        {
-          "Type": "DefaultSupportingCharacterTemplate",
-          "Properties": {
-            "TechnicalName": "Ntt_32A02A7C",
-            "Id": "0x010000030000052E",
+            "TechnicalName": "Ntt_3EF8A2B8",
+            "Id": "0x0100000300000003",
             "Parent": "0x0100000300000001",
             "Attachments": [],
-            "DisplayName": "Stabby-Rat",
+            "DisplayName": "War Chef",
             "Color": {
-              "r": 0.5764706,
-              "g": 0.75686276,
-              "b": 0.8
+              "r": 0.0117647061,
+              "g": 0.0627451,
+              "b": 0.203921571
             },
             "Text": "",
             "ExternalId": "",
             "Position": {
-              "x": 630.0,
-              "y": 398.0
+              "x": 208.0,
+              "y": 272.0
             },
-            "ZIndex": 5.0,
+            "ZIndex": 0.0,
             "Size": {
               "w": 256.0,
               "h": 196.0
@@ -14307,11 +14211,19 @@
                 "h": 0.0
               },
               "Mode": "FromAsset",
-              "Asset": "0x0000000000000000"
+              "Asset": "0x0100000300000278"
             },
-            "ShortId": 849357436
+            "ShortId": 1056481976
           },
           "Template": {
+            "DefaultExtendedCharacterFeature": {
+              "Motivation": "",
+              "InnerConflict": "",
+              "Skills": "",
+              "Fears": "",
+              "Habits": "",
+              "FurtherDetails": ""
+            },
             "DefaultBasicCharacterFeature": {
               "Age": null,
               "Species": "",
@@ -14327,11 +14239,11 @@
         {
           "Type": "DefaultSupportingCharacterTemplate",
           "Properties": {
-            "TechnicalName": "Ntt_96182783",
-            "Id": "0x0100000300000379",
+            "TechnicalName": "Ntt_F3CDD966",
+            "Id": "0x010000030000009C",
             "Parent": "0x0100000300000001",
             "Attachments": [],
-            "DisplayName": "Field Marshal Toothsy",
+            "DisplayName": "General Ratso",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -14340,10 +14252,10 @@
             "Text": "",
             "ExternalId": "",
             "Position": {
-              "x": 421.0,
-              "y": 349.0
+              "x": 272.0,
+              "y": 281.0
             },
-            "ZIndex": 4.0,
+            "ZIndex": 1.0,
             "Size": {
               "w": 256.0,
               "h": 196.0
@@ -14356,58 +14268,9 @@
                 "h": 0.0
               },
               "Mode": "FromAsset",
-              "Asset": "0x010000030000037D"
+              "Asset": "0x010000030000027B"
             },
-            "ShortId": 2518165379
-          },
-          "Template": {
-            "DefaultBasicCharacterFeature": {
-              "Age": null,
-              "Species": "",
-              "BornIn": "",
-              "Sex": null,
-              "Occupation": "",
-              "Accent": "",
-              "Personality": "",
-              "Appearance": ""
-            }
-          }
-        },
-        {
-          "Type": "DefaultSupportingCharacterTemplate",
-          "Properties": {
-            "TechnicalName": "Ntt_42B0011E",
-            "Id": "0x0100000300000293",
-            "Parent": "0x0100000300000001",
-            "Attachments": [],
-            "DisplayName": "Mobling",
-            "Color": {
-              "r": 0.5764706,
-              "g": 0.75686276,
-              "b": 0.8
-            },
-            "Text": "",
-            "ExternalId": "",
-            "Position": {
-              "x": 482.0,
-              "y": 319.0
-            },
-            "ZIndex": 3.0,
-            "Size": {
-              "w": 256.0,
-              "h": 196.0
-            },
-            "PreviewImage": {
-              "ViewBox": {
-                "x": 0.0,
-                "y": 0.0,
-                "w": 0.0,
-                "h": 0.0
-              },
-              "Mode": "FromAsset",
-              "Asset": "0x0000000000000000"
-            },
-            "ShortId": 1118830878
+            "ShortId": 4090354022
           },
           "Template": {
             "DefaultBasicCharacterFeature": {
@@ -14474,11 +14337,11 @@
         {
           "Type": "DefaultSupportingCharacterTemplate",
           "Properties": {
-            "TechnicalName": "Ntt_F3CDD966",
-            "Id": "0x010000030000009C",
+            "TechnicalName": "Ntt_42B0011E",
+            "Id": "0x0100000300000293",
             "Parent": "0x0100000300000001",
             "Attachments": [],
-            "DisplayName": "General Ratso",
+            "DisplayName": "Mobling",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -14487,10 +14350,10 @@
             "Text": "",
             "ExternalId": "",
             "Position": {
-              "x": 272.0,
-              "y": 281.0
+              "x": 482.0,
+              "y": 319.0
             },
-            "ZIndex": 1.0,
+            "ZIndex": 3.0,
             "Size": {
               "w": 256.0,
               "h": 196.0
@@ -14503,9 +14366,107 @@
                 "h": 0.0
               },
               "Mode": "FromAsset",
-              "Asset": "0x010000030000027B"
+              "Asset": "0x0000000000000000"
             },
-            "ShortId": 4090354022
+            "ShortId": 1118830878
+          },
+          "Template": {
+            "DefaultBasicCharacterFeature": {
+              "Age": null,
+              "Species": "",
+              "BornIn": "",
+              "Sex": null,
+              "Occupation": "",
+              "Accent": "",
+              "Personality": "",
+              "Appearance": ""
+            }
+          }
+        },
+        {
+          "Type": "DefaultSupportingCharacterTemplate",
+          "Properties": {
+            "TechnicalName": "Ntt_96182783",
+            "Id": "0x0100000300000379",
+            "Parent": "0x0100000300000001",
+            "Attachments": [],
+            "DisplayName": "Field Marshal Toothsy",
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": 421.0,
+              "y": 349.0
+            },
+            "ZIndex": 4.0,
+            "Size": {
+              "w": 256.0,
+              "h": 196.0
+            },
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x010000030000037D"
+            },
+            "ShortId": 2518165379
+          },
+          "Template": {
+            "DefaultBasicCharacterFeature": {
+              "Age": null,
+              "Species": "",
+              "BornIn": "",
+              "Sex": null,
+              "Occupation": "",
+              "Accent": "",
+              "Personality": "",
+              "Appearance": ""
+            }
+          }
+        },
+        {
+          "Type": "DefaultSupportingCharacterTemplate",
+          "Properties": {
+            "TechnicalName": "Ntt_32A02A7C",
+            "Id": "0x010000030000052E",
+            "Parent": "0x0100000300000001",
+            "Attachments": [],
+            "DisplayName": "Stabby-Rat",
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": 630.0,
+              "y": 398.0
+            },
+            "ZIndex": 5.0,
+            "Size": {
+              "w": 256.0,
+              "h": 196.0
+            },
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "ShortId": 849357436
           },
           "Template": {
             "DefaultBasicCharacterFeature": {
@@ -14619,136 +14580,41 @@
           }
         },
         {
-          "Type": "DefaultMainCharacterTemplate",
+          "Type": "Asset",
+          "AssetRef": "Assets/Images/Characters/Glut_Rattan.png",
+          "Category": "Image",
           "Properties": {
-            "TechnicalName": "Ntt_3EF8A2B8",
-            "Id": "0x0100000300000003",
-            "Parent": "0x0100000300000001",
-            "Attachments": [],
-            "DisplayName": "War Chef",
+            "TechnicalName": "Ast_6DC5C0BC",
+            "Id": "0x0100000300000190",
+            "Parent": "0x010000030000018E",
+            "DisplayName": "Glut Rattan",
+            "Filename": "Glut_Rattan(0093).png",
+            "OriginalSource": "file:///C:/Users/PC/Desktop/War Chef/Glut Rattan.png",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              }
+            },
             "Color": {
-              "r": 0.0117647061,
-              "g": 0.0627451,
-              "b": 0.203921571
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
             },
             "Text": "",
             "ExternalId": "",
             "Position": {
-              "x": 208.0,
-              "y": 272.0
+              "x": 0.0,
+              "y": 0.0
             },
             "ZIndex": 0.0,
             "Size": {
               "w": 256.0,
               "h": 196.0
             },
-            "PreviewImage": {
-              "ViewBox": {
-                "x": 0.0,
-                "y": 0.0,
-                "w": 0.0,
-                "h": 0.0
-              },
-              "Mode": "FromAsset",
-              "Asset": "0x0100000300000278"
-            },
-            "ShortId": 1056481976
-          },
-          "Template": {
-            "DefaultExtendedCharacterFeature": {
-              "Motivation": "",
-              "InnerConflict": "",
-              "Skills": "",
-              "Fears": "",
-              "Habits": "",
-              "FurtherDetails": ""
-            },
-            "DefaultBasicCharacterFeature": {
-              "Age": null,
-              "Species": "",
-              "BornIn": "",
-              "Sex": null,
-              "Occupation": "",
-              "Accent": "",
-              "Personality": "",
-              "Appearance": ""
-            }
-          }
-        },
-        {
-          "Type": "Asset",
-          "AssetRef": "Assets/Images/Characters/Field_Marshal.png",
-          "Category": "Image",
-          "Properties": {
-            "TechnicalName": "Ast_7C5F967E",
-            "Id": "0x010000030000037D",
-            "Parent": "0x010000030000018E",
-            "DisplayName": "Field Marshal",
-            "Filename": "Field_Marshal(027E).png",
-            "OriginalSource": "file:///C:/Users/PC/Desktop/War Chef/Field Marshal.png",
-            "PreviewImage": {
-              "ViewBox": {
-                "x": 0.0,
-                "y": 0.0,
-                "w": 0.0,
-                "h": 0.0
-              }
-            },
-            "Color": {
-              "r": 0.5764706,
-              "g": 0.75686276,
-              "b": 0.8
-            },
-            "Text": "",
-            "ExternalId": "",
-            "Position": {
-              "x": 60.0,
-              "y": 60.0
-            },
-            "ZIndex": 3.0,
-            "Size": {
-              "w": 256.0,
-              "h": 196.0
-            },
-            "ShortId": 2086639230
-          }
-        },
-        {
-          "Type": "Asset",
-          "AssetRef": "Assets/Images/Characters/General_Ratso.png",
-          "Category": "Image",
-          "Properties": {
-            "TechnicalName": "Ast_9CD15E67",
-            "Id": "0x010000030000027B",
-            "Parent": "0x010000030000018E",
-            "DisplayName": "General Ratso",
-            "Filename": "General_Ratso(0378).png",
-            "OriginalSource": "file:///C:/Users/PC/Desktop/War Chef/General Ratso.png",
-            "PreviewImage": {
-              "ViewBox": {
-                "x": 0.0,
-                "y": 0.0,
-                "w": 0.0,
-                "h": 0.0
-              }
-            },
-            "Color": {
-              "r": 0.5764706,
-              "g": 0.75686276,
-              "b": 0.8
-            },
-            "Text": "",
-            "ExternalId": "",
-            "Position": {
-              "x": 40.0,
-              "y": 40.0
-            },
-            "ZIndex": 2.0,
-            "Size": {
-              "w": 256.0,
-              "h": 196.0
-            },
-            "ShortId": 2630966887
+            "ShortId": 1841676476
           }
         },
         {
@@ -14791,15 +14657,15 @@
         },
         {
           "Type": "Asset",
-          "AssetRef": "Assets/Images/Characters/Glut_Rattan.png",
+          "AssetRef": "Assets/Images/Characters/General_Ratso.png",
           "Category": "Image",
           "Properties": {
-            "TechnicalName": "Ast_6DC5C0BC",
-            "Id": "0x0100000300000190",
+            "TechnicalName": "Ast_9CD15E67",
+            "Id": "0x010000030000027B",
             "Parent": "0x010000030000018E",
-            "DisplayName": "Glut Rattan",
-            "Filename": "Glut_Rattan(0093).png",
-            "OriginalSource": "file:///C:/Users/PC/Desktop/War Chef/Glut Rattan.png",
+            "DisplayName": "General Ratso",
+            "Filename": "General_Ratso(0378).png",
+            "OriginalSource": "file:///C:/Users/PC/Desktop/War Chef/General Ratso.png",
             "PreviewImage": {
               "ViewBox": {
                 "x": 0.0,
@@ -14816,15 +14682,53 @@
             "Text": "",
             "ExternalId": "",
             "Position": {
-              "x": 0.0,
-              "y": 0.0
+              "x": 40.0,
+              "y": 40.0
             },
-            "ZIndex": 0.0,
+            "ZIndex": 2.0,
             "Size": {
               "w": 256.0,
               "h": 196.0
             },
-            "ShortId": 1841676476
+            "ShortId": 2630966887
+          }
+        },
+        {
+          "Type": "Asset",
+          "AssetRef": "Assets/Images/Characters/Field_Marshal.png",
+          "Category": "Image",
+          "Properties": {
+            "TechnicalName": "Ast_7C5F967E",
+            "Id": "0x010000030000037D",
+            "Parent": "0x010000030000018E",
+            "DisplayName": "Field Marshal",
+            "Filename": "Field_Marshal(027E).png",
+            "OriginalSource": "file:///C:/Users/PC/Desktop/War Chef/Field Marshal.png",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              }
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": 60.0,
+              "y": 60.0
+            },
+            "ZIndex": 3.0,
+            "Size": {
+              "w": 256.0,
+              "h": 196.0
+            },
+            "ShortId": 2086639230
           }
         },
         {
@@ -14868,6 +14772,50 @@
         {
           "Type": "UserFolder",
           "Properties": {
+            "TechnicalName": "Ufo_24ABC043",
+            "Id": "0x0100000100000105",
+            "Parent": "0x030000004C3DAF54",
+            "DisplayName": "Images",
+            "ExternalId": "",
+            "ShortId": 615235651
+          }
+        },
+        {
+          "Type": "UserFolder",
+          "Properties": {
+            "TechnicalName": "Ufo_BB2F443B",
+            "Id": "0x010000030000018E",
+            "Parent": "0x0100000100000105",
+            "DisplayName": "Characters",
+            "ExternalId": "",
+            "ShortId": 3140437051
+          }
+        },
+        {
+          "Type": "UserFolder",
+          "Properties": {
+            "TechnicalName": "Ufo_9536F90E",
+            "Id": "0x0100000100000107",
+            "Parent": "0x030000004C3DAF54",
+            "DisplayName": "Videos",
+            "ExternalId": "",
+            "ShortId": 2503407886
+          }
+        },
+        {
+          "Type": "UserFolder",
+          "Properties": {
+            "TechnicalName": "Ufo_5B02AF10",
+            "Id": "0x0100000100000109",
+            "Parent": "0x030000004C3DAF54",
+            "DisplayName": "Audio",
+            "ExternalId": "",
+            "ShortId": 1526902544
+          }
+        },
+        {
+          "Type": "UserFolder",
+          "Properties": {
             "TechnicalName": "Ufo_3DC56503",
             "Id": "0x010000010000010B",
             "Parent": "0x030000004C3DAF54",
@@ -14885,50 +14833,6 @@
             "DisplayName": "Miscellaneous",
             "ExternalId": "",
             "ShortId": 2205069498
-          }
-        },
-        {
-          "Type": "UserFolder",
-          "Properties": {
-            "TechnicalName": "Ufo_5B02AF10",
-            "Id": "0x0100000100000109",
-            "Parent": "0x030000004C3DAF54",
-            "DisplayName": "Audio",
-            "ExternalId": "",
-            "ShortId": 1526902544
-          }
-        },
-        {
-          "Type": "UserFolder",
-          "Properties": {
-            "TechnicalName": "Ufo_9536F90E",
-            "Id": "0x0100000100000107",
-            "Parent": "0x030000004C3DAF54",
-            "DisplayName": "Videos",
-            "ExternalId": "",
-            "ShortId": 2503407886
-          }
-        },
-        {
-          "Type": "UserFolder",
-          "Properties": {
-            "TechnicalName": "Ufo_BB2F443B",
-            "Id": "0x010000030000018E",
-            "Parent": "0x0100000100000105",
-            "DisplayName": "Characters",
-            "ExternalId": "",
-            "ShortId": 3140437051
-          }
-        },
-        {
-          "Type": "UserFolder",
-          "Properties": {
-            "TechnicalName": "Ufo_24ABC043",
-            "Id": "0x0100000100000105",
-            "Parent": "0x030000004C3DAF54",
-            "DisplayName": "Images",
-            "ExternalId": "",
-            "ShortId": 615235651
           }
         },
         {
@@ -15379,11 +15283,6 @@
             "TechnicalName": "WC3B1",
             "Type": "Dialogue",
             "Children": [
-              {
-                "Id": "0x0100000100000249",
-                "TechnicalName": "DFr_AEB78445",
-                "Type": "DialogueFragment"
-              },
               {
                 "Id": "0x0100000100000251",
                 "TechnicalName": "Ins_4384F79D",
@@ -15875,6 +15774,11 @@
                 "Type": "DialogueFragment"
               },
               {
+                "Id": "0x01000003000005BF",
+                "TechnicalName": "",
+                "Type": "Comment"
+              },
+              {
                 "Id": "0x010000030000063A",
                 "TechnicalName": "DFr_474A48D5",
                 "Type": "DialogueFragment"
@@ -15913,56 +15817,6 @@
                 "Id": "0x010000030000066B",
                 "TechnicalName": "DFr_DAA36463",
                 "Type": "DialogueFragment"
-              },
-              {
-                "Id": "0x01000003000006B6",
-                "TechnicalName": "Ins_563624F2",
-                "Type": "Instruction"
-              },
-              {
-                "Id": "0x01000003000006B1",
-                "TechnicalName": "Ins_ACC39582",
-                "Type": "Instruction"
-              },
-              {
-                "Id": "0x01000003000006BB",
-                "TechnicalName": "Ins_0B6EAECD",
-                "Type": "Instruction"
-              },
-              {
-                "Id": "0x01000003000006C0",
-                "TechnicalName": "DFr_315A3BC9",
-                "Type": "DialogueFragment"
-              },
-              {
-                "Id": "0x01000003000006CB",
-                "TechnicalName": "DFr_5F54F84E",
-                "Type": "DialogueFragment"
-              },
-              {
-                "Id": "0x01000003000006D2",
-                "TechnicalName": "DFr_17AAC0C7",
-                "Type": "DialogueFragment"
-              },
-              {
-                "Id": "0x01000003000006D9",
-                "TechnicalName": "DFr_110E23C4",
-                "Type": "DialogueFragment"
-              },
-              {
-                "Id": "0x01000003000006EE",
-                "TechnicalName": "DFr_5FEA43D3",
-                "Type": "DialogueFragment"
-              },
-              {
-                "Id": "0x01000003000005BF",
-                "TechnicalName": "",
-                "Type": "Comment"
-              },
-              {
-                "Id": "0x01000003000006C9",
-                "TechnicalName": "",
-                "Type": "Comment"
               },
               {
                 "Id": "0x0100000300000679",
@@ -16005,6 +15859,41 @@
                 "Type": "DialogueFragment"
               },
               {
+                "Id": "0x01000003000006B6",
+                "TechnicalName": "Ins_563624F2",
+                "Type": "Instruction"
+              },
+              {
+                "Id": "0x01000003000006B1",
+                "TechnicalName": "Ins_ACC39582",
+                "Type": "Instruction"
+              },
+              {
+                "Id": "0x01000003000006BB",
+                "TechnicalName": "Ins_0B6EAECD",
+                "Type": "Instruction"
+              },
+              {
+                "Id": "0x01000003000006C0",
+                "TechnicalName": "DFr_315A3BC9",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000003000006CB",
+                "TechnicalName": "DFr_5F54F84E",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000003000006D2",
+                "TechnicalName": "DFr_17AAC0C7",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000003000006D9",
+                "TechnicalName": "DFr_110E23C4",
+                "Type": "DialogueFragment"
+              },
+              {
                 "Id": "0x01000003000006E0",
                 "TechnicalName": "DFr_F01EDB34",
                 "Type": "DialogueFragment"
@@ -16012,6 +15901,11 @@
               {
                 "Id": "0x01000003000006E7",
                 "TechnicalName": "DFr_0A5F5677",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000003000006EE",
+                "TechnicalName": "DFr_5FEA43D3",
                 "Type": "DialogueFragment"
               }
             ]

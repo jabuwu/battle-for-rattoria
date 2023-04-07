@@ -37,7 +37,7 @@ impl Item {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Inventory {
     items: Vec<Item>,
 }

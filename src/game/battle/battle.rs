@@ -8,9 +8,9 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, BattlefieldSpawnEvent, DamageReceiveEvent, Depth, EventSet,
-    HealthDieEvent, SpawnSet, Team, Transform2, Unit, UnitKind, UnitSpawnEvent, UpdateSet,
-    DEPTH_BATTLE_TEXT,
+    AddFixedEvent, BattleSplashEndedEvent, BattleSplashKind, BattleSplashPlayEvent,
+    BattleSplashSpawnEvent, BattlefieldSpawnEvent, DamageReceiveEvent, EventSet, HealthDieEvent,
+    SpawnSet, Team, Unit, UnitKind, UnitSpawnEvent, UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -18,6 +18,7 @@ pub enum BattleSystem {
     Start,
     UnitDie,
     EndDetection,
+    SplashEnded,
 }
 
 pub struct BattlePlugin;
@@ -33,6 +34,7 @@ impl Plugin for BattlePlugin {
                     .in_set(BattleSystem::Start)
                     .in_set(SpawnSet)
                     .in_set(EventSet::<BattlefieldSpawnEvent>::Sender)
+                    .in_set(EventSet::<BattleSplashSpawnEvent>::Sender)
                     .in_set(EventSet::<UnitSpawnEvent>::Sender)
                     .after(EventSet::<BattleStartEvent>::Sender),
             )
@@ -48,8 +50,16 @@ impl Plugin for BattlePlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(BattleSystem::EndDetection)
                     .in_set(UpdateSet)
-                    .in_set(EventSet::<BattleEndedEvent>::Sender)
+                    .in_set(EventSet::<BattleSplashPlayEvent>::Sender)
                     .after(EventSet::<DamageReceiveEvent>::Sender),
+            )
+            .add_system(
+                battle_splash_ended
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(BattleSystem::SplashEnded)
+                    .in_set(UpdateSet)
+                    .in_set(EventSet::<BattleEndedEvent>::Sender)
+                    .after(EventSet::<BattleSplashEndedEvent>::Sender),
             );
     }
 }
@@ -57,6 +67,7 @@ impl Plugin for BattlePlugin {
 #[derive(Resource)]
 pub struct BattleState {
     battling: bool,
+    phase: BattlePhase,
     report: BattleReport,
     end_timer: f32,
     damage_inflicted: bool,
@@ -65,10 +76,25 @@ pub struct BattleState {
     enemy_modifiers: BattleModifiers,
 }
 
+impl BattleState {
+    pub fn phase(&self) -> BattlePhase {
+        self.phase
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum BattlePhase {
+    PreBattle,
+    Battling,
+    End { victory: bool },
+    Results,
+}
+
 impl Default for BattleState {
     fn default() -> Self {
         Self {
             battling: false,
+            phase: BattlePhase::PreBattle,
             report: BattleReport::default(),
             end_timer: 0.,
             damage_inflicted: false,
@@ -99,6 +125,7 @@ impl BattleState {
 #[derive(Default)]
 pub struct BattleReport {
     pub dead_units: UnitComposition,
+    pub victory: bool,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
@@ -190,16 +217,16 @@ pub type BattleModifiers = EnumMap<BattleModifier, bool>;
 pub enum BattleModifier {
     ExtraDefense,
     ExtraAttack,
-    QuickAttack, // TODO
+    QuickAttack,
     ExtraSpeed,
-    Fire, // TODO
-    Ice,  // TODO
-    Wet,  // TODO
+    Fire,
+    Ice,
+    Wet,
     FriendlyFire,
     Cowardly,
-    Sickness,   // TODO
-    Explosive,  // TODO
-    Combustion, // TODO
+    Sickness,
+    Explosive,
+    Combustion,
     Blindness,
     Slowness,
 }
@@ -209,9 +236,9 @@ impl BattleModifier {
         match self {
             Self::ExtraDefense => "Extra Defense",
             Self::ExtraAttack => "Extra Attack",
-            Self::QuickAttack => "Quick Attack (TODO)",
+            Self::QuickAttack => "Quick Attack",
             Self::ExtraSpeed => "Extra Speed",
-            Self::Fire => "Fire (TODO)",
+            Self::Fire => "Fire",
             Self::Ice => "Ice (TODO)",
             Self::Wet => "Wet (TODO)",
             Self::FriendlyFire => "Friendly Fire",
@@ -239,33 +266,16 @@ fn battle_start(
     mut start_events: EventReader<BattleStartEvent>,
     mut battle_state: ResMut<BattleState>,
     mut battlefield_spawn_events: EventWriter<BattlefieldSpawnEvent>,
+    mut battle_splash_spawn_events: EventWriter<BattleSplashSpawnEvent>,
     mut unit_spawn_events: EventWriter<UnitSpawnEvent>,
-    mut commands: Commands,
-    asset_library: Res<AssetLibrary>,
 ) {
     for start_event in start_events.iter() {
         *battle_state = BattleState::default();
         battle_state.battling = true;
         battle_state.friendly_modifiers = start_event.config.friendly_modifiers;
         battle_state.enemy_modifiers = start_event.config.enemy_modifiers;
-        commands.spawn((
-            Text2dBundle {
-                text: Text::from_sections([TextSection {
-                    value: "Battling!".to_owned(),
-                    style: TextStyle {
-                        font: asset_library.font_placeholder.clone(),
-                        font_size: 128.,
-                        color: Color::WHITE,
-                        ..Default::default()
-                    },
-                }])
-                .with_alignment(TextAlignment::Center),
-                ..Default::default()
-            },
-            Transform2::from_xy(0., 600.),
-            Depth::from(DEPTH_BATTLE_TEXT),
-        ));
         battlefield_spawn_events.send_default();
+        battle_splash_spawn_events.send_default();
 
         const X_DISTANCE: f32 = 400.;
         const Y_MIN: f32 = -300.;
@@ -314,21 +324,21 @@ fn battle_unit_die(
 
 fn battle_end_detection(
     mut battle_state: ResMut<BattleState>,
-    mut battle_ended_events: EventWriter<BattleEndedEvent>,
     mut damage_receive_events: EventReader<DamageReceiveEvent>,
+    mut battle_splash_play_events: EventWriter<BattleSplashPlayEvent>,
     unit_query: Query<&Unit>,
     time: Res<FixedTime>,
 ) {
-    if !battle_state.battling {
+    if battle_state.phase != BattlePhase::Battling {
         return;
     }
-    let mut friendly_exists = false;
-    let mut enemy_exists = false;
+    let mut friendly_count = 0;
+    let mut enemy_count = 0;
     for unit in unit_query.iter() {
         if unit.team == Team::Friendly {
-            friendly_exists = true;
+            friendly_count += 1;
         } else if unit.team == Team::Enemy {
-            enemy_exists = true;
+            enemy_count += 1;
         }
     }
     for _ in damage_receive_events.iter() {
@@ -336,7 +346,7 @@ fn battle_end_detection(
         battle_state.time_since_last_damage = 0.;
     }
     battle_state.time_since_last_damage += time.period.as_secs_f32();
-    if !friendly_exists || !enemy_exists {
+    if friendly_count == 0 || enemy_count == 0 {
         battle_state.end_timer += time.period.as_secs_f32();
     } else {
         battle_state.end_timer = 0.;
@@ -345,10 +355,33 @@ fn battle_end_detection(
         || (battle_state.damage_inflicted && battle_state.time_since_last_damage > 4.)
         || (!battle_state.damage_inflicted && battle_state.time_since_last_damage > 8.)
     {
-        battle_ended_events.send(BattleEndedEvent {
-            report: take(&mut battle_state.report),
-            _private: (),
+        let victory = friendly_count > enemy_count;
+        battle_state.report.victory = victory;
+        battle_state.phase = BattlePhase::End { victory };
+        battle_splash_play_events.send(BattleSplashPlayEvent {
+            kind: if victory {
+                BattleSplashKind::Victory
+            } else {
+                BattleSplashKind::Defeat
+            },
         });
-        battle_state.battling = false;
+    }
+}
+
+pub fn battle_splash_ended(
+    mut battle_splash_ended_events: EventReader<BattleSplashEndedEvent>,
+    mut battle_state: ResMut<BattleState>,
+    mut battle_ended_events: EventWriter<BattleEndedEvent>,
+) {
+    for _ in battle_splash_ended_events.iter() {
+        if battle_state.phase == BattlePhase::PreBattle {
+            battle_state.phase = BattlePhase::Battling;
+        } else if matches!(battle_state.phase, BattlePhase::End { .. }) {
+            battle_ended_events.send(BattleEndedEvent {
+                report: take(&mut battle_state.report),
+                _private: (),
+            });
+            battle_state.battling = false;
+        }
     }
 }

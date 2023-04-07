@@ -34,6 +34,7 @@ fn intermission_enter(
     articy: Res<Articy>,
     asset_library: Res<AssetLibrary>,
 ) {
+    game_state.food += 20;
     if let Some(script) = game_state.quest.preplanning_script(articy.as_ref()) {
         dialogue.queue(script, game_state.as_mut());
     }

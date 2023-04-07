@@ -684,6 +684,8 @@ fn dialogue_update(
             DialogueAction::Text { children, text, .. } => {
                 if keys.just_pressed(KeyCode::Space)
                     || mouse_buttons.just_pressed(MouseButton::Left)
+                    || keys.pressed(KeyCode::LControl)
+                    || keys.pressed(KeyCode::RControl)
                 {
                     let children = children.clone();
                     if typewriter_text(&text, dialogue.chars as usize).len()

@@ -1,6 +1,6 @@
 use crate::{BattleModifiers, UnitComposition};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Quest {
     pub war_chef: usize,
     pub battle: usize,
@@ -11,7 +11,7 @@ impl Quest {
         match self.war_chef {
             0 => match self.battle {
                 0 => UnitComposition {
-                    peasants: 5,
+                    peasants: 3,
                     warriors: 0,
                     archers: 0,
                     mages: 0,
@@ -19,14 +19,14 @@ impl Quest {
                 },
                 1 => UnitComposition {
                     peasants: 4,
-                    warriors: 1,
+                    warriors: 0,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
                 },
                 2 => UnitComposition {
                     peasants: 10,
-                    warriors: 1,
+                    warriors: 0,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
@@ -36,7 +36,7 @@ impl Quest {
             1 => match self.battle {
                 0 => UnitComposition {
                     peasants: 2,
-                    warriors: 5,
+                    warriors: 2,
                     archers: 0,
                     mages: 0,
                     brutes: 0,

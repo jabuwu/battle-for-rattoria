@@ -16,6 +16,7 @@ pub struct AssetLibrary {
     pub spine_attack_magic: Handle<SkeletonData>,
     pub spine_fx_blood_splat: Handle<SkeletonData>,
     pub spine_dialogue: Handle<SkeletonData>,
+    pub spine_battle_splash: Handle<SkeletonData>,
 }
 
 pub struct AssetLibraryPlugin;
@@ -78,5 +79,10 @@ fn asset_library_load(
     asset_library.spine_dialogue = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/dialogue/skeleton.skel"),
         asset_server.load("spines/dialogue/dialogue.atlas"),
+    ));
+
+    asset_library.spine_battle_splash = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/battle_splash/skeleton.skel"),
+        asset_server.load("spines/battle_splash/battle_splash.atlas"),
     ));
 }

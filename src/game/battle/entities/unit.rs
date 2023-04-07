@@ -1,16 +1,17 @@
 use bevy::prelude::*;
-use bevy_spine::{SkeletonData, Spine, SpineBundle, SpineEvent, SpineReadyEvent, SpineSet};
+use bevy_spine::prelude::*;
 use bitflags::bitflags;
 use enum_map::Enum;
 use rand::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{
-    AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, BattleModifier, BattleState,
-    CollisionShape, DamageKind, DamageReceiveEvent, DamageSystem, DefenseKind, Depth, DepthLayer,
-    EventSet, Feeler, FixedInput, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
-    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2,
-    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, BattleModifier, BattlePhase, BattleState,
+    CollisionShape, DamageKind, DamageModifier, DamageModifiers, DamageReceiveEvent, DamageSystem,
+    DefenseKind, DefenseModifier, DefenseModifiers, Depth, DepthLayer, EventSet, Feeler,
+    FixedInput, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner,
+    Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2, UpdateSet, YOrder,
+    DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -27,7 +28,7 @@ pub enum UnitSystem {
     Die,
     Cowardly,
     UpdateSpriteDirection,
-    UpdateAttackAnimation,
+    UpdateAnimations,
     UpdateFeeler,
 }
 
@@ -43,7 +44,6 @@ impl Plugin for UnitPlugin {
                     .in_set(SpawnSet)
                     .after(EventSet::<UnitSpawnEvent>::Sender),
             )
-            .add_system(unit_spine_ready.in_set(SpineSet::OnReady))
             .add_system(
                 unit_slow
                     .in_schedule(CoreSchedule::FixedUpdate)
@@ -96,9 +96,9 @@ impl Plugin for UnitPlugin {
                     .before(UnitSystem::Update),
             )
             .add_system(
-                unit_update_attack_animation
+                unit_update_animations
                     .in_schedule(CoreSchedule::FixedUpdate)
-                    .in_set(UnitSystem::UpdateAttackAnimation)
+                    .in_set(UnitSystem::UpdateAnimations)
                     .in_set(UpdateSet)
                     .before(UnitSystem::Update),
             )
@@ -375,82 +375,116 @@ fn unit_spawn(
     for spawn_event in spawn_events.iter() {
         let team = spawn_event.team;
         let team_modifiers = battle_state.get_modifiers(team);
+        let mut defense_modifiers = DefenseModifiers::default();
+        if team_modifiers[BattleModifier::Fire] {
+            defense_modifiers[DefenseModifier::Fire] = true;
+        }
+        if team_modifiers[BattleModifier::Ice] {
+            defense_modifiers[DefenseModifier::Ice] = true;
+        }
+        if team_modifiers[BattleModifier::Wet] {
+            defense_modifiers[DefenseModifier::Wet] = true;
+        }
         let mut stats = spawn_event.kind.stats();
         if team_modifiers[BattleModifier::ExtraSpeed] {
             stats.speed *= 3.;
             stats.speed_slow *= 1.5;
         }
         if team_modifiers[BattleModifier::Slowness] {
-            stats.speed *= 0.3;
-            stats.speed_slow *= 0.3;
+            stats.speed *= 0.5;
+            stats.speed_slow *= 0.5;
         }
-        commands.spawn((
-            SpineBundle {
-                skeleton: spawn_event.kind.skeleton(asset_library.as_ref()),
-                ..Default::default()
-            },
-            Transform2::from_translation(spawn_event.position).with_scale(Vec2::new(
-                if spawn_event.team == Team::Friendly {
-                    UNIT_SCALE
-                } else {
-                    -UNIT_SCALE
+        commands
+            .spawn((
+                SpineBundle {
+                    skeleton: spawn_event.kind.skeleton(asset_library.as_ref()),
+                    ..Default::default()
                 },
-                UNIT_SCALE,
-            )),
-            Depth::from(DepthLayer::YOrder(0.)),
-            Health::new(stats.health),
-            HitBox {
-                flags: team.hit_flags(),
-                shape: CollisionShape::Rect {
-                    offset: Vec2::ZERO,
-                    size: stats.hit_box_size,
+                Transform2::from_translation(spawn_event.position).with_scale(Vec2::new(
+                    if spawn_event.team == Team::Friendly {
+                        UNIT_SCALE
+                    } else {
+                        -UNIT_SCALE
+                    },
+                    UNIT_SCALE,
+                )),
+                Depth::from(DepthLayer::YOrder(0.)),
+                Health::new(stats.health),
+                HitBox {
+                    flags: team.hit_flags(),
+                    shape: CollisionShape::Rect {
+                        offset: Vec2::ZERO,
+                        size: stats.hit_box_size,
+                    },
+                    defense: if team_modifiers[BattleModifier::ExtraDefense] {
+                        2.5
+                    } else {
+                        1.
+                    },
+                    defense_kind: stats.defense_kind,
+                    defense_modifiers,
                 },
-                defense: if team_modifiers[BattleModifier::ExtraDefense] {
-                    2.
-                } else {
-                    1.
+                YOrder,
+                Target { team },
+                Feeler {
+                    shape: CollisionShape::None,
+                    flags: team.hurt_flags(),
+                    ..Default::default()
                 },
-                defense_kind: stats.defense_kind,
-            },
-            YOrder,
-            Target { team },
-            Feeler {
-                shape: CollisionShape::None,
-                flags: team.hurt_flags(),
-                ..Default::default()
-            },
-            Unit {
-                team,
-                kind: spawn_event.kind,
-                stats,
-                slow_timer: 0.,
-                retreating: false,
-                blind: team_modifiers[BattleModifier::Blindness] && rng.gen_bool(0.5),
-                attributes: stats.attributes,
-            },
-        ));
-    }
-}
-
-fn unit_spine_ready(
-    mut spine_ready_events: EventReader<SpineReadyEvent>,
-    mut spine_query: Query<(&mut Spine, &Unit)>,
-    battle_state: Res<BattleState>,
-) {
-    let mut rng = thread_rng();
-    for spine_ready_event in spine_ready_events.iter() {
-        if let Ok((mut spine, unit)) = spine_query.get_mut(spine_ready_event.entity) {
-            if let Ok(mut track) = spine.animation_state.set_animation_by_name(
-                UNIT_TRACK_WALK as i32,
-                "animation",
-                true,
-            ) {
-                track.set_track_time(rng.gen_range(0.0..1.0));
-                if battle_state.get_modifiers(unit.team)[BattleModifier::Slowness] {
-                    track.set_timescale(0.5);
+                Unit {
+                    team,
+                    kind: spawn_event.kind,
+                    stats,
+                    slow_timer: 0.,
+                    retreating: false,
+                    blind: team_modifiers[BattleModifier::Blindness] && rng.gen_bool(0.5),
+                    attributes: stats.attributes,
+                },
+            ))
+            .with_children(|parent| {
+                if team_modifiers[BattleModifier::Fire] {
+                    parent.spawn((
+                        SpriteBundle {
+                            sprite: Sprite {
+                                color: Color::RED,
+                                custom_size: Some(Vec2::splat(20.)),
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        Transform2::from_xy(0., 0.),
+                        Depth::Inherit(0.01),
+                    ));
                 }
-            }
-        }
+                if team_modifiers[BattleModifier::Ice] {
+                    parent.spawn((
+                        SpriteBundle {
+                            sprite: Sprite {
+                                color: Color::TURQUOISE,
+                                custom_size: Some(Vec2::splat(20.)),
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        Transform2::from_xy(0., 40.),
+                        Depth::Inherit(0.01),
+                    ));
+                }
+                if team_modifiers[BattleModifier::Wet] {
+                    parent.spawn((
+                        SpriteBundle {
+                            sprite: Sprite {
+                                color: Color::BLUE,
+                                custom_size: Some(Vec2::splat(20.)),
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        Transform2::from_xy(0., -40.),
+                        Depth::Inherit(0.01),
+                    ));
+                }
+            });
     }
 }
 
@@ -497,10 +531,16 @@ fn unit_damage_fx(
     }
 }
 
-fn unit_update(mut unit_query: Query<(&mut Transform2, &Unit)>, time: Res<FixedTime>) {
-    for (mut unit_transform, unit) in unit_query.iter_mut() {
-        unit_transform.translation.x +=
-            time.period.as_secs_f32() * unit.speed() * unit_transform.scale.x.signum();
+fn unit_update(
+    mut unit_query: Query<(&mut Transform2, &Unit)>,
+    time: Res<FixedTime>,
+    battle_state: Res<BattleState>,
+) {
+    if battle_state.phase() != BattlePhase::PreBattle {
+        for (mut unit_transform, unit) in unit_query.iter_mut() {
+            unit_transform.translation.x +=
+                time.period.as_secs_f32() * unit.speed() * unit_transform.scale.x.signum();
+        }
     }
 }
 
@@ -529,6 +569,16 @@ fn unit_attack(
                     } else {
                         1.
                     };
+                    let mut damage_modifiers = DamageModifiers::default();
+                    if team_modifiers[BattleModifier::Fire] {
+                        damage_modifiers[DamageModifier::Fire] = true;
+                    }
+                    if team_modifiers[BattleModifier::Ice] {
+                        damage_modifiers[DamageModifier::Ice] = true;
+                    }
+                    if team_modifiers[BattleModifier::Wet] {
+                        damage_modifiers[DamageModifier::Wet] = true;
+                    }
                     let friendly_fire = if (team_modifiers[BattleModifier::FriendlyFire]
                         || unit.attributes.contains(Attributes::MAY_FRIENDLY_FIRE))
                         && rng.gen_bool(0.25)
@@ -556,6 +606,7 @@ fn unit_attack(
                                     },
                                     damage: attack_stats.damage * damage_multiplier,
                                     damage_kind: attack_stats.damage_kind,
+                                    damage_modifiers,
                                     max_hits: attack_stats.hit_count,
                                     ignore_entity: unit_entity,
                                 },
@@ -587,6 +638,7 @@ fn unit_attack(
                                             },
                                             damage: attack_stats.damage * damage_multiplier,
                                             damage_kind: attack_stats.damage_kind,
+                                            damage_modifiers,
                                             max_hits: attack_stats.hit_count,
                                             ignore_entity: unit_entity,
                                         },
@@ -609,6 +661,7 @@ fn unit_attack(
                                     },
                                     damage: attack_stats.damage * damage_multiplier,
                                     damage_kind: attack_stats.damage_kind,
+                                    damage_modifiers,
                                     max_hits: attack_stats.hit_count,
                                     ignore_entity: unit_entity,
                                 },
@@ -676,11 +729,37 @@ fn unit_update_sprite_direction(mut unit_query: Query<(&mut Transform2, &Unit)>)
     }
 }
 
-fn unit_update_attack_animation(
+fn unit_update_animations(
     mut unit_query: Query<(&mut Spine, &Unit, &Feeler)>,
     battle_state: Res<BattleState>,
 ) {
+    let mut rng = thread_rng();
     for (mut unit_spine, unit, unit_feeler) in unit_query.iter_mut() {
+        if battle_state.phase() != BattlePhase::PreBattle {
+            if unit_spine
+                .animation_state
+                .track_at_index(UNIT_TRACK_WALK)
+                .is_none()
+            {
+                if let Ok(mut track) = unit_spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_WALK as i32,
+                    "animation",
+                    true,
+                ) {
+                    track.set_timescale(rng.gen_range(0.9..1.1));
+                }
+            }
+        } else {
+            if unit_spine
+                .animation_state
+                .track_at_index(UNIT_TRACK_WALK)
+                .is_some()
+            {
+                unit_spine
+                    .animation_state
+                    .clear_track(UNIT_TRACK_WALK as i32);
+            }
+        }
         if (unit.can_attack() && unit_feeler.feeling) || unit.blind {
             if unit_spine
                 .animation_state
@@ -692,8 +771,15 @@ fn unit_update_attack_animation(
                     "attack",
                     true,
                 ) {
-                    if battle_state.get_modifiers(unit.team)[BattleModifier::Slowness] {
+                    let slowness = battle_state.get_modifiers(unit.team)[BattleModifier::Slowness];
+                    let quick_attack =
+                        battle_state.get_modifiers(unit.team)[BattleModifier::QuickAttack];
+                    if slowness && !quick_attack {
                         track.set_timescale(0.5);
+                    } else if !slowness && quick_attack {
+                        track.set_timescale(2.);
+                    } else {
+                        track.set_timescale(1.);
                     }
                 }
             }
