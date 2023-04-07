@@ -133,7 +133,7 @@ impl UnitKind {
                 attack: Attack::Claw,
                 defense_kind: DefenseKind::Flesh,
                 spawn_distance_min: 0.,
-                spawn_distance_max: 1200.,
+                spawn_distance_max: 900.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(200., 400.),
                 retreat_chance: 0.01,

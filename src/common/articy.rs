@@ -60,7 +60,9 @@ pub enum ArticyDialogueKind {
 #[derive(Clone)]
 pub enum ArticyDialogueInstruction {
     AddUnits(UnitKind, usize),
+    SubtractUnits(UnitKind, usize),
     AddFood(usize),
+    SubtractFood(usize),
     AddItem(Item),
     SetGlobalVariable(String, bool),
 }
@@ -175,7 +177,10 @@ fn parse_dialogue_nodes(
                 } else {
                     let speaker_model = models
                         .get(&ArticyId::from(dialogue_fragment.speaker.clone()))
-                        .expect("expected speaker to exist");
+                        .expect(&format!(
+                            "expected speaker to exist: {}",
+                            dialogue_fragment.speaker
+                        ));
                     let character =
                         serde_json::from_value::<json::DefaultSupportingCharacterTemplate>(
                             Value::Object(speaker_model.properties.clone()),
@@ -185,8 +190,14 @@ fn parse_dialogue_nodes(
                         "General Ratso" => Speaker::General,
                         "Glut Rattan" => Speaker::WarChef1,
                         "Field Marshal Toothsy" => Speaker::WarChef2,
+                        "Rattin Hood" => Speaker::WarChef3,
+                        "Archmage Ratus" => Speaker::WarChef4,
+                        "Chompers the Barbarian" => Speaker::WarChef5,
                         "Mobling" => Speaker::Mobling,
                         "Stabby-Rat" => Speaker::StabbyRat,
+                        "Shooty-Rat" => Speaker::ShootyRat,
+                        "Scoutling" => Speaker::Scoutling,
+                        "Narrator" => Speaker::Narrator,
                         _ => panic!("Unknown speaker: {}", character.display_name),
                     }
                 };
@@ -296,9 +307,39 @@ fn parse_instructions(str: &str) -> Vec<ArticyDialogueInstruction> {
                             function, params
                         ),
                     },
+                    "SubtractUnits" => match (params.get(0), params.get(1)) {
+                        (Some(Param::String(unit_kind)), Some(Param::Integer(amount))) => {
+                            let unit_kind = match unit_kind.as_str() {
+                                "Peasant" => UnitKind::Peasant,
+                                "Warrior" => UnitKind::Warrior,
+                                "Archer" => UnitKind::Archer,
+                                "Mage" => UnitKind::Mage,
+                                "Brute" => UnitKind::Brute,
+                                _ => panic!("unknown AddUnit() kind: {}", unit_kind),
+                            };
+                            instructions.push(ArticyDialogueInstruction::SubtractUnits(
+                                unit_kind,
+                                *amount as usize,
+                            ));
+                        }
+                        _ => panic!(
+                            "wrong parameters to articy function: {} {:?}",
+                            function, params
+                        ),
+                    },
                     "AddFood" => match params.get(0) {
                         Some(Param::Integer(amount)) => {
                             instructions.push(ArticyDialogueInstruction::AddFood(*amount as usize));
+                        }
+                        _ => panic!(
+                            "wrong parameters to articy function: {} {:?}",
+                            function, params
+                        ),
+                    },
+                    "SubtractFood" => match params.get(0) {
+                        Some(Param::Integer(amount)) => {
+                            instructions
+                                .push(ArticyDialogueInstruction::SubtractFood(*amount as usize));
                         }
                         _ => panic!(
                             "wrong parameters to articy function: {} {:?}",

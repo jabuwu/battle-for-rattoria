@@ -3,8 +3,8 @@ use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
 use crate::{
-    in_game_state, AppState, ArticyDialogueInstruction, DebugDrawSettings, DialogueEvent,
-    GameState, UnitKind,
+    in_game_state, AppState, Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue,
+    DialogueEvent, GameState, Script, UnitKind,
 };
 
 pub struct GamePlugin;
@@ -31,8 +31,20 @@ fn game_dialogue_events(
                     .available_army
                     .mutate_count(*unit_kind, |i| i + *count);
             }
+            ArticyDialogueInstruction::SubtractUnits(unit_kind, count) => {
+                game_state
+                    .available_army
+                    .mutate_count(*unit_kind, |i| (i - *count).max(0));
+            }
             ArticyDialogueInstruction::AddFood(count) => {
                 game_state.food += count;
+            }
+            ArticyDialogueInstruction::SubtractFood(count) => {
+                if *count > game_state.food {
+                    game_state.food = 0;
+                } else {
+                    game_state.food -= count;
+                }
             }
             ArticyDialogueInstruction::AddItem(item) => {
                 game_state.inventory.add(*item);
@@ -57,6 +69,8 @@ fn game_debug(
     mut contexts: EguiContexts,
     mut debug_draw_settings: ResMut<DebugDrawSettings>,
     mut game_state: ResMut<GameState>,
+    mut dialogue: ResMut<Dialogue>,
+    articy: Res<Articy>,
 ) {
     egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
         ui.checkbox(&mut debug_draw_settings.draw_hit_boxes, "Draw Hitboxes");
@@ -85,6 +99,22 @@ fn game_debug(
                     game_state.available_army.set_count(unit_kind, count);
                     ui.label(unit_kind.name_plural());
                 });
+            }
+        });
+        ui.collapsing("Dialogues", |ui| {
+            for dialogue_str in [
+                "WC1B1", "WC1B2", "WC1B3", "WC2B1", "WC2B2", "WC2B3", "WC3B1", "WC3B2", "WC3B3",
+                "WC3B4",
+            ] {
+                if ui.button(dialogue_str).clicked() {
+                    dialogue.queue(
+                        Script::new(articy.dialogues[dialogue_str].clone()),
+                        game_state.as_mut(),
+                    );
+                }
+            }
+            if ui.button("Clear").clicked() {
+                dialogue.clear();
             }
         });
     });

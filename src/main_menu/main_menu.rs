@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AppState, AssetLibrary, Dialogue};
+use crate::{AppState, Articy, AssetLibrary, Dialogue, GameState};
 
 pub struct MainMenuPlugin;
 
@@ -16,9 +16,14 @@ impl Plugin for MainMenuPlugin {
 fn main_menu_enter(
     mut commands: Commands,
     mut dialogue: ResMut<Dialogue>,
+    mut game_state: ResMut<GameState>,
     asset_library: Res<AssetLibrary>,
+    articy: Res<Articy>,
 ) {
     dialogue.clear();
+    for (name, value) in articy.global_variables.iter() {
+        game_state.global_variables.insert(name.clone(), *value);
+    }
     commands.spawn(Text2dBundle {
         text: Text::from_section(
             "War Chef: Battle for Rattoria\n\nPress space to play\n\nPress S to enter Sandbox",

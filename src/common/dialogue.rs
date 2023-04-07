@@ -23,6 +23,7 @@ const FONT_SIZE_NAME: f32 = 42.;
 const FONT_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 const FONT_COLOR_CHOICE: Color = Color::rgba(0.2, 0.2, 0.2, 0.97);
 const CHARACTERS_PER_LINE: usize = 40;
+const CHARACTERS_PER_LINE_UNITS: usize = 50;
 const CHOICES_DISTANCE: f32 = 44.;
 const CHOICES_PADDING: Vec2 = Vec2::new(20., 4.);
 const CHOICES_GAP: f32 = 4.;
@@ -69,9 +70,16 @@ pub enum Speaker {
     General,
     WarChef1,
     WarChef2,
+    WarChef3,
+    WarChef4,
+    WarChef5,
 
     Mobling,
     StabbyRat,
+    ShootyRat,
+    Scoutling,
+
+    Narrator,
 }
 
 impl Speaker {
@@ -82,8 +90,14 @@ impl Speaker {
             Self::General => SpeakerKind::Friendly,
             Self::WarChef1 => SpeakerKind::Enemy,
             Self::WarChef2 => SpeakerKind::Enemy,
+            Self::WarChef3 => SpeakerKind::Enemy,
+            Self::WarChef4 => SpeakerKind::Enemy,
+            Self::WarChef5 => SpeakerKind::Enemy,
             Self::Mobling => SpeakerKind::Unit,
             Self::StabbyRat => SpeakerKind::Unit,
+            Self::ShootyRat => SpeakerKind::Unit,
+            Self::Scoutling => SpeakerKind::Unit,
+            Self::Narrator => SpeakerKind::Unit,
         }
     }
 
@@ -94,8 +108,14 @@ impl Speaker {
             Self::General => "General Ratso",
             Self::WarChef1 => "Glut Rattan",
             Self::WarChef2 => "Field Marshal Toothsy",
+            Self::WarChef3 => "Rattin Hood",
+            Self::WarChef4 => "Archmage Ratus",
+            Self::WarChef5 => "Chompers the Barbarian",
             Self::Mobling => "Mobling",
             Self::StabbyRat => "Stabby-Rat",
+            Self::ShootyRat => "Shooty-Rat",
+            Self::Scoutling => "Scoutling",
+            Self::Narrator => "Narrator",
         }
     }
 }
@@ -539,6 +559,9 @@ fn dialogue_update(
                 Speaker::General => Some("general"),
                 Speaker::WarChef1 => Some("wc1"),
                 Speaker::WarChef2 => Some("wc2"),
+                Speaker::WarChef3 => Some("wc3"),
+                Speaker::WarChef4 => Some("wc4"),
+                Speaker::WarChef5 => Some("wc5"),
                 _ => None,
             } {
                 if let Some(skin_general) = dialogue_spine.skeleton.data().find_skin(speaker_skin) {
@@ -580,7 +603,11 @@ fn dialogue_update(
                         section.value = match dialogue_action {
                             DialogueAction::Text { speaker, text, .. } => {
                                 if dialogue_text.speaker_kind == speaker.speaker_kind() {
-                                    typewriter_text(text, dialogue.chars as usize)
+                                    typewriter_text(
+                                        text,
+                                        dialogue.chars as usize,
+                                        speaker.speaker_kind() == SpeakerKind::Unit,
+                                    )
                                 } else {
                                     "".to_owned()
                                 }
@@ -640,13 +667,13 @@ fn dialogue_update(
                     text_query.get_mut(dialogue_option_text_entity)
                 {
                     if let Some(section) = dialogue_option_text_text.sections.get_mut(0) {
-                        section.value = typewriter_text(&choice.0, dialogue.chars as usize);
+                        section.value = typewriter_text(&choice.0, dialogue.chars as usize, false);
                         section.style.color = if hovered {
                             FONT_COLOR
                         } else {
                             FONT_COLOR_CHOICE
                         };
-                        height = typewriter_text(&choice.0, 99999).split('\n').count();
+                        height = typewriter_text(&choice.0, 99999, false).split('\n').count();
                     }
                 }
             }
@@ -688,8 +715,8 @@ fn dialogue_update(
                     || keys.pressed(KeyCode::RControl)
                 {
                     let children = children.clone();
-                    if typewriter_text(&text, dialogue.chars as usize).len()
-                        == typewriter_text(&text, 99999).len()
+                    if typewriter_text(&text, dialogue.chars as usize, false).len()
+                        == typewriter_text(&text, 99999, false).len()
                     {
                         dialogue.show(children, game_state.as_mut());
                     } else {
@@ -754,13 +781,19 @@ fn dialogue_update_interaction(
     interaction_stack.set_wants_interaction(InteractionMode::Dialogue, dialogue.action.is_some());
 }
 
-fn typewriter_text(string: &str, cap_chars: usize) -> String {
+fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
     let mut wrapped_string = String::new();
     for line in string.split('\n') {
         let mut chars = 0;
         for split in line.to_owned().split_ascii_whitespace() {
             chars += split.len();
-            if chars > CHARACTERS_PER_LINE {
+            if chars
+                > if unit {
+                    CHARACTERS_PER_LINE_UNITS
+                } else {
+                    CHARACTERS_PER_LINE
+                }
+            {
                 wrapped_string.push('\n');
                 wrapped_string += split;
                 chars = split.len();
