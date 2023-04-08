@@ -34,7 +34,7 @@ fn intermission_enter(
     articy: Res<Articy>,
     asset_library: Res<AssetLibrary>,
 ) {
-    game_state.food += 20;
+    game_state.food += 15;
     for used_item in game_state.used_items.clone().iter() {
         if let Some(script) = game_state.quest.item_script(*used_item, articy.as_ref()) {
             dialogue.queue(script, game_state.as_mut());

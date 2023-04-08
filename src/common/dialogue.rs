@@ -78,6 +78,8 @@ pub enum Speaker {
     StabbyRat,
     ShootyRat,
     Scoutling,
+    Deserter,
+    BlastyRat,
 
     Narrator,
 }
@@ -97,6 +99,8 @@ impl Speaker {
             Self::StabbyRat => SpeakerKind::Unit,
             Self::ShootyRat => SpeakerKind::Unit,
             Self::Scoutling => SpeakerKind::Unit,
+            Self::Deserter => SpeakerKind::Unit,
+            Self::BlastyRat => SpeakerKind::Unit,
             Self::Narrator => SpeakerKind::Unit,
         }
     }
@@ -115,6 +119,8 @@ impl Speaker {
             Self::StabbyRat => "Stabby-Rat",
             Self::ShootyRat => "Shooty-Rat",
             Self::Scoutling => "Scoutling",
+            Self::Deserter => "Deserter",
+            Self::BlastyRat => "Blasty-Rat",
             Self::Narrator => "Narrator",
         }
     }

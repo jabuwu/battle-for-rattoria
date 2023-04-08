@@ -3,3 +3,5 @@ Multiply blend mode is broken in wasm >:(
 Better y order for projectiles, fx?
 Move unit spines up so their feet is at y = 0
 Better font
+Make units slow down when attacking
+Remove nametag for narrator

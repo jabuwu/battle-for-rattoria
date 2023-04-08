@@ -45,14 +45,14 @@ impl Quest {
                     brutes: 0,
                 },
                 1 => UnitComposition {
-                    peasants: 20,
+                    peasants: 12,
                     warriors: 3,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
                 },
                 2 => UnitComposition {
-                    peasants: 10,
+                    peasants: 8,
                     warriors: 2,
                     archers: 0,
                     mages: 0,
@@ -71,7 +71,7 @@ impl Quest {
                 1 => UnitComposition {
                     peasants: 5,
                     warriors: 1,
-                    archers: 20,
+                    archers: 15,
                     mages: 0,
                     brutes: 0,
                 },

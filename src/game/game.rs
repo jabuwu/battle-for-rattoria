@@ -4,7 +4,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     in_game_state, AppState, Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue,
-    DialogueEvent, GameState, Script, UnitComposition, UnitKind,
+    DialogueEvent, GameState, PersistentGameState, Script, UnitComposition, UnitKind,
 };
 
 pub struct GamePlugin;
@@ -12,6 +12,7 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GameState>()
+            .init_resource::<PersistentGameState>()
             .add_system(game_dialogue_events)
             .add_system(game_debug);
         if app.world.contains_resource::<State<AppState>>() {
@@ -146,12 +147,23 @@ fn game_debug(
                 "WC3B2",
                 "WC3B3",
                 "WC3B4",
+                "WC4B1",
+                "WC4B2",
+                "WC4B3",
+                "WC4B4",
+                "WC5B1",
+                "WC5B2",
+                "WC5B3",
                 "BogHardWeeds",
                 "CeleryQuartz",
                 "CracklingMoss",
                 "AxeShrooms",
                 "SquirtBlopBerries",
                 "FrostyWebStrands",
+                "RewindScreen",
+                "Tutorial1",
+                "Tutorial2",
+                "Tutorial3",
             ] {
                 if ui.button(dialogue_str).clicked() {
                     dialogue.queue(

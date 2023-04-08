@@ -18,7 +18,7 @@ pub struct GameState {
     pub inventory: Inventory,
     pub used_items: Vec<Item>,
     pub consumed_items: Vec<Item>,
-    checkpoint: Option<Box<GameState>>,
+    pub checkpoint: Option<Box<GameState>>,
 }
 
 impl Default for GameState {
@@ -41,6 +41,19 @@ impl Default for GameState {
             used_items: vec![],
             consumed_items: vec![],
             checkpoint: None,
+        }
+    }
+}
+
+#[derive(Resource, Clone)]
+pub struct PersistentGameState {
+    pub show_rewind_screen_dialogue: bool,
+}
+
+impl Default for PersistentGameState {
+    fn default() -> Self {
+        Self {
+            show_rewind_screen_dialogue: true,
         }
     }
 }

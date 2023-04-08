@@ -44,5 +44,7 @@ fn main_menu_update(mut next_state: ResMut<NextState<AppState>>, keys: Res<Input
         next_state.set(AppState::GameStart);
     } else if keys.just_pressed(KeyCode::S) {
         next_state.set(AppState::Sandbox);
+    } else if keys.just_pressed(KeyCode::R) {
+        next_state.set(AppState::GameRewind);
     }
 }

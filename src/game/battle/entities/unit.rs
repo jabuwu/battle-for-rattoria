@@ -209,21 +209,21 @@ impl UnitKind {
 
     pub fn name(&self) -> &'static str {
         match self {
-            UnitKind::Peasant => "Peasant",
-            UnitKind::Warrior => "Warrior",
-            UnitKind::Archer => "Archer",
-            UnitKind::Mage => "Mage",
-            UnitKind::Brute => "Brute",
+            UnitKind::Peasant => "Mobling",
+            UnitKind::Warrior => "Stabby-Rat",
+            UnitKind::Archer => "Shooty-Rat",
+            UnitKind::Mage => "Blasty-Rat",
+            UnitKind::Brute => "Bigg-Rat",
         }
     }
 
     pub fn name_plural(&self) -> &'static str {
         match self {
-            UnitKind::Peasant => "Peasants",
-            UnitKind::Warrior => "Warriors",
-            UnitKind::Archer => "Archers",
-            UnitKind::Mage => "Mages",
-            UnitKind::Brute => "Brutes",
+            UnitKind::Peasant => "Moblings",
+            UnitKind::Warrior => "Stabby-Rats",
+            UnitKind::Archer => "Shooty-Rats",
+            UnitKind::Mage => "Blasty-Rats",
+            UnitKind::Brute => "Bigg-Rats",
         }
     }
 
