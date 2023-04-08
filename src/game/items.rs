@@ -1,6 +1,8 @@
+use enum_map::Enum;
+
 use crate::BattleModifier;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Enum)]
 pub enum Item {
     CracklingMoss,
     SquirtBlopBerries,

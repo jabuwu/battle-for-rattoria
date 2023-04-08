@@ -430,7 +430,7 @@ fn unit_spawn(
                         size: stats.hit_box_size,
                     },
                     defense: if team_modifiers[BattleModifier::ExtraDefense] {
-                        2.5
+                        3.
                     } else {
                         1.
                     },

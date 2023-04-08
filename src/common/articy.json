@@ -2867,6 +2867,390 @@
           }
         },
         {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "BogHardWeeds",
+            "Id": "0x0100000100000343",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Side Effect: Bog Hard-Weeds",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Positive: More Defense\r\n\r\nNegative: Sickness\r\n\r\nThis dialogue only plays if the player uses the Bog Hard-Weeds after the first turn they receive it (since that's already accounted for)",
+            "ExternalId": "",
+            "Position": {
+              "x": 317.0,
+              "y": -25.0
+            },
+            "ZIndex": 10.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 1513876181,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000346",
+                "Owner": "0x0100000100000343",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x010000010000039F",
+                    "Target": "0x010000010000039D"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000347",
+                "Owner": "0x0100000100000343"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "CeleryQuartz",
+            "Id": "0x010000010000034A",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Side Effect: Celery Quartz",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Positive: Increase Unit Speed\r\n\r\nNegative: Explosive",
+            "ExternalId": "",
+            "Position": {
+              "x": 617.0,
+              "y": -25.0
+            },
+            "ZIndex": 11.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 3893619116,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000034D",
+                "Owner": "0x010000010000034A",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x010000010000037D",
+                    "Target": "0x010000010000037A"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000034E",
+                "Owner": "0x010000010000034A"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "CracklingMoss",
+            "Id": "0x0100000100000356",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Side Effect: Crackling Moss",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Positive: Quick Attack\r\n\r\nNegative: Cowardly",
+            "ExternalId": "",
+            "Position": {
+              "x": 917.0,
+              "y": -25.0
+            },
+            "ZIndex": 12.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 4158827111,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000359",
+                "Owner": "0x0100000100000356",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x0100000100000384",
+                    "Target": "0x0100000100000381"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000035A",
+                "Owner": "0x0100000100000356"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "SquirtBlopBerries",
+            "Id": "0x010000010000035E",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Side Effect: Squirt Blop-Berries",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Positive: Wet\r\n\r\nNegative: Slowness",
+            "ExternalId": "",
+            "Position": {
+              "x": 1517.0,
+              "y": -25.0
+            },
+            "ZIndex": 12.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 477244374,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000035F",
+                "Owner": "0x010000010000035E",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x0100000100000392",
+                    "Target": "0x010000010000038F"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000360",
+                "Owner": "0x010000010000035E"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "AxeShrooms",
+            "Id": "0x0100000100000365",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Side Effect: Axe Shrooms",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Positive: Stronger Attacks\r\n\r\nNegative: Friendly Fire",
+            "ExternalId": "",
+            "Position": {
+              "x": 1217.0,
+              "y": -25.0
+            },
+            "ZIndex": 12.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 3822732994,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000366",
+                "Owner": "0x0100000100000365",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x010000010000038B",
+                    "Target": "0x0100000100000388"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000367",
+                "Owner": "0x0100000100000365"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "FrostyWebStrands",
+            "Id": "0x010000010000036C",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Side Effect: Frosty Web-Strands",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Positive: Ice\r\n\r\nNegative: Blindness",
+            "ExternalId": "",
+            "Position": {
+              "x": 1817.0,
+              "y": -25.0
+            },
+            "ZIndex": 12.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 2544108381,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000036D",
+                "Owner": "0x010000010000036C",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x0100000100000399",
+                    "Target": "0x0100000100000396"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000036E",
+                "Owner": "0x010000010000036C"
+              }
+            ]
+          }
+        },
+        {
           "Type": "DialogueFragment",
           "Properties": {
             "TechnicalName": "DFr_AE09F388",
@@ -16113,6 +16497,264 @@
           }
         },
         {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_E6358AF2",
+            "Id": "0x0100000100000373",
+            "Parent": "0x0100000100000343",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "our dudes are sick",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 3862268658,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000376",
+                "Owner": "0x0100000100000373"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000377",
+                "Owner": "0x0100000100000373"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_6E489C25",
+            "Id": "0x010000010000037A",
+            "Parent": "0x010000010000034A",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "our dudes are explosive",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 1850252325,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000037D",
+                "Owner": "0x010000010000037A"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000037E",
+                "Owner": "0x010000010000037A"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_C4F9FC5C",
+            "Id": "0x0100000100000381",
+            "Parent": "0x0100000100000356",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "our dudes are cowardly",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 3304717404,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000384",
+                "Owner": "0x0100000100000381"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000385",
+                "Owner": "0x0100000100000381"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_40199E21",
+            "Id": "0x0100000100000388",
+            "Parent": "0x0100000100000365",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "our dudes hit each other accidentally",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 1075420705,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000038B",
+                "Owner": "0x0100000100000388"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000038C",
+                "Owner": "0x0100000100000388"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_1A8B2484",
+            "Id": "0x010000010000038F",
+            "Parent": "0x010000010000035E",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "our dudes are slow",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 445326468,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000392",
+                "Owner": "0x010000010000038F"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000393",
+                "Owner": "0x010000010000038F"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_238D6173",
+            "Id": "0x0100000100000396",
+            "Parent": "0x010000010000036C",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "our dudes are blind",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 596468083,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000399",
+                "Owner": "0x0100000100000396"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000039A",
+                "Owner": "0x0100000100000396"
+              }
+            ]
+          }
+        },
+        {
           "Type": "Hub",
           "Properties": {
             "TechnicalName": "Hub_4F99282C",
@@ -16877,6 +17519,65 @@
           }
         },
         {
+          "Type": "Condition",
+          "Properties": {
+            "TechnicalName": "Cnd_60D5A57F",
+            "Id": "0x010000010000039D",
+            "Parent": "0x0100000100000343",
+            "DisplayName": "Game.ArmyBogSick == false",
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": -325.0,
+              "y": 50.0
+            },
+            "ZIndex": 2.0,
+            "Size": {
+              "w": 225.0,
+              "h": 100.0
+            },
+            "ShortId": 1624614271,
+            "Expression": "Game.ArmyBogSick == false",
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000039F",
+                "Owner": "0x010000010000039D"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000003A0",
+                "Owner": "0x010000010000039D",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x0100000100000376",
+                    "Target": "0x0100000100000373"
+                  }
+                ]
+              },
+              {
+                "Text": "",
+                "Id": "0x01000001000003A1",
+                "Owner": "0x010000010000039D"
+              }
+            ]
+          }
+        },
+        {
           "Type": "Instruction",
           "Properties": {
             "TechnicalName": "Ins_15629745",
@@ -17066,7 +17767,7 @@
             "TechnicalName": "Ins_22AB1A76",
             "Id": "0x01000001000001A9",
             "Parent": "0x01000001000001A7",
-            "DisplayName": "AddUnits(\"Peasant\", 30);",
+            "DisplayName": "AddUnits(\"Peasant\", 20);",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -17079,7 +17780,7 @@
               "h": 100.0
             },
             "ShortId": 581638774,
-            "Expression": "AddUnits(\"Peasant\", 30);\n",
+            "Expression": "AddUnits(\"Peasant\", 20);\n",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -18133,7 +18834,7 @@
             "TechnicalName": "Ins_0EB3E6FB",
             "Id": "0x01000003000007C9",
             "Parent": "0x010000010000022B",
-            "DisplayName": "SubtractFood(5);",
+            "DisplayName": "SubtractFood(3);",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -18146,7 +18847,7 @@
               "h": 100.0
             },
             "ShortId": 246671099,
-            "Expression": "SubtractFood(5);",
+            "Expression": "SubtractFood(3);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -18187,7 +18888,7 @@
             "TechnicalName": "Ins_CD59145B",
             "Id": "0x01000003000007CD",
             "Parent": "0x010000010000022B",
-            "DisplayName": "SubtractFood(10);",
+            "DisplayName": "SubtractFood(6);",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -18200,7 +18901,7 @@
               "h": 100.0
             },
             "ShortId": 3445167195,
-            "Expression": "SubtractFood(10);",
+            "Expression": "SubtractFood(6);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -19290,6 +19991,23 @@
         "Type": "Flow",
         "Children": [
           {
+            "Id": "0x0100000100000343",
+            "TechnicalName": "BogHardWeeds",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x010000010000039D",
+                "TechnicalName": "Cnd_60D5A57F",
+                "Type": "Condition"
+              },
+              {
+                "Id": "0x0100000100000373",
+                "TechnicalName": "DFr_E6358AF2",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
             "Id": "0x010000010000010F",
             "TechnicalName": "WC1B1",
             "Type": "Dialogue",
@@ -19921,6 +20639,18 @@
             ]
           },
           {
+            "Id": "0x010000010000034A",
+            "TechnicalName": "CeleryQuartz",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x010000010000037A",
+                "TechnicalName": "DFr_6E489C25",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
             "Id": "0x0100000100000177",
             "TechnicalName": "WC1B2",
             "Type": "Dialogue",
@@ -20273,6 +21003,18 @@
                 "Id": "0x0100000300000937",
                 "TechnicalName": "",
                 "Type": "Comment"
+              }
+            ]
+          },
+          {
+            "Id": "0x0100000100000356",
+            "TechnicalName": "CracklingMoss",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x0100000100000381",
+                "TechnicalName": "DFr_C4F9FC5C",
+                "Type": "DialogueFragment"
               }
             ]
           },
@@ -20693,6 +21435,18 @@
             ]
           },
           {
+            "Id": "0x0100000100000365",
+            "TechnicalName": "AxeShrooms",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x0100000100000388",
+                "TechnicalName": "DFr_40199E21",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
             "Id": "0x010000010000023D",
             "TechnicalName": "WC3B4",
             "Type": "Dialogue",
@@ -20730,6 +21484,30 @@
               {
                 "Id": "0x0100000100000310",
                 "TechnicalName": "DFr_EFE5BFBC",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
+            "Id": "0x010000010000035E",
+            "TechnicalName": "SquirtBlopBerries",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x010000010000038F",
+                "TechnicalName": "DFr_1A8B2484",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
+            "Id": "0x010000010000036C",
+            "TechnicalName": "FrostyWebStrands",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x0100000100000396",
+                "TechnicalName": "DFr_238D6173",
                 "Type": "DialogueFragment"
               }
             ]

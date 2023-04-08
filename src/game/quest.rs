@@ -1,9 +1,12 @@
-use crate::{BattleModifiers, UnitComposition};
+use enum_map::EnumMap;
+
+use crate::{BattleModifiers, Item, UnitComposition};
 
 #[derive(Default, Clone)]
 pub struct Quest {
     pub war_chef: usize,
     pub battle: usize,
+    pub seen_item_dialogue: EnumMap<Item, bool>,
 }
 
 impl Quest {
@@ -62,6 +65,13 @@ impl Quest {
                     peasants: 3,
                     warriors: 0,
                     archers: 10,
+                    mages: 0,
+                    brutes: 0,
+                },
+                1 => UnitComposition {
+                    peasants: 5,
+                    warriors: 1,
+                    archers: 20,
                     mages: 0,
                     brutes: 0,
                 },

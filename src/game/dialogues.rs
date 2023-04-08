@@ -1,4 +1,4 @@
-use crate::{Articy, Quest, Script};
+use crate::{Articy, Item, Quest, Script};
 
 impl Quest {
     pub fn next(&mut self) {
@@ -36,5 +36,29 @@ impl Quest {
             _ => None,
         }
         .map(|str| Script::new(articy.dialogues[str].clone()))
+    }
+
+    pub fn item_script(&mut self, used_item: Item, articy: &Articy) -> Option<Script> {
+        if !self.seen_item_dialogue[used_item] {
+            self.seen_item_dialogue[used_item] = true;
+            match used_item {
+                Item::BogHardWeeds => {
+                    if self.war_chef == 1 && self.battle == 2 {
+                        None
+                    } else {
+                        Some("BogHardWeeds")
+                    }
+                }
+                Item::CeleryQuartz => Some("CeleryQuartz"),
+                Item::CracklingMoss => Some("CracklingMoss"),
+                Item::AxeShrooms => Some("AxeShrooms"),
+                Item::SquirtBlopBerries => Some("SquirtBlopBerries"),
+                Item::FrostyWebStrands => Some("FrostyWebStrands"),
+                _ => None,
+            }
+            .map(|str| Script::new(articy.dialogues[str].clone()))
+        } else {
+            None
+        }
     }
 }

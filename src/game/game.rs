@@ -116,8 +116,8 @@ fn game_debug(
             if ui.button("WC2 Loadout").clicked() {
                 game_state.food = 45;
                 game_state.available_army = UnitComposition {
-                    peasants: 35,
-                    warriors: 4,
+                    peasants: 25,
+                    warriors: 3,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
@@ -126,8 +126,8 @@ fn game_debug(
             if ui.button("WC3 Loadout").clicked() {
                 game_state.food = 40;
                 game_state.available_army = UnitComposition {
-                    peasants: 30,
-                    warriors: 4,
+                    peasants: 26,
+                    warriors: 6,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
@@ -136,8 +136,22 @@ fn game_debug(
         });
         ui.collapsing("Dialogues", |ui| {
             for dialogue_str in [
-                "WC1B1", "WC1B2", "WC1B3", "WC2B1", "WC2B2", "WC2B3", "WC3B1", "WC3B2", "WC3B3",
+                "WC1B1",
+                "WC1B2",
+                "WC1B3",
+                "WC2B1",
+                "WC2B2",
+                "WC2B3",
+                "WC3B1",
+                "WC3B2",
+                "WC3B3",
                 "WC3B4",
+                "BogHardWeeds",
+                "CeleryQuartz",
+                "CracklingMoss",
+                "AxeShrooms",
+                "SquirtBlopBerries",
+                "FrostyWebStrands",
             ] {
                 if ui.button(dialogue_str).clicked() {
                     dialogue.queue(

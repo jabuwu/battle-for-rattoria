@@ -341,10 +341,12 @@ fn battle_end_detection(
     let mut friendly_count = 0;
     let mut enemy_count = 0;
     for unit in unit_query.iter() {
-        if unit.team == Team::Friendly {
-            friendly_count += 1;
-        } else if unit.team == Team::Enemy {
-            enemy_count += 1;
+        if !unit.retreating {
+            if unit.team == Team::Friendly {
+                friendly_count += 1;
+            } else if unit.team == Team::Enemy {
+                enemy_count += 1;
+            }
         }
     }
     for _ in damage_receive_events.iter() {

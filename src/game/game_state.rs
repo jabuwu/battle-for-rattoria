@@ -16,6 +16,7 @@ pub struct GameState {
     pub intel: Intel,
     pub global_variables: HashMap<String, bool>,
     pub inventory: Inventory,
+    pub used_items: Vec<Item>,
     pub consumed_items: Vec<Item>,
     checkpoint: Option<Box<GameState>>,
 }
@@ -37,6 +38,7 @@ impl Default for GameState {
             intel: Intel::default(),
             global_variables: HashMap::new(),
             inventory: Inventory::default(),
+            used_items: vec![],
             consumed_items: vec![],
             checkpoint: None,
         }

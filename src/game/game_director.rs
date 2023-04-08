@@ -63,6 +63,7 @@ fn game_director_battle_enter(
     let friendly_units = game_state.get_and_reset_fed_army();
     let mut friendly_modifiers = BattleModifiers::default();
     let mut sick = false;
+    game_state.used_items = vec![];
     for item in take(&mut game_state.consumed_items) {
         for modifier in item.modifiers() {
             friendly_modifiers[modifier] = true;
@@ -75,6 +76,7 @@ fn game_director_battle_enter(
                 .global_variables
                 .insert("UsedBogHardWeed".to_owned(), true);
         }
+        game_state.used_items.push(item);
     }
     game_state.apply_sickness(sick);
     battle_start_events.send(BattleStartEvent {

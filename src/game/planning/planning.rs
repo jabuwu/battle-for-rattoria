@@ -173,16 +173,17 @@ fn planning_ui(
 
             ui.add_space(32.);
 
-            if ui.button("Skip Battle").clicked() {
-                planning_state.skip = true;
-            }
-
-            if game_state.can_rewind() {
-                ui.add_space(32.);
-                if ui.button("Rewind to Previous Battle").clicked() {
-                    planning_state.rewind = true;
+            ui.horizontal(|ui| {
+                if ui.button("Skip Battle").clicked() {
+                    planning_state.skip = true;
                 }
-            }
+
+                if game_state.can_rewind() {
+                    if ui.button("Rewind to Previous Battle").clicked() {
+                        planning_state.rewind = true;
+                    }
+                }
+            });
         });
         egui::Window::new("Intel").show(contexts.ctx_mut(), |ui| {
             ui.label("Enemy's Army");
