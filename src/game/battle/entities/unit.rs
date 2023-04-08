@@ -145,7 +145,7 @@ impl UnitKind {
                 spawn_distance_max: 900.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(200., 400.),
-                retreat_chance: 0.01,
+                retreat_chance: 0.005,
                 attributes: Attributes::empty(),
             },
             UnitKind::Warrior => UnitStats {
@@ -159,11 +159,11 @@ impl UnitKind {
                 spawn_distance_max: 500.,
                 hit_box_size: Vec2::new(300., 400.),
                 feeler_size: Vec2::new(400., 400.),
-                retreat_chance: 0.1,
+                retreat_chance: 0.01,
                 attributes: Attributes::empty(),
             },
             UnitKind::Archer => UnitStats {
-                cost: 3,
+                cost: 2,
                 speed: 10.,
                 speed_slow: 10.,
                 health: 5.,
@@ -201,7 +201,7 @@ impl UnitKind {
                 spawn_distance_max: 250.,
                 hit_box_size: Vec2::new(300., 500.),
                 feeler_size: Vec2::new(400., 400.),
-                retreat_chance: 0.01,
+                retreat_chance: 0.005,
                 attributes: Attributes::MAY_FRIENDLY_FIRE,
             },
         }
@@ -400,7 +400,7 @@ fn unit_spawn(
         }
         let mut stats = spawn_event.kind.stats();
         if team_modifiers[BattleModifier::ExtraSpeed] {
-            stats.speed *= 3.;
+            stats.speed *= 2.;
             stats.speed_slow *= 1.5;
         }
         if team_modifiers[BattleModifier::Slowness] {
@@ -430,7 +430,7 @@ fn unit_spawn(
                         size: stats.hit_box_size,
                     },
                     defense: if team_modifiers[BattleModifier::ExtraDefense] {
-                        3.
+                        4.
                     } else {
                         1.
                     },
@@ -789,10 +789,8 @@ fn unit_update_animations(
                     .clear_track(UNIT_TRACK_WALK as i32);
             }
         }
-        if (unit.can_attack()
-            && unit_feeler.feeling
-            && battle_state.phase() == BattlePhase::Battling)
-            || unit.blind
+        if (unit.can_attack() && unit_feeler.feeling || unit.blind)
+            && battle_state.phase() == BattlePhase::Battling
         {
             if unit_spine
                 .animation_state

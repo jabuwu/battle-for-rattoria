@@ -3,8 +3,8 @@ use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, AppState, GameState, InteractionMode, InteractionStack, SpawnSet, UnitKind,
-    UpdateSet,
+    AddFixedEvent, AppState, Articy, Dialogue, GameState, InteractionMode, InteractionStack,
+    PersistentGameState, Script, SpawnSet, UnitKind, UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -87,9 +87,41 @@ fn planning_enter(mut start_events: EventWriter<PlanningStartEvent>) {
 fn planning_start(
     mut start_events: EventReader<PlanningStartEvent>,
     mut planning_state: ResMut<PlanningState>,
+    mut dialogue: ResMut<Dialogue>,
+    mut persistent_game_state: ResMut<PersistentGameState>,
+    mut game_state: ResMut<GameState>,
+    articy: Res<Articy>,
 ) {
     for _ in start_events.iter() {
         planning_state.planning = true;
+        if let Some(tutorial_index) = match game_state.quest.war_chef {
+            0 => match game_state.quest.battle {
+                0 => Some(0),
+                1 => Some(1),
+                2 => Some(2),
+                _ => None,
+            },
+            1 => match game_state.quest.battle {
+                0 => Some(3),
+                _ => None,
+            },
+            _ => None,
+        } {
+            let tutorials = &["Tutorial1", "Tutorial2", "Tutorial3", "Tutorial4"];
+            if persistent_game_state.show_tutorial[tutorial_index] {
+                persistent_game_state.show_tutorial[tutorial_index] = false;
+                dialogue.queue(
+                    Script::new(
+                        articy
+                            .dialogues
+                            .get(tutorials[tutorial_index])
+                            .unwrap()
+                            .clone(),
+                    ),
+                    game_state.as_mut(),
+                );
+            }
+        }
     }
 }
 
@@ -116,7 +148,9 @@ fn planning_ui(
     mut contexts: EguiContexts,
     mut game_state: ResMut<GameState>,
     mut planning_state: ResMut<PlanningState>,
+    mut dialogue: ResMut<Dialogue>,
     interaction_stack: Res<InteractionStack>,
+    articy: Res<Articy>,
 ) {
     if planning_state.planning && interaction_stack.can_interact(InteractionMode::Game) {
         egui::Window::new("Planning").show(contexts.ctx_mut(), |ui| {
@@ -165,8 +199,13 @@ fn planning_ui(
 
             ui.add_space(16.);
 
-            if game_state.fed_army.total_units() > 0 {
-                if ui.button("Start Battle").clicked() {
+            if ui.button("Start Battle").clicked() {
+                if let Some(tutorial_dialogue) = tutorial_dialogue(game_state.as_ref()) {
+                    dialogue.queue(
+                        Script::new(articy.dialogues.get(tutorial_dialogue).unwrap().clone()),
+                        game_state.as_mut(),
+                    );
+                } else {
                     planning_state.start = true;
                 }
             }
@@ -200,5 +239,38 @@ fn planning_ui(
                 }
             }
         });
+    }
+}
+
+fn tutorial_dialogue(game_state: &GameState) -> Option<&'static str> {
+    if game_state.quest.war_chef == 0 {
+        match game_state.quest.battle {
+            0 => {
+                if game_state.available_army.peasants != 0 {
+                    return Some("Tutorial1");
+                }
+            }
+            1 => {
+                if game_state.available_army.peasants != 0
+                    || game_state.available_army.warriors != 0
+                {
+                    return Some("Tutorial2");
+                }
+            }
+            2 => {
+                if game_state.available_army.peasants != 0
+                    || game_state.available_army.warriors != 0
+                    || !game_state.inventory.is_empty()
+                {
+                    return Some("Tutorial3");
+                }
+            }
+            _ => {}
+        }
+    }
+    if game_state.fed_army.total_units() == 0 {
+        Some("MustFeedUnits")
+    } else {
+        None
     }
 }

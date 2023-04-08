@@ -2695,8 +2695,8 @@
                       "b": 0.8
                     },
                     "Label": "",
-                    "TargetPin": "0x010000030000094C",
-                    "Target": "0x0100000300000949"
+                    "TargetPin": "0x01000001000002B6",
+                    "Target": "0x01000001000002B3"
                   }
                 ]
               }
@@ -3335,8 +3335,8 @@
                       "b": 0.8
                     },
                     "Label": "",
-                    "TargetPin": "0x01000001000003C7",
-                    "Target": "0x01000001000003C4"
+                    "TargetPin": "0x01000001000006AE",
+                    "Target": "0x01000001000006AD"
                   }
                 ]
               }
@@ -3986,6 +3986,134 @@
                 "Text": "",
                 "Id": "0x0100000100000687",
                 "Owner": "0x010000010000067E"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "Tutorial4",
+            "Id": "0x010000010000068B",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Tutorial4",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": -83.0,
+              "y": -25.0
+            },
+            "ZIndex": 24.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 3011132424,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000693",
+                "Owner": "0x010000010000068B",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x010000010000068D",
+                    "Target": "0x010000010000068C"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000694",
+                "Owner": "0x010000010000068B"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Dialogue",
+          "Properties": {
+            "TechnicalName": "MustFeedUnits",
+            "Id": "0x010000010000069F",
+            "Parent": "0x0300000043CE43F7",
+            "Attachments": [],
+            "DisplayName": "Must Feed Units",
+            "PreviewImage": {
+              "ViewBox": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 0.0,
+                "h": 0.0
+              },
+              "Mode": "FromAsset",
+              "Asset": "0x0000000000000000"
+            },
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": 242.0,
+              "y": -525.0
+            },
+            "ZIndex": 24.0,
+            "Size": {
+              "w": 291.0,
+              "h": 200.0
+            },
+            "ShortId": 1345895985,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006A7",
+                "Owner": "0x010000010000069F",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000006A1",
+                    "Target": "0x01000001000006A0"
+                  }
+                ]
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006A8",
+                "Owner": "0x010000010000069F"
               }
             ]
           }
@@ -5246,7 +5374,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "to battle!",
+            "Text": "the ground is shaking.. it must be a bigg rat! a last ditch effort! we should fight it from a distance!",
             "ExternalId": "",
             "Position": {
               "x": 1325.0,
@@ -10243,7 +10371,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "How did you defeat me, I wonder?Such imbeciles giving you counsel.",
+            "Text": "How did you defeat me, I wonder? Such imbeciles giving you counsel.",
             "ExternalId": "",
             "Position": {
               "x": 2107.6696969696968,
@@ -10778,7 +10906,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "to battle!",
+            "Text": "to battle! the enemy's army is a balanced, medium-sized army",
             "ExternalId": "",
             "Position": {
               "x": 1001.0,
@@ -17509,7 +17637,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "where to search? the river or caves may be ripe with resources",
+            "Text": "we have some time before the next war. where to search? the river or caves may be ripe with resources",
             "ExternalId": "",
             "Position": {
               "x": 0.0,
@@ -18158,7 +18286,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "introduce next war chef and battle, indicate a small army",
+            "Text": "introduce next war chef and battle, indicate a small army with no mages or archers",
             "ExternalId": "",
             "Position": {
               "x": 3525.0,
@@ -18313,7 +18441,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "an army approaches",
+            "Text": "an army approaches, including a mage",
             "ExternalId": "",
             "Position": {
               "x": 3050.0,
@@ -19229,7 +19357,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "an army approaches",
+            "Text": "an army approaches, including a mage and fire units",
             "ExternalId": "",
             "Position": {
               "x": 3475.0,
@@ -20321,7 +20449,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "prepare for intense battles",
+            "Text": "prepare for intense battles! first is a bunch of wet moblings",
             "ExternalId": "",
             "Position": {
               "x": 3950.0,
@@ -20387,7 +20515,20 @@
               {
                 "Text": "",
                 "Id": "0x0100000100000639",
-                "Owner": "0x0100000100000635"
+                "Owner": "0x0100000100000635",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000006CE",
+                    "Target": "0x01000001000006CD"
+                  }
+                ]
               }
             ]
           }
@@ -20407,7 +20548,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "War Chef 5: Battle 3",
+            "Text": "War Chef 5: Battle 3. Player gets a Bigg-Rat somehow.",
             "ExternalId": "",
             "Position": {
               "x": 0.0,
@@ -20430,7 +20571,20 @@
               {
                 "Text": "",
                 "Id": "0x0100000100000640",
-                "Owner": "0x010000010000063C"
+                "Owner": "0x010000010000063C",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000006C8",
+                    "Target": "0x01000001000006C5"
+                  }
+                ]
               }
             ]
           }
@@ -20598,7 +20752,7 @@
             "Parent": "0x0100000100000664",
             "MenuText": "",
             "StageDirections": "",
-            "Speaker": "0x0000000000000000",
+            "Speaker": "0x01000003000008D7",
             "SplitHeight": 64.0,
             "Color": {
               "r": 0.5764706,
@@ -20641,7 +20795,7 @@
             "Parent": "0x0100000100000671",
             "MenuText": "",
             "StageDirections": "",
-            "Speaker": "0x0000000000000000",
+            "Speaker": "0x01000003000008D7",
             "SplitHeight": 64.0,
             "Color": {
               "r": 0.5764706,
@@ -20684,14 +20838,14 @@
             "Parent": "0x010000010000067E",
             "MenuText": "",
             "StageDirections": "",
-            "Speaker": "0x0000000000000000",
+            "Speaker": "0x01000003000008D7",
             "SplitHeight": 64.0,
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "Add the Firemander Salts to the Cauldron before battle!",
+            "Text": "Add the Firemander Salts to the Cauldron and feed all of your units before battle!",
             "ExternalId": "",
             "Position": {
               "x": 0.0,
@@ -20715,6 +20869,316 @@
                 "Text": "",
                 "Id": "0x0100000100000681",
                 "Owner": "0x010000010000067F"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_6F5C4DAB",
+            "Id": "0x010000010000068C",
+            "Parent": "0x010000010000068B",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x01000003000008D7",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "Conserve food by feeding the necessary number of units. You only need a few Moblings and Stabby-Rats to defeat Toothsy's parley units!",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 1868320171,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000068D",
+                "Owner": "0x010000010000068C"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000068E",
+                "Owner": "0x010000010000068C",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x0100000100000699",
+                    "Target": "0x0100000100000698"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_371D86C5",
+            "Id": "0x0100000100000698",
+            "Parent": "0x010000010000068B",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x01000003000008D7",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "From here on out, you're on your own!",
+            "ExternalId": "",
+            "Position": {
+              "x": 300.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 924681925,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x0100000100000699",
+                "Owner": "0x0100000100000698"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x010000010000069A",
+                "Owner": "0x0100000100000698"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_ADBA30DD",
+            "Id": "0x01000001000006A0",
+            "Parent": "0x010000010000069F",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x01000003000008D7",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "You must feed some units before battle!",
+            "ExternalId": "",
+            "Position": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 2914660573,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006A1",
+                "Owner": "0x01000001000006A0"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006A2",
+                "Owner": "0x01000001000006A0"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_45699D3E",
+            "Id": "0x01000001000006AD",
+            "Parent": "0x01000001000003A7",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "we defeated the guy and got some food and troops",
+            "ExternalId": "",
+            "Position": {
+              "x": -700.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 1164549438,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006AE",
+                "Owner": "0x01000001000006AD"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006AF",
+                "Owner": "0x01000001000006AD",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000006B7",
+                    "Target": "0x01000001000006B5"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_D42EC7FA",
+            "Id": "0x01000001000006C5",
+            "Parent": "0x01000001000005A8",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "incoming army! two bigg-rats!",
+            "ExternalId": "",
+            "Position": {
+              "x": 325.0,
+              "y": 0.0
+            },
+            "ZIndex": 3.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 3559835642,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006C8",
+                "Owner": "0x01000001000006C5"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006C9",
+                "Owner": "0x01000001000006C5",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000006C2",
+                    "Target": "0x01000001000006C0"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Type": "DialogueFragment",
+          "Properties": {
+            "TechnicalName": "DFr_7E8F1A09",
+            "Id": "0x01000001000006CD",
+            "Parent": "0x01000001000005A2",
+            "MenuText": "",
+            "StageDirections": "",
+            "Speaker": "0x010000030000009C",
+            "SplitHeight": 64.0,
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "Text": "incoming army! lots of stabby-rats and a brute!",
+            "ExternalId": "",
+            "Position": {
+              "x": 300.0,
+              "y": 0.0
+            },
+            "ZIndex": 0.0,
+            "Size": {
+              "w": 225.0,
+              "h": 200.0
+            },
+            "ShortId": 2123307529,
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006CE",
+                "Owner": "0x01000001000006CD"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006CF",
+                "Owner": "0x01000001000006CD",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000006BD",
+                    "Target": "0x01000001000006BB"
+                  }
+                ]
               }
             ]
           }
@@ -21993,7 +22457,7 @@
             "TechnicalName": "Cnd_A17833CC",
             "Id": "0x0100000100000602",
             "Parent": "0x010000010000059C",
-            "DisplayName": "Game.KnowsOfSquirtBlopBerries == true;",
+            "DisplayName": "Game.KnowsOfAxeShrooms == true;",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -22006,7 +22470,7 @@
               "h": 100.0
             },
             "ShortId": 2709009356,
-            "Expression": "Game.KnowsOfSquirtBlopBerries == true;",
+            "Expression": "Game.KnowsOfAxeShrooms == true;",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -22830,7 +23294,7 @@
             "TechnicalName": "Ins_4384F79D",
             "Id": "0x0100000100000251",
             "Parent": "0x010000010000022B",
-            "DisplayName": "AddUnits(\"Peasant\", 15);",
+            "DisplayName": "AddUnits(\"Peasant\", 10);",
             "Text": "",
             "ExternalId": "",
             "Position": {
@@ -22843,7 +23307,7 @@
               "h": 100.0
             },
             "ShortId": 1132787613,
-            "Expression": "AddUnits(\"Peasant\", 15);\nAddFood(20);",
+            "Expression": "AddUnits(\"Peasant\", 10);\nAddFood(20);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -24301,7 +24765,7 @@
               "h": 100.0
             },
             "ShortId": 3429172653,
-            "Expression": "AddItem(\"Firemander Salts\");\nAddItem(\"Crackling Moss\");",
+            "Expression": "AddItem(\"Firemander Salts\");\nAddItem(\"Crackling Moss\");\nAddItem(\"Frosty Web-Strands\");\nAddItem(\"Bog Hard-Weeds\");",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -24355,7 +24819,7 @@
               "h": 100.0
             },
             "ShortId": 1421277565,
-            "Expression": "AddUnits(\"Peasant\", 15);\nAddUnits(\"Warrior\", 5);\nAddUnits(\"Archer\", 10);\nAddUnits(\"Mage\", 3);\nAddFood(30);",
+            "Expression": "AddUnits(\"Peasant\", 15);\nAddUnits(\"Warrior\", 5);\nAddUnits(\"Archer\", 10);\nAddUnits(\"Mage\", 3);\nAddFood(50);",
             "Color": {
               "r": 0.5764706,
               "g": 0.75686276,
@@ -24494,6 +24958,142 @@
                     "Target": "0x01000001000005BF"
                   }
                 ]
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Instruction",
+          "Properties": {
+            "TechnicalName": "Ins_129EE76A",
+            "Id": "0x01000001000006B5",
+            "Parent": "0x01000001000003A7",
+            "DisplayName": "AddUnits(\"Peasant\", 15);",
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": -350.0,
+              "y": 50.0
+            },
+            "ZIndex": 46.0,
+            "Size": {
+              "w": 225.0,
+              "h": 100.0
+            },
+            "ShortId": 312403818,
+            "Expression": "AddUnits(\"Peasant\", 15);\nAddUnits(\"Warrior\", 6);\nAddUnits(\"Archer\", 8);\nAddFood(30);",
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006B7",
+                "Owner": "0x01000001000006B5"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006B8",
+                "Owner": "0x01000001000006B5",
+                "Connections": [
+                  {
+                    "Color": {
+                      "a": 1.0,
+                      "r": 0.5764706,
+                      "g": 0.75686276,
+                      "b": 0.8
+                    },
+                    "Label": "",
+                    "TargetPin": "0x01000001000003C7",
+                    "Target": "0x01000001000003C4"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Instruction",
+          "Properties": {
+            "TechnicalName": "Ins_D5E41098",
+            "Id": "0x01000001000006BB",
+            "Parent": "0x01000001000005A2",
+            "DisplayName": "AddFood(20);",
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": 600.0,
+              "y": 50.0
+            },
+            "ZIndex": 3.0,
+            "Size": {
+              "w": 225.0,
+              "h": 100.0
+            },
+            "ShortId": 3588493464,
+            "Expression": "AddFood(20);",
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006BD",
+                "Owner": "0x01000001000006BB"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006BE",
+                "Owner": "0x01000001000006BB"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "Instruction",
+          "Properties": {
+            "TechnicalName": "Ins_3D6CC5C1",
+            "Id": "0x01000001000006C0",
+            "Parent": "0x01000001000005A8",
+            "DisplayName": "AddFood(20);",
+            "Text": "",
+            "ExternalId": "",
+            "Position": {
+              "x": 650.0,
+              "y": 50.0
+            },
+            "ZIndex": 2.0,
+            "Size": {
+              "w": 225.0,
+              "h": 100.0
+            },
+            "ShortId": 1030538689,
+            "Expression": "AddFood(20);\nAddUnits(\"Brute\", 1);",
+            "Color": {
+              "r": 0.5764706,
+              "g": 0.75686276,
+              "b": 0.8
+            },
+            "InputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006C2",
+                "Owner": "0x01000001000006C0"
+              }
+            ],
+            "OutputPins": [
+              {
+                "Text": "",
+                "Id": "0x01000001000006C3",
+                "Owner": "0x01000001000006C0"
               }
             ]
           }
@@ -24646,16 +25246,16 @@
               "g": 0.0,
               "b": 0.0
             },
-            "Text": "we won't get any items/units/food in this dialogue nor the next, and dialogues should be kinda short. players might replay the last 3 battles a few times. they won't be easy.",
+            "Text": "we won't get many things in this dialogue nor the next, and dialogues should be kinda short. players might replay the last 3 battles a few times. they won't be easy.",
             "ExternalId": "",
             "Position": {
-              "x": 250.0,
+              "x": 875.0,
               "y": 0.0
             },
             "ZIndex": 2.0,
             "Size": {
-              "w": 225.0,
-              "h": 125.0
+              "w": 275.0,
+              "h": 200.0
             },
             "ShortId": 271580997
           }
@@ -25660,6 +26260,23 @@
             ]
           },
           {
+            "Id": "0x010000010000068B",
+            "TechnicalName": "Tutorial4",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x010000010000068C",
+                "TechnicalName": "DFr_6F5C4DAB",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x0100000100000698",
+                "TechnicalName": "DFr_371D86C5",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
             "Id": "0x0100000100000649",
             "TechnicalName": "RewindScreen",
             "Type": "Dialogue",
@@ -25677,6 +26294,18 @@
               {
                 "Id": "0x010000010000065D",
                 "TechnicalName": "DFr_8A378998",
+                "Type": "DialogueFragment"
+              }
+            ]
+          },
+          {
+            "Id": "0x010000010000069F",
+            "TechnicalName": "MustFeedUnits",
+            "Type": "Dialogue",
+            "Children": [
+              {
+                "Id": "0x01000001000006A0",
+                "TechnicalName": "DFr_ADBA30DD",
                 "Type": "DialogueFragment"
               }
             ]
@@ -27209,6 +27838,16 @@
             "Type": "Dialogue",
             "Children": [
               {
+                "Id": "0x01000001000006AD",
+                "TechnicalName": "DFr_45699D3E",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000001000006B5",
+                "TechnicalName": "Ins_129EE76A",
+                "Type": "Instruction"
+              },
+              {
                 "Id": "0x01000001000003C4",
                 "TechnicalName": "DFr_CE866021",
                 "Type": "DialogueFragment"
@@ -27639,6 +28278,16 @@
                 "Type": "DialogueFragment"
               },
               {
+                "Id": "0x01000001000006CD",
+                "TechnicalName": "DFr_7E8F1A09",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000001000006BB",
+                "TechnicalName": "Ins_D5E41098",
+                "Type": "Instruction"
+              },
+              {
                 "Id": "0x0100000100000647",
                 "TechnicalName": "",
                 "Type": "Comment"
@@ -27654,6 +28303,16 @@
                 "Id": "0x010000010000063C",
                 "TechnicalName": "DFr_FB858BC3",
                 "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000001000006C5",
+                "TechnicalName": "DFr_D42EC7FA",
+                "Type": "DialogueFragment"
+              },
+              {
+                "Id": "0x01000001000006C0",
+                "TechnicalName": "Ins_3D6CC5C1",
+                "Type": "Instruction"
               }
             ]
           }

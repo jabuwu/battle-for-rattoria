@@ -52,7 +52,7 @@ impl DamageModifier {
         };
 
         if is_weak {
-            0.75
+            0.25
         } else {
             match self {
                 Self::Fire => match defense_kind {

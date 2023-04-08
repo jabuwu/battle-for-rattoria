@@ -1,8 +1,9 @@
 use enum_map::Enum;
+use strum_macros::EnumIter;
 
 use crate::BattleModifier;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Enum)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Enum, EnumIter)]
 pub enum Item {
     CracklingMoss,
     SquirtBlopBerries,

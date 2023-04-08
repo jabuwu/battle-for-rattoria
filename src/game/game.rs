@@ -4,7 +4,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     in_game_state, AppState, Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue,
-    DialogueEvent, GameState, PersistentGameState, Script, UnitComposition, UnitKind,
+    DialogueEvent, GameState, Item, PersistentGameState, Script, UnitComposition, UnitKind,
 };
 
 pub struct GamePlugin;
@@ -115,22 +115,42 @@ fn game_debug(
                 });
             }
             if ui.button("WC2 Loadout").clicked() {
-                game_state.food = 45;
+                game_state.food = 25;
                 game_state.available_army = UnitComposition {
                     peasants: 25,
-                    warriors: 3,
+                    warriors: 5,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
                 };
             }
             if ui.button("WC3 Loadout").clicked() {
-                game_state.food = 40;
+                game_state.food = 29;
                 game_state.available_army = UnitComposition {
-                    peasants: 26,
-                    warriors: 6,
+                    peasants: 23,
+                    warriors: 4,
                     archers: 0,
                     mages: 0,
+                    brutes: 0,
+                };
+            }
+            if ui.button("WC4 Loadout").clicked() {
+                game_state.food = 54;
+                game_state.available_army = UnitComposition {
+                    peasants: 25,
+                    warriors: 8,
+                    archers: 21,
+                    mages: 0,
+                    brutes: 0,
+                };
+            }
+            if ui.button("WC5 Loadout").clicked() {
+                game_state.food = 65;
+                game_state.available_army = UnitComposition {
+                    peasants: 30,
+                    warriors: 13,
+                    archers: 31,
+                    mages: 3,
                     brutes: 0,
                 };
             }
@@ -164,6 +184,8 @@ fn game_debug(
                 "Tutorial1",
                 "Tutorial2",
                 "Tutorial3",
+                "Tutorial4",
+                "MustFeedUnits",
             ] {
                 if ui.button(dialogue_str).clicked() {
                     dialogue.queue(
@@ -174,6 +196,13 @@ fn game_debug(
             }
             if ui.button("Clear").clicked() {
                 dialogue.clear();
+            }
+        });
+        ui.collapsing("Items", |ui| {
+            for item in Item::iter() {
+                if ui.button(format!("Add {}", item.name())).clicked() {
+                    game_state.inventory.add(item);
+                }
             }
         });
     });

@@ -9,6 +9,12 @@ impl Quest {
         } else if self.war_chef == 1 && self.battle == 3 {
             self.war_chef = 2;
             self.battle = 0;
+        } else if self.war_chef == 2 && self.battle == 4 {
+            self.war_chef = 3;
+            self.battle = 0;
+        } else if self.war_chef == 3 && self.battle == 4 {
+            self.war_chef = 4;
+            self.battle = 0;
         }
     }
 
@@ -31,6 +37,19 @@ impl Quest {
                 1 => Some("WC3B2"),
                 2 => Some("WC3B3"),
                 3 => Some("WC3B4"),
+                _ => None,
+            },
+            3 => match self.battle {
+                0 => Some("WC4B1"),
+                1 => Some("WC4B2"),
+                2 => Some("WC4B3"),
+                3 => Some("WC4B4"),
+                _ => None,
+            },
+            4 => match self.battle {
+                0 => Some("WC5B1"),
+                1 => Some("WC5B2"),
+                2 => Some("WC5B3"),
                 _ => None,
             },
             _ => None,

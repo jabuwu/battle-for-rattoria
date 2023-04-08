@@ -48,12 +48,14 @@ impl Default for GameState {
 #[derive(Resource, Clone)]
 pub struct PersistentGameState {
     pub show_rewind_screen_dialogue: bool,
+    pub show_tutorial: [bool; 4],
 }
 
 impl Default for PersistentGameState {
     fn default() -> Self {
         Self {
             show_rewind_screen_dialogue: true,
+            show_tutorial: [true, true, true, true],
         }
     }
 }
