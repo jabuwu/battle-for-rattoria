@@ -1,17 +1,18 @@
 use bevy::prelude::*;
 use bevy_spine::prelude::*;
 use bitflags::bitflags;
-use enum_map::Enum;
+use enum_map::{Enum, EnumMap};
 use rand::prelude::*;
+use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, BattleModifier, BattlePhase, BattleState,
-    CollisionShape, DamageKind, DamageModifier, DamageModifiers, DamageReceiveEvent, DamageSystem,
-    DefenseKind, DefenseModifier, DefenseModifiers, Depth, DepthLayer, EventSet, Feeler,
-    FixedInput, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox, HurtBoxDespawner,
-    Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2, UpdateSet, YOrder,
-    DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    CollisionShape, DamageInflictEvent, DamageKind, DamageModifier, DamageModifiers,
+    DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
+    DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
+    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2,
+    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -30,6 +31,7 @@ pub enum UnitSystem {
     UpdateSpriteDirection,
     UpdateAnimations,
     UpdateFeeler,
+    Combust,
 }
 
 pub struct UnitPlugin;
@@ -109,7 +111,14 @@ impl Plugin for UnitPlugin {
                     .in_set(UpdateSet)
                     .before(UnitSystem::Update),
             )
-            .add_system(unit_debug_keys.in_schedule(CoreSchedule::FixedUpdate));
+            .add_system(
+                unit_combust
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::Combust)
+                    .in_set(UpdateSet)
+                    .in_set(EventSet::<DamageInflictEvent>::Sender)
+                    .before(UnitSystem::Update),
+            );
     }
 }
 
@@ -328,6 +337,9 @@ pub struct Unit {
     pub attributes: Attributes,
 }
 
+#[derive(Component)]
+pub struct UnitFire;
+
 impl Unit {
     pub fn can_attack(&self) -> bool {
         !self.retreating
@@ -356,6 +368,7 @@ bitflags! {
     pub struct Attributes: u32 {
         const MAY_RETREAT = 0b00000001;
         const MAY_FRIENDLY_FIRE = 0b00000010;
+        const ON_FIRE = 0b00000100;
     }
 }
 
@@ -484,6 +497,20 @@ fn unit_spawn(
                         Depth::Inherit(0.01),
                     ));
                 }
+                parent.spawn((
+                    SpriteBundle {
+                        sprite: Sprite {
+                            color: Color::rgba(1., 0., 0., 0.4),
+                            custom_size: Some(Vec2::new(200., 400.)),
+                            ..Default::default()
+                        },
+                        visibility: Visibility::Hidden,
+                        ..Default::default()
+                    },
+                    Transform2::default(),
+                    Depth::Inherit(0.01),
+                    UnitFire,
+                ));
             });
     }
 }
@@ -515,18 +542,20 @@ fn unit_damage_fx(
     let mut rng = thread_rng();
     for damage_receive_event in damage_receive_events.iter() {
         if let Ok(unit_transform) = unit_query.get(damage_receive_event.entity) {
-            commands.spawn((
-                SpineBundle {
-                    skeleton: asset_library.spine_fx_blood_splat.clone(),
-                    ..Default::default()
-                },
-                Transform2::from_translation(
-                    unit_transform.translation().truncate()
-                        + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(-70.0..70.0)),
-                ),
-                Depth::from(DEPTH_BLOOD_FX),
-                SpineFx,
-            ));
+            if rng.gen_bool(0.25) {
+                commands.spawn((
+                    SpineBundle {
+                        skeleton: asset_library.spine_fx_blood_splat.clone(),
+                        ..Default::default()
+                    },
+                    Transform2::from_translation(
+                        unit_transform.translation().truncate()
+                            + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(-70.0..70.0)),
+                    ),
+                    Depth::from(DEPTH_BLOOD_FX),
+                    SpineFx,
+                ));
+            }
         }
     }
 }
@@ -760,7 +789,11 @@ fn unit_update_animations(
                     .clear_track(UNIT_TRACK_WALK as i32);
             }
         }
-        if (unit.can_attack() && unit_feeler.feeling) || unit.blind {
+        if (unit.can_attack()
+            && unit_feeler.feeling
+            && battle_state.phase() == BattlePhase::Battling)
+            || unit.blind
+        {
             if unit_spine
                 .animation_state
                 .track_at_index(UNIT_TRACK_ATTACK)
@@ -806,10 +839,63 @@ fn unit_update_feeler(mut unit_query: Query<(&mut Feeler, &Unit)>) {
     }
 }
 
-fn unit_debug_keys(mut unit_query: Query<&mut Unit>, keys: Res<FixedInput<KeyCode>>) {
-    for mut unit in unit_query.iter_mut() {
-        if keys.just_pressed(KeyCode::R) {
-            unit.retreating = true;
+#[derive(Default)]
+struct UnitCombustion {
+    time_since_last_combustion: EnumMap<Team, f32>,
+    time_until_next_combustion: EnumMap<Team, f32>,
+}
+
+fn unit_combust(
+    mut local: Local<UnitCombustion>,
+    mut unit_query: Query<(Entity, &mut Unit, &Children)>,
+    mut unit_fire_query: Query<&mut Visibility, With<UnitFire>>,
+    mut damage_inflict_events: EventWriter<DamageInflictEvent>,
+    battle_state: Res<BattleState>,
+    time: Res<FixedTime>,
+) {
+    let mut rng = thread_rng();
+    for (unit_entity, unit, _) in unit_query.iter_mut() {
+        if unit.attributes.contains(Attributes::ON_FIRE) {
+            damage_inflict_events.send(DamageInflictEvent {
+                entity: unit_entity,
+                damage: time.period.as_secs_f32() * 5.,
+            });
+        }
+    }
+    for team in Team::iter() {
+        if battle_state.battling() && battle_state.phase() == BattlePhase::Battling {
+            if local.time_until_next_combustion[team] == 0. {
+                local.time_until_next_combustion[team] = rng.gen_range(0.5..1.);
+            }
+            if battle_state.get_modifiers(team)[BattleModifier::Combustion] {
+                let mut combust = false;
+                if local.time_since_last_combustion[team] > local.time_until_next_combustion[team] {
+                    combust = true;
+                    local.time_since_last_combustion[team] = 0.;
+                    local.time_until_next_combustion[team] = rng.gen_range(0.5..2.0);
+                }
+                local.time_since_last_combustion[team] += time.period.as_secs_f32();
+                if combust {
+                    let mut units = unit_query
+                        .iter_mut()
+                        .filter(|(_, unit, _)| {
+                            unit.team == team && !unit.attributes.contains(Attributes::ON_FIRE)
+                        })
+                        .collect::<Vec<_>>();
+                    units.shuffle(&mut rng);
+                    if let Some((_, mut unit, unit_children)) = units.into_iter().nth(0) {
+                        for child in unit_children.iter() {
+                            if let Ok(mut unit_fire_visibility) = unit_fire_query.get_mut(*child) {
+                                *unit_fire_visibility = Visibility::Visible;
+                            }
+                        }
+                        unit.attributes |= Attributes::ON_FIRE;
+                    }
+                }
+            }
+        } else {
+            local.time_until_next_combustion[team] = 0.;
+            local.time_since_last_combustion[team] = 0.;
         }
     }
 }

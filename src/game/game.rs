@@ -4,7 +4,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     in_game_state, AppState, Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue,
-    DialogueEvent, GameState, Script, UnitKind,
+    DialogueEvent, GameState, Script, UnitComposition, UnitKind,
 };
 
 pub struct GamePlugin;
@@ -77,15 +77,28 @@ fn game_debug(
         ui.checkbox(&mut debug_draw_settings.draw_hurt_boxes, "Draw Hurtboxes");
         ui.checkbox(&mut debug_draw_settings.draw_feelers, "Draw Feelers");
         ui.collapsing("Variables", |ui| {
-            for (name, value) in game_state.global_variables.iter() {
-                ui.label(format!("{}: {}", name, *value));
+            for (name, value) in game_state.global_variables.iter_mut() {
+                ui.checkbox(value, name);
             }
         });
         ui.collapsing("Quest", |ui| {
             ui.label(format!("War Chef: {}", game_state.quest.war_chef));
             ui.label(format!("Battle: {}", game_state.quest.battle));
+            if ui.button("next").clicked() {
+                game_state.quest.next();
+            }
+            if ui.button("checkpoint").clicked() {
+                game_state.checkpoint();
+            }
         });
         ui.collapsing("Units", |ui| {
+            if ui.button("-").clicked() && game_state.food > 0 {
+                game_state.food -= 1;
+            }
+            ui.add(egui::DragValue::new(&mut game_state.food).clamp_range(0..=100));
+            if ui.button("+").clicked() && game_state.food < 100 {
+                game_state.food += 1;
+            }
             for unit_kind in UnitKind::iter() {
                 ui.horizontal(|ui| {
                     let mut count = game_state.available_army.get_count(unit_kind);
@@ -99,6 +112,26 @@ fn game_debug(
                     game_state.available_army.set_count(unit_kind, count);
                     ui.label(unit_kind.name_plural());
                 });
+            }
+            if ui.button("WC2 Loadout").clicked() {
+                game_state.food = 45;
+                game_state.available_army = UnitComposition {
+                    peasants: 35,
+                    warriors: 4,
+                    archers: 0,
+                    mages: 0,
+                    brutes: 0,
+                };
+            }
+            if ui.button("WC3 Loadout").clicked() {
+                game_state.food = 40;
+                game_state.available_army = UnitComposition {
+                    peasants: 30,
+                    warriors: 4,
+                    archers: 0,
+                    mages: 0,
+                    brutes: 0,
+                };
             }
         });
         ui.collapsing("Dialogues", |ui| {

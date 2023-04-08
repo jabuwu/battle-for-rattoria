@@ -48,10 +48,14 @@ impl Plugin for BattleSplashPlugin {
 }
 
 #[derive(Component)]
-pub struct BattleSplash;
+pub struct BattleSplash {
+    play_battle_start: bool,
+}
 
 #[derive(Default)]
-pub struct BattleSplashSpawnEvent;
+pub struct BattleSplashSpawnEvent {
+    pub play_battle_start: bool,
+}
 
 pub struct BattleSplashPlayEvent {
     pub kind: BattleSplashKind,
@@ -72,13 +76,15 @@ fn battle_splash_spawn(
     mut spawn_events: EventReader<BattleSplashSpawnEvent>,
     asset_library: Res<AssetLibrary>,
 ) {
-    for _ in spawn_events.iter() {
+    for spawn_event in spawn_events.iter() {
         commands.spawn((
             SpineBundle {
                 skeleton: asset_library.spine_battle_splash.clone(),
                 ..Default::default()
             },
-            BattleSplash,
+            BattleSplash {
+                play_battle_start: spawn_event.play_battle_start,
+            },
             Depth::from(DEPTH_BATTLE_SPLASH),
         ));
     }
@@ -86,13 +92,19 @@ fn battle_splash_spawn(
 
 fn battle_splash_on_ready(
     mut spine_ready_events: EventReader<SpineReadyEvent>,
-    mut spine_query: Query<&mut Spine, With<BattleSplash>>,
+    mut spine_query: Query<(&mut Spine, &BattleSplash)>,
 ) {
     for spine_ready_event in spine_ready_events.iter() {
-        if let Ok(mut spine) = spine_query.get_mut(spine_ready_event.entity) {
-            let _ = spine
-                .animation_state
-                .set_animation_by_name(0, "battle_start", false);
+        if let Ok((mut spine, battle_splash)) = spine_query.get_mut(spine_ready_event.entity) {
+            if battle_splash.play_battle_start {
+                let _ = spine
+                    .animation_state
+                    .set_animation_by_name(0, "battle_start", false);
+            } else {
+                let _ = spine
+                    .animation_state
+                    .set_animation_by_name(0, "init", false);
+            }
         }
     }
 }

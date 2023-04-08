@@ -4,8 +4,8 @@ use bevy::prelude::*;
 
 use crate::{
     in_game_state, not_in_game_state_or_sandbox, AppState, BattleConfig, BattleEndedEvent,
-    BattleModifiers, BattleStartEvent, BattleState, GameState, Intel, PlanningEndedEvent,
-    PlanningStartEvent, PlanningState,
+    BattleModifier, BattleModifiers, BattleStartEvent, BattleState, GameState, Intel, Item,
+    PlanningEndedEvent, PlanningStartEvent, PlanningState,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -62,11 +62,21 @@ fn game_director_battle_enter(
 ) {
     let friendly_units = game_state.get_and_reset_fed_army();
     let mut friendly_modifiers = BattleModifiers::default();
+    let mut sick = false;
     for item in take(&mut game_state.consumed_items) {
         for modifier in item.modifiers() {
             friendly_modifiers[modifier] = true;
+            if modifier == BattleModifier::Sickness {
+                sick = true;
+            }
+        }
+        if item == Item::BogHardWeeds {
+            game_state
+                .global_variables
+                .insert("UsedBogHardWeed".to_owned(), true);
         }
     }
+    game_state.apply_sickness(sick);
     battle_start_events.send(BattleStartEvent {
         config: BattleConfig {
             friendly_units,
@@ -74,6 +84,7 @@ fn game_director_battle_enter(
             enemy_units: game_state.quest.enemy_unit_composition(),
             enemy_modifiers: game_state.quest.enemy_modifiers(),
         },
+        sandbox: false,
     });
     game_state.intel = Intel::default();
 }

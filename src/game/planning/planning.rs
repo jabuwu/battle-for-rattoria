@@ -126,9 +126,11 @@ fn planning_ui(
                 let unit_cost = unit_kind.stats().cost;
                 if ui
                     .button(format!(
-                        "Feed {} ({} available, cost: {})",
+                        "Feed {} ({} available, {} ready, {} sick, cost: {})",
                         unit_kind.name(),
                         game_state.available_army.get_count(unit_kind),
+                        game_state.fed_army.get_count(unit_kind),
+                        game_state.sick_army.get_count(unit_kind),
                         unit_cost,
                     ))
                     .clicked()

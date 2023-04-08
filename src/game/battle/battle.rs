@@ -243,9 +243,9 @@ impl BattleModifier {
             Self::Wet => "Wet (TODO)",
             Self::FriendlyFire => "Friendly Fire",
             Self::Cowardly => "Cowardly",
-            Self::Sickness => "Sickness (TODO)",
+            Self::Sickness => "Sickness",
             Self::Explosive => "Explosive (TODO)",
-            Self::Combustion => "Combustion (TODO)",
+            Self::Combustion => "Combustion",
             Self::Blindness => "Blindness",
             Self::Slowness => "Slowness",
         }
@@ -254,6 +254,7 @@ impl BattleModifier {
 
 pub struct BattleStartEvent {
     pub config: BattleConfig,
+    pub sandbox: bool,
 }
 
 #[derive(Default)]
@@ -275,7 +276,12 @@ fn battle_start(
         battle_state.friendly_modifiers = start_event.config.friendly_modifiers;
         battle_state.enemy_modifiers = start_event.config.enemy_modifiers;
         battlefield_spawn_events.send_default();
-        battle_splash_spawn_events.send_default();
+        battle_splash_spawn_events.send(BattleSplashSpawnEvent {
+            play_battle_start: !start_event.sandbox,
+        });
+        if start_event.sandbox {
+            battle_state.phase = BattlePhase::Battling;
+        }
 
         const X_DISTANCE: f32 = 400.;
         const Y_MIN: f32 = -300.;

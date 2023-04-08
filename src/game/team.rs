@@ -1,8 +1,9 @@
+use enum_map::Enum;
 use strum_macros::EnumIter;
 
 use crate::DamageFlags;
 
-#[derive(Copy, Clone, PartialEq, Eq, EnumIter, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, EnumIter, Hash, Enum)]
 pub enum Team {
     Friendly,
     Enemy,

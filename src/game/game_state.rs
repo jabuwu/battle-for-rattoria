@@ -1,14 +1,17 @@
 use std::{collections::HashMap, mem::replace};
 
 use bevy::prelude::*;
+use rand::prelude::*;
+use strum::IntoEnumIterator;
 
-use crate::{Intel, Inventory, Item, Quest, UnitComposition};
+use crate::{Intel, Inventory, Item, Quest, UnitComposition, UnitKind};
 
 #[derive(Resource, Clone)]
 pub struct GameState {
     pub food: usize,
     pub available_army: UnitComposition,
     pub fed_army: UnitComposition,
+    pub sick_army: UnitComposition,
     pub quest: Quest,
     pub intel: Intel,
     pub global_variables: HashMap<String, bool>,
@@ -29,6 +32,7 @@ impl Default for GameState {
                 brutes: 0,
             },
             fed_army: UnitComposition::empty(),
+            sick_army: UnitComposition::empty(),
             quest: Quest::default(),
             intel: Intel::default(),
             global_variables: HashMap::new(),
@@ -44,6 +48,27 @@ impl GameState {
         let fed_army = replace(&mut self.fed_army, UnitComposition::empty());
         self.available_army.add_units(&fed_army);
         fed_army
+    }
+
+    pub fn apply_sickness(&mut self, sick: bool) {
+        let mut rng = thread_rng();
+
+        // undo previous sickness
+        for unit_kind in UnitKind::iter() {
+            let count = self.available_army.get_count(unit_kind);
+            let sick = self.sick_army.get_count(unit_kind);
+            self.available_army.set_count(unit_kind, count + sick);
+            self.sick_army.set_count(unit_kind, 0);
+        }
+        // apply new sickness
+        if sick {
+            for unit_kind in UnitKind::iter() {
+                let count = self.available_army.get_count(unit_kind);
+                let sick = rng.gen_range(0..=(count / 2)).max(2).min(count.max(1) - 1);
+                self.available_army.set_count(unit_kind, count - sick);
+                self.sick_army.set_count(unit_kind, sick);
+            }
+        }
     }
 
     pub fn checkpoint(&mut self) {
