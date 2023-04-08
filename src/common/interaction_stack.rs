@@ -11,9 +11,10 @@ impl Plugin for InteractionStackPlugin {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Enum, EnumIter)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq, Enum, EnumIter)]
 pub enum InteractionMode {
     Dialogue,
+    #[default]
     Game,
 }
 

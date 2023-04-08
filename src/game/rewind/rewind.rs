@@ -4,8 +4,8 @@ use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::{
-    AppState, Articy, AssetLibrary, Clickable, Depth, Dialogue, GameState, PersistentGameState,
-    Script, Transform2, UnitKind,
+    AppState, Articy, AssetLibrary, Clickable, ClickableSystem, Depth, Dialogue, GameState,
+    PersistentGameState, Script, Transform2, UnitKind,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -28,8 +28,16 @@ impl Plugin for RewindPlugin {
                         .in_schedule(OnEnter(AppState::GameRewind))
                         .in_set(RewindSystem::Enter),
                 )
-                .add_system(rewind_stage_click.in_set(RewindSystem::StageClick))
-                .add_system(rewind_update_button.in_set(RewindSystem::UpdateButton))
+                .add_system(
+                    rewind_stage_click
+                        .in_set(RewindSystem::StageClick)
+                        .after(ClickableSystem),
+                )
+                .add_system(
+                    rewind_update_button
+                        .in_set(RewindSystem::UpdateButton)
+                        .after(ClickableSystem),
+                )
                 .add_system(rewind_update_button_text.in_set(RewindSystem::UpdateButtonText))
                 .add_system(rewind_update_battle_info.in_set(RewindSystem::UpdateBattleInfo));
         }
@@ -90,7 +98,7 @@ fn rewind_enter(
             text: Text::from_section(
                 "Select Battle",
                 TextStyle {
-                    font: asset_library.font_placeholder.clone(),
+                    font: asset_library.font_heading.clone(),
                     font_size: 128.,
                     color: Color::WHITE,
                 },
@@ -128,7 +136,7 @@ fn rewind_enter(
                     text: Text::from_section(
                         "",
                         TextStyle {
-                            font: asset_library.font_placeholder.clone(),
+                            font: asset_library.font_heading.clone(),
                             font_size: 92.,
                             color: Color::WHITE,
                         },
@@ -147,7 +155,7 @@ fn rewind_enter(
                 TextSection {
                     value: "Checkpoint Info\n\n".to_owned(),
                     style: TextStyle {
-                        font: asset_library.font_placeholder.clone(),
+                        font: asset_library.font_normal.clone(),
                         font_size: 82.,
                         color: Color::WHITE,
                     },
@@ -155,7 +163,7 @@ fn rewind_enter(
                 TextSection {
                     value: "".to_owned(),
                     style: TextStyle {
-                        font: asset_library.font_placeholder.clone(),
+                        font: asset_library.font_normal.clone(),
                         font_size: 42.,
                         color: Color::WHITE,
                     },

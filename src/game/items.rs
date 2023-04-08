@@ -3,7 +3,7 @@ use strum_macros::EnumIter;
 
 use crate::BattleModifier;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Enum, EnumIter)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Enum, EnumIter)]
 pub enum Item {
     CracklingMoss,
     SquirtBlopBerries,
@@ -38,6 +38,30 @@ impl Item {
             Self::FrostyWebStrands => "Frosty Web-Strands",
         }
     }
+
+    pub fn skin_name(&self) -> &'static str {
+        match self {
+            Self::CracklingMoss => "CracklingMoss",
+            Self::SquirtBlopBerries => "SquirtBlopBerries",
+            Self::FiremanderSalts => "FiremanderSalts",
+            Self::AxeShrooms => "AxeShrooms",
+            Self::BogHardWeeds => "BogHardWeeds",
+            Self::CeleryQuartz => "CeleryQuartz",
+            Self::FrostyWebStrands => "FrostyWebStrands",
+        }
+    }
+
+    pub fn index(&self) -> usize {
+        match self {
+            Self::CracklingMoss => 0,
+            Self::SquirtBlopBerries => 1,
+            Self::FiremanderSalts => 2,
+            Self::AxeShrooms => 3,
+            Self::BogHardWeeds => 4,
+            Self::CeleryQuartz => 5,
+            Self::FrostyWebStrands => 6,
+        }
+    }
 }
 
 #[derive(Default, Clone)]
@@ -58,7 +82,25 @@ impl Inventory {
         self.items.remove(index);
     }
 
+    pub fn remove_last(&mut self, item: Item) {
+        let mut i = self.items.len() - 1;
+        loop {
+            if self.items[i] == item {
+                self.remove(i);
+                break;
+            } else if i == 0 {
+                break;
+            } else {
+                i -= 1;
+            }
+        }
+    }
+
     pub fn items(&self) -> &Vec<Item> {
         &self.items
+    }
+
+    pub fn count(&self, item: Item) -> usize {
+        self.items.iter().filter(|i| **i == item).count()
     }
 }

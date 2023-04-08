@@ -28,7 +28,7 @@ fn main_menu_enter(
         text: Text::from_section(
             "War Chef: Battle for Rattoria\n\nPress space to play\n\nPress S to enter Sandbox",
             TextStyle {
-                font: asset_library.font_placeholder.clone(),
+                font: asset_library.font_normal.clone(),
                 font_size: 72.,
                 color: Color::WHITE,
                 ..Default::default()

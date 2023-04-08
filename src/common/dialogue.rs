@@ -18,15 +18,15 @@ pub enum DialogueSystem {
     UpdateInteraction,
 }
 
-const FONT_SIZE: f32 = 42.;
-const FONT_SIZE_NAME: f32 = 42.;
+const FONT_SIZE: f32 = 48.;
+const FONT_SIZE_NAME: f32 = 72.;
 const FONT_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 const FONT_COLOR_CHOICE: Color = Color::rgba(0.2, 0.2, 0.2, 0.97);
 const CHARACTERS_PER_LINE: usize = 40;
 const CHARACTERS_PER_LINE_UNITS: usize = 50;
-const CHOICES_DISTANCE: f32 = 44.;
-const CHOICES_PADDING: Vec2 = Vec2::new(20., 4.);
-const CHOICES_GAP: f32 = 4.;
+const CHOICES_DISTANCE: f32 = 48.;
+const CHOICES_PADDING: Vec2 = Vec2::new(20., 2.);
+const CHOICES_GAP: f32 = 2.;
 
 pub struct DialoguePlugin;
 
@@ -349,7 +349,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_normal.clone(),
                                     font_size: FONT_SIZE,
                                     color: FONT_COLOR,
                                 },
@@ -371,7 +371,7 @@ fn dialogue_spine_ready(
                                     text: Text::from_section(
                                         "",
                                         TextStyle {
-                                            font: asset_library.font_placeholder.clone(),
+                                            font: asset_library.font_normal.clone(),
                                             font_size: FONT_SIZE,
                                             color: FONT_COLOR_CHOICE,
                                         },
@@ -402,6 +402,7 @@ fn dialogue_spine_ready(
                                             size: Vec2::splat(1.),
                                             offset: Vec2::ZERO,
                                         },
+                                        interaction_mode: InteractionMode::Dialogue,
                                         ..Default::default()
                                     },
                                 ));
@@ -420,7 +421,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_normal.clone(),
                                     font_size: FONT_SIZE,
                                     color: FONT_COLOR,
                                 },
@@ -440,7 +441,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_normal.clone(),
                                     font_size: FONT_SIZE,
                                     color: FONT_COLOR,
                                 },
@@ -468,7 +469,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "War Chef",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_heading.clone(),
                                     font_size: FONT_SIZE_NAME,
                                     color: FONT_COLOR,
                                 },

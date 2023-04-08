@@ -4,10 +4,15 @@ use bevy_spine::SkeletonData;
 
 #[derive(Resource, Default)]
 pub struct AssetLibrary {
-    pub font_placeholder: Handle<Font>,
+    //pub font_placeholder: Handle<Font>,
+    pub font_heading: Handle<Font>,
+    pub font_normal: Handle<Font>,
+    pub font_bold: Handle<Font>,
     pub sound_placeholder: Handle<AudioSource>,
     pub image_background_bg: Handle<Image>,
+    pub image_planning_bg: Handle<Image>,
     pub image_vignette: Handle<Image>,
+    pub image_atlas_planning_buttons: Handle<TextureAtlas>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
     pub spine_rat_archer: Handle<SkeletonData>,
@@ -17,6 +22,7 @@ pub struct AssetLibrary {
     pub spine_fx_blood_splat: Handle<SkeletonData>,
     pub spine_dialogue: Handle<SkeletonData>,
     pub spine_battle_splash: Handle<SkeletonData>,
+    pub spine_planning: Handle<SkeletonData>,
 }
 
 pub struct AssetLibraryPlugin;
@@ -34,12 +40,27 @@ impl Plugin for AssetLibraryPlugin {
 fn asset_library_load(
     mut asset_library: ResMut<AssetLibrary>,
     mut skeletons: ResMut<Assets<SkeletonData>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
 ) {
-    asset_library.font_placeholder = asset_server.load("fonts/FiraSans-Bold.ttf");
+    //asset_library.font_placeholder = asset_server.load("fonts/FiraSans-Bold.ttf");
+    asset_library.font_heading = asset_server.load("fonts/Enchanted Land.otf");
+    asset_library.font_normal = asset_server.load("fonts/EBGaramond-SemiBold.ttf");
+    asset_library.font_bold = asset_server.load("fonts/EBGaramond-ExtraBold.ttf");
+
     asset_library.sound_placeholder = asset_server.load("audio/flying.ogg");
     asset_library.image_background_bg = asset_server.load("images/battlefield_bg.png");
+    asset_library.image_planning_bg = asset_server.load("images/Background_Camp.png");
     asset_library.image_vignette = asset_server.load("images/vignette.png");
+
+    asset_library.image_atlas_planning_buttons = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/planning_buttons.png"),
+        Vec2::new(230., 230.),
+        7,
+        6,
+        None,
+        None,
+    ));
 
     asset_library.spine_rat = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/rat_test/skeleton.skel"),
@@ -84,5 +105,10 @@ fn asset_library_load(
     asset_library.spine_battle_splash = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/battle_splash/skeleton.skel"),
         asset_server.load("spines/battle_splash/battle_splash.atlas"),
+    ));
+
+    asset_library.spine_planning = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/planning/skeleton.skel"),
+        asset_server.load("spines/planning/planning.atlas"),
     ));
 }

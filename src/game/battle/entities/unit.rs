@@ -227,6 +227,16 @@ impl UnitKind {
         }
     }
 
+    pub fn description(&self) -> &'static str {
+        match self {
+            UnitKind::Peasant => "Poor fighters but useful as meat shields in a throng.",
+            UnitKind::Warrior => "Meat and potatoes of every ratkin army.",
+            UnitKind::Archer => "Rats ready to rain death from afar.",
+            UnitKind::Mage => "Wielders of arcane powers, ready to melt away faces.",
+            UnitKind::Brute => "Natural born fighters, gluttonous eaters.",
+        }
+    }
+
     pub fn skeleton(&self, asset_library: &AssetLibrary) -> Handle<SkeletonData> {
         match self {
             UnitKind::Peasant => asset_library.spine_rat.clone(),
@@ -854,10 +864,12 @@ fn unit_combust(
     let mut rng = thread_rng();
     for (unit_entity, unit, _) in unit_query.iter_mut() {
         if unit.attributes.contains(Attributes::ON_FIRE) {
-            damage_inflict_events.send(DamageInflictEvent {
-                entity: unit_entity,
-                damage: time.period.as_secs_f32() * 5.,
-            });
+            if battle_state.battling() && battle_state.phase() == BattlePhase::Battling {
+                damage_inflict_events.send(DamageInflictEvent {
+                    entity: unit_entity,
+                    damage: time.period.as_secs_f32() * 5.,
+                });
+            }
         }
     }
     for team in Team::iter() {
