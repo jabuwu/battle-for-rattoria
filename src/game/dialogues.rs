@@ -1,4 +1,4 @@
-use crate::{Articy, Quest, Script};
+use crate::{Articy, Item, Quest, Script};
 
 impl Quest {
     pub fn next(&mut self) {
@@ -8,6 +8,12 @@ impl Quest {
             self.battle = 0;
         } else if self.war_chef == 1 && self.battle == 3 {
             self.war_chef = 2;
+            self.battle = 0;
+        } else if self.war_chef == 2 && self.battle == 4 {
+            self.war_chef = 3;
+            self.battle = 0;
+        } else if self.war_chef == 3 && self.battle == 4 {
+            self.war_chef = 4;
             self.battle = 0;
         }
     }
@@ -33,8 +39,45 @@ impl Quest {
                 3 => Some("WC3B4"),
                 _ => None,
             },
+            3 => match self.battle {
+                0 => Some("WC4B1"),
+                1 => Some("WC4B2"),
+                2 => Some("WC4B3"),
+                3 => Some("WC4B4"),
+                _ => None,
+            },
+            4 => match self.battle {
+                0 => Some("WC5B1"),
+                1 => Some("WC5B2"),
+                2 => Some("WC5B3"),
+                _ => None,
+            },
             _ => None,
         }
         .map(|str| Script::new(articy.dialogues[str].clone()))
+    }
+
+    pub fn item_script(&mut self, used_item: Item, articy: &Articy) -> Option<Script> {
+        if !self.seen_item_dialogue[used_item] {
+            self.seen_item_dialogue[used_item] = true;
+            match used_item {
+                Item::BogHardWeeds => {
+                    if self.war_chef == 1 && self.battle == 2 {
+                        None
+                    } else {
+                        Some("BogHardWeeds")
+                    }
+                }
+                Item::CeleryQuartz => Some("CeleryQuartz"),
+                Item::CracklingMoss => Some("CracklingMoss"),
+                Item::AxeShrooms => Some("AxeShrooms"),
+                Item::SquirtBlopBerries => Some("SquirtBlopBerries"),
+                Item::FrostyWebStrands => Some("FrostyWebStrands"),
+                _ => None,
+            }
+            .map(|str| Script::new(articy.dialogues[str].clone()))
+        } else {
+            None
+        }
     }
 }

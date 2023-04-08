@@ -3,7 +3,7 @@ use enum_map::{enum_map, EnumMap};
 
 use crate::UnitKind;
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct Intel {
     pub can_see: EnumMap<UnitKind, bool>,
 }

@@ -73,8 +73,14 @@ fn events(mut dialogue_events: EventReader<DialogueEvent>) {
             ArticyDialogueInstruction::AddUnits(unit_kind, amount) => {
                 println!("Add {} {} unit(s)", amount, unit_kind.name());
             }
+            ArticyDialogueInstruction::SubtractUnits(unit_kind, amount) => {
+                println!("Subtract {} {} unit(s)", amount, unit_kind.name());
+            }
             ArticyDialogueInstruction::AddFood(amount) => {
                 println!("Add {} food", amount);
+            }
+            ArticyDialogueInstruction::SubtractFood(amount) => {
+                println!("Subtract {} food", amount);
             }
             ArticyDialogueInstruction::AddItem(item) => {
                 println!("Add item: {}", item.name());

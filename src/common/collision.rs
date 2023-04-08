@@ -4,6 +4,9 @@ use bevy::prelude::*;
 pub enum CollisionShape {
     #[default]
     None,
+    Point {
+        offset: Vec2,
+    },
     Rect {
         offset: Vec2,
         size: Vec2,
@@ -29,8 +32,25 @@ impl TranslatedCollisionShape {
     pub fn overlaps(&self, other: TranslatedCollisionShape) -> bool {
         match self.shape {
             CollisionShape::None => false,
+            CollisionShape::Point { .. } => match other.shape {
+                CollisionShape::None => false,
+                CollisionShape::Point { .. } => false,
+                CollisionShape::Rect { .. } => other.overlaps(*self),
+            },
             CollisionShape::Rect { offset, size } => match other.shape {
                 CollisionShape::None => false,
+                CollisionShape::Point {
+                    offset: other_offset,
+                } => {
+                    (self.translation.x + offset.x) - size.x * 0.5
+                        <= other.translation.x + other_offset.x
+                        && (self.translation.x + offset.x) + size.x * 0.5
+                            >= other.translation.x + other_offset.x
+                        && (self.translation.y + offset.y) - size.y * 0.5
+                            <= other.translation.y + other_offset.y
+                        && (self.translation.y + offset.y) + size.y * 0.5
+                            >= other.translation.y + other_offset.y
+                }
                 CollisionShape::Rect {
                     offset: other_offset,
                     size: other_size,

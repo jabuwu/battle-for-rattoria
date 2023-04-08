@@ -22,7 +22,7 @@ impl Plugin for BattlefieldPlugin {
 }
 
 #[derive(Component)]
-pub struct Battiefield;
+pub struct Battlefield;
 
 #[derive(Default)]
 pub struct BattlefieldSpawnEvent;

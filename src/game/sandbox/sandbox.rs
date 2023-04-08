@@ -68,6 +68,7 @@ fn sandbox_fixed_update(
     if example_state.start_battle {
         battle_start_events.send(BattleStartEvent {
             config: example_state.battle_config.clone(),
+            sandbox: true,
         });
         example_state.start_battle = false;
     }

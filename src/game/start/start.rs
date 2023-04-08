@@ -29,5 +29,6 @@ fn start_enter(
     for (name, value) in articy.global_variables.iter() {
         game_state.global_variables.insert(name.clone(), *value);
     }
+    game_state.checkpoint();
     next_state.set(AppState::GameIntermission);
 }

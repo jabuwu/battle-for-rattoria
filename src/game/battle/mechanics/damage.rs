@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 use bitflags::bitflags;
+use enum_map::{Enum, EnumMap};
 use rand::prelude::*;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, CollisionShape, DebugDraw, DebugDrawSettings, DebugRectangle, EventSet,
@@ -28,6 +31,41 @@ pub enum DamageKind {
     Arrow,
     Magic,
 }
+
+#[derive(Clone, Copy, PartialEq, Eq, Enum, EnumIter)]
+pub enum DamageModifier {
+    Fire,
+    Ice,
+    Wet,
+}
+
+impl DamageModifier {
+    pub fn damage_multiplier(
+        &self,
+        defense_kind: DefenseKind,
+        defense_modifiers: DefenseModifiers,
+    ) -> f32 {
+        let is_weak = match self {
+            Self::Fire => defense_modifiers[DefenseModifier::Wet],
+            Self::Ice => defense_modifiers[DefenseModifier::Fire],
+            Self::Wet => defense_modifiers[DefenseModifier::Ice],
+        };
+
+        if is_weak {
+            0.25
+        } else {
+            match self {
+                Self::Fire => match defense_kind {
+                    DefenseKind::Flesh => 3.,
+                    DefenseKind::Armor => 1.25,
+                },
+                _ => 1.,
+            }
+        }
+    }
+}
+
+pub type DamageModifiers = EnumMap<DamageModifier, bool>;
 
 impl DamageKind {
     pub fn damage_multiplier(&self, defense_kind: DefenseKind) -> f32 {
@@ -58,6 +96,15 @@ pub enum DefenseKind {
     Flesh,
     Armor,
 }
+
+#[derive(Clone, Copy, PartialEq, Eq, Enum, EnumIter)]
+pub enum DefenseModifier {
+    Fire,
+    Ice,
+    Wet,
+}
+
+pub type DefenseModifiers = EnumMap<DefenseModifier, bool>;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum DamageSystem {
@@ -98,6 +145,7 @@ pub struct HitBox {
     pub shape: CollisionShape,
     pub defense: f32,
     pub defense_kind: DefenseKind,
+    pub defense_modifiers: DefenseModifiers,
 }
 
 #[derive(Clone, Copy, Component)]
@@ -106,6 +154,7 @@ pub struct HurtBox {
     pub shape: CollisionShape,
     pub damage: f32,
     pub damage_kind: DamageKind,
+    pub damage_modifiers: DamageModifiers,
     pub max_hits: usize,
     pub ignore_entity: Entity,
 }
@@ -162,6 +211,12 @@ pub fn damage_update(
             {
                 let mut damage =
                     hurt_box.damage * hurt_box.damage_kind.damage_multiplier(hit_box.defense_kind);
+                for damage_modifier in DamageModifier::iter() {
+                    if hurt_box.damage_modifiers[damage_modifier] {
+                        damage *= damage_modifier
+                            .damage_multiplier(hit_box.defense_kind, hit_box.defense_modifiers);
+                    }
+                }
                 damage /= hit_box.defense;
                 if damage > 0. {
                     damage_candidates.push(DamageCandidate {
@@ -214,6 +269,7 @@ pub fn damage_debug_draw(
         for (hit_box, hit_box_transform) in hit_box_query.iter() {
             let (offset, size) = match hit_box.shape {
                 CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Point { .. } => (Vec2::ZERO, Vec2::ZERO),
                 CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {
@@ -229,6 +285,7 @@ pub fn damage_debug_draw(
         for (hurt_box, hurt_box_transform) in hurt_box_query.iter() {
             let (offset, size) = match hurt_box.shape {
                 CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Point { .. } => (Vec2::ZERO, Vec2::ZERO),
                 CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {

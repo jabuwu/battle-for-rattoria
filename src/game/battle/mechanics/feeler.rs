@@ -72,6 +72,7 @@ pub fn feeler_debug_draw(
         for (feeler, feeler_transform) in feeler_query.iter() {
             let (offset, size) = match feeler.shape {
                 CollisionShape::None => (Vec2::ZERO, Vec2::ZERO),
+                CollisionShape::Point { .. } => (Vec2::ZERO, Vec2::ZERO),
                 CollisionShape::Rect { offset, size } => (offset, size),
             };
             debug_draw.draw(DebugRectangle {
