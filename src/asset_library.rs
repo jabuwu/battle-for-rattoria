@@ -26,6 +26,7 @@ pub struct AssetLibrary {
     pub spine_dialogue: Handle<SkeletonData>,
     pub spine_battle_splash: Handle<SkeletonData>,
     pub spine_planning: Handle<SkeletonData>,
+    pub spine_intro: Handle<SkeletonData>,
 
     pub sounds: Sounds,
 }
@@ -123,6 +124,11 @@ fn asset_library_load(
     asset_library.spine_planning = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/planning/skeleton.skel"),
         asset_server.load("spines/planning/planning.atlas"),
+    ));
+
+    asset_library.spine_intro = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/intro/skeleton.skel"),
+        asset_server.load("spines/intro/intro.atlas"),
     ));
 
     asset_library.sounds = Sounds::setup(asset_server.as_ref());

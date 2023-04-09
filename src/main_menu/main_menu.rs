@@ -143,7 +143,7 @@ fn main_menu_update(
         }
         if button_clickable.confirmed {
             sfx.play(SfxKind::UiButtonConfirm);
-            next_state.set(AppState::GameStart);
+            next_state.set(AppState::GameIntro);
         }
     }
     if keys.just_pressed(KeyCode::S) {

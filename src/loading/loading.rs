@@ -78,7 +78,7 @@ fn loading_progress(
     loading: Res<Loading>,
 ) {
     for mut loading_bar_transform in loading_bar_query.iter_mut() {
-        loading_bar_transform.scale.x = loading.progress;
+        loading_bar_transform.scale.x = loading.progress.clamp(0., 1.);
     }
     if loading.progress >= 1. {
         next_state.set(AppState::MainMenu);
@@ -90,6 +90,7 @@ macro_rules! loading_check_progress {
         fn loading_check_progress(
             mut loading: ResMut<Loading>,
             asset_server: Res<AssetServer>,
+            keys: Res<Input<KeyCode>>,
             $(
                 $ident: Res<Assets<$ty>>,
             )*
@@ -105,6 +106,9 @@ macro_rules! loading_check_progress {
                     }
                 }
             )*
+            if keys.just_pressed(KeyCode::Key7) {
+                dbg!(asset_count);
+            }
             loading.progress = asset_count as f32 / $count as f32;
         }
     };
@@ -112,7 +116,7 @@ macro_rules! loading_check_progress {
 
 // game jam'd
 loading_check_progress!(
-    70,
+    68,
     images: Image,
     audio_sources: AudioSource,
     fonts: Font,

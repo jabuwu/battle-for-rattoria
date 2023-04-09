@@ -2,9 +2,9 @@ use bevy::{app::PluginGroupBuilder, prelude::*};
 
 use crate::{
     AreaOfEffectTargetingPlugin, BattlePlugin, BattleSplashPlugin, BattlefieldPlugin, DamagePlugin,
-    FeelerPlugin, GameDirectorPlugin, GamePlugin, HealthPlugin, IntermissionPlugin, MusicPlugin,
-    PlanningPlugin, ProjectilePlugin, RewindPlugin, SandboxPlugin, SfxPlugin, SpineAttackPlugin,
-    SpineFxPlugin, StartPlugin, UnitPlugin,
+    FeelerPlugin, GameDirectorPlugin, GamePlugin, HealthPlugin, IntermissionPlugin, IntroPlugin,
+    MusicPlugin, PlanningPlugin, ProjectilePlugin, RewindPlugin, SandboxPlugin, SfxPlugin,
+    SpineAttackPlugin, SpineFxPlugin, StartPlugin, UnitPlugin,
 };
 
 pub struct GamePlugins;
@@ -17,6 +17,9 @@ impl PluginGroup for GamePlugins {
         group = group.add(GameDirectorPlugin);
         group = group.add(MusicPlugin);
         group = group.add(SfxPlugin);
+
+        // start
+        group = group.add(IntroPlugin);
 
         // start
         group = group.add(StartPlugin);

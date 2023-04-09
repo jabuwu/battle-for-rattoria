@@ -27,6 +27,9 @@ pub struct Sfx {
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, EnumIter, Component)]
 pub enum SfxKind {
+    CutsceneTextAppear,
+    CutsceneProceed,
+
     UiButtonClick,
     UiButtonHover,
     UiButtonRelease,
@@ -51,6 +54,8 @@ pub enum SfxKind {
 impl SfxKind {
     pub fn effect(&self, sounds: &Sounds) -> AudioPlusSoundEffect {
         match self {
+            Self::CutsceneTextAppear => &sounds.cutscene_text_appear,
+            Self::CutsceneProceed => &sounds.cutscene_proceed,
             Self::UiButtonClick => &sounds.ui_button_click,
             Self::UiButtonHover => &sounds.ui_button_hover,
             Self::UiButtonRelease => &sounds.ui_button_release,

@@ -6,6 +6,9 @@ use bevy_kira_audio::AudioSource;
 pub struct Sounds {
     pub placeholder: AudioPlusSoundEffect,
 
+    pub cutscene_text_appear: AudioPlusSoundEffect,
+    pub cutscene_proceed: AudioPlusSoundEffect,
+
     pub ui_button_click: AudioPlusSoundEffect,
     pub ui_button_hover: AudioPlusSoundEffect,
     pub ui_button_release: AudioPlusSoundEffect,
@@ -50,6 +53,16 @@ impl Sounds {
             placeholder: AudioPlusSoundEffect::multiple(vec![
                 asset_server.load("audio/placeholder.ogg")
             ]),
+            cutscene_text_appear: AudioPlusSoundEffect {
+                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
+                volume: 1.,
+                ..Default::default()
+            },
+            cutscene_proceed: AudioPlusSoundEffect {
+                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
+                volume: 1.,
+                ..Default::default()
+            },
             ui_button_click: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Click 01.ogg")],
                 volume: 1.,
