@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_spine::prelude::*;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, Depth, EventSet, Sfx, SfxKind, SpawnSet, UpdateSet,
+    AddFixedEvent, AssetLibrary, Depth, EventSet, Sfx, SfxKind, SpawnSet, SpineSpawnSet, UpdateSet,
     DEPTH_BATTLE_SPLASH,
 };
 
@@ -26,6 +26,7 @@ impl Plugin for BattleSplashPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(BattleSplashSystem::Spawn)
                     .in_set(SpawnSet)
+                    .in_set(SpineSpawnSet)
                     .after(EventSet::<BattleSplashSpawnEvent>::Sender),
             )
             .add_system(

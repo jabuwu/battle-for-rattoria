@@ -6,8 +6,8 @@ use bevy_spine::{prelude::*, rusty_spine::Skin};
 use crate::{
     AddFixedEvent, ArticyDialogue, ArticyDialogueInstruction, ArticyDialogueKind,
     ArticyDialogueNode, ArticyId, AssetLibrary, Clickable, CollisionShape, Depth, GameState,
-    InteractionMode, InteractionSet, InteractionStack, Persistent, Sfx, SfxKind, Transform2,
-    DEPTH_DIALOGUE,
+    InteractionMode, InteractionSet, InteractionStack, Persistent, Sfx, SfxKind, SpineSpawnSet,
+    Transform2, DEPTH_DIALOGUE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -35,7 +35,11 @@ impl Plugin for DialoguePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Dialogue>()
             .add_fixed_event::<DialogueEvent>()
-            .add_startup_system(dialogue_setup.in_set(DialogueSystem::Setup))
+            .add_startup_system(
+                dialogue_setup
+                    .in_set(DialogueSystem::Setup)
+                    .in_set(SpineSpawnSet),
+            )
             .add_system(dialogue_update.in_set(DialogueSystem::Update))
             .add_system(
                 dialogue_spine_ready

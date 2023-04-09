@@ -44,6 +44,7 @@ pub struct Sounds {
 
     pub music_planning: Handle<AudioSource>,
     pub music_battle: Handle<AudioSource>,
+    pub music_intro: Handle<AudioSource>,
 }
 
 impl Sounds {
@@ -206,6 +207,7 @@ impl Sounds {
             },
             music_planning: asset_server.load("audio/music/Preparation.ogg"),
             music_battle: asset_server.load("audio/music/Battle.ogg"),
+            music_intro: asset_server.load("audio/music/Intro.ogg"),
         }
     }
 }

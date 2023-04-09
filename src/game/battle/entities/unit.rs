@@ -12,8 +12,8 @@ use crate::{
     CollisionShape, DamageInflictEvent, DamageKind, DamageModifier, DamageModifiers,
     DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
-    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, TempSfxBundle,
-    Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, SpineSpawnSet, Target, Team,
+    TempSfxBundle, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -45,6 +45,7 @@ impl Plugin for UnitPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::Spawn)
                     .in_set(SpawnSet)
+                    .in_set(SpineSpawnSet)
                     .after(EventSet::<UnitSpawnEvent>::Sender),
             )
             .add_system(
@@ -60,6 +61,7 @@ impl Plugin for UnitPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::DamageFx)
                     .in_set(UpdateSet)
+                    .in_set(SpineSpawnSet)
                     .before(EventSet::<DamageReceiveEvent>::Sender),
             )
             .add_system(
@@ -74,6 +76,7 @@ impl Plugin for UnitPlugin {
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::Attack)
                     .in_set(UpdateSet)
+                    .in_set(SpineSpawnSet)
                     .before(DamageSystem::Update),
             )
             .add_system(

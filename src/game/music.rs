@@ -15,7 +15,8 @@ impl Plugin for MusicPlugin {
             app.add_fixed_event::<BattleJingleEvent>()
                 .add_system(music_controller)
                 .add_audio_channel::<Music>()
-                .add_audio_channel::<BattleMusic>();
+                .add_audio_channel::<BattleMusic>()
+                .add_audio_channel::<IntroMusic>();
         }
     }
 }
@@ -26,11 +27,16 @@ pub struct Music;
 #[derive(Resource)]
 pub struct BattleMusic;
 
+#[derive(Resource)]
+pub struct IntroMusic;
+
 #[derive(Default)]
 pub struct MusicController {
     planning_instance: Option<Handle<AudioInstance>>,
     battle_instance: Option<Handle<AudioInstance>>,
+    intro_instance: Option<Handle<AudioInstance>>,
     battle_crossfade: f64,
+    intro_crossfade: f64,
     volume: f64,
     playback_rate: f64,
     jingle_time: f64,
@@ -52,6 +58,7 @@ fn music_controller(
     mut commands: Commands,
     channel: Res<AudioChannel<Music>>,
     battle_channel: Res<AudioChannel<BattleMusic>>,
+    intro_channel: Res<AudioChannel<IntroMusic>>,
     app_state: Res<State<AppState>>,
     asset_library: Res<AssetLibrary>,
     time: Res<Time>,
@@ -76,8 +83,18 @@ fn music_controller(
                     .handle(),
             );
         }
+        if local.intro_instance.is_none() {
+            local.intro_instance = Some(
+                intro_channel
+                    .play(asset_library.sounds.music_intro.clone())
+                    .looped()
+                    .with_volume(0.)
+                    .handle(),
+            );
+        }
     } else if !should_play {
         local.battle_crossfade = 0.;
+        local.intro_crossfade = 1.;
         local.volume = 0.;
         local.playback_rate = 1.;
         local.jingle_time = 0.;
@@ -88,6 +105,10 @@ fn music_controller(
         if local.battle_instance.is_some() {
             battle_channel.stop();
             local.battle_instance = None;
+        }
+        if local.intro_instance.is_some() {
+            intro_channel.stop();
+            local.intro_instance = None;
         }
     }
 
@@ -122,9 +143,17 @@ fn music_controller(
         } else {
             0.
         };
+    let target_intro_crossfade = if app_state.0 == AppState::GameIntro {
+        1.
+    } else {
+        0.
+    };
     local.battle_crossfade = local
         .battle_crossfade
         .lerp(target_battle_crossfade, time.delta_seconds_f64() * 2.);
+    local.intro_crossfade = local
+        .intro_crossfade
+        .lerp(target_intro_crossfade, time.delta_seconds_f64() * 1.);
 
     let planning_position = if let Some(planning_instance) = local
         .planning_instance
@@ -132,7 +161,7 @@ fn music_controller(
         .and_then(|i| audio_instances.get_mut(i))
     {
         planning_instance.set_volume(
-            (1. - local.battle_crossfade) * local.volume * 0.3,
+            (1. - local.battle_crossfade.max(local.intro_crossfade)) * local.volume * 0.3,
             AudioTween::linear(Duration::from_millis(0)),
         );
         planning_instance.set_playback_rate(
@@ -161,6 +190,17 @@ fn music_controller(
         if (battle_position - planning_position).abs() > 0.05 {
             battle_instance.seek_to(planning_position);
         }
+    };
+
+    if let Some(intro_instance) = local
+        .intro_instance
+        .as_ref()
+        .and_then(|i| audio_instances.get_mut(i))
+    {
+        intro_instance.set_volume(
+            local.intro_crossfade * local.volume * 0.3,
+            AudioTween::linear(Duration::from_millis(0)),
+        );
     };
 
     let wants_ambient_cauldron =

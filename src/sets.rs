@@ -5,6 +5,10 @@ use std::{
 };
 
 use bevy::prelude::*;
+use bevy_spine::SpineSystem;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct SpineSpawnSet;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
 pub struct SpawnSet;
@@ -70,7 +74,15 @@ pub struct SetsPlugin;
 
 impl Plugin for SetsPlugin {
     fn build(&self, app: &mut App) {
-        let schedule = app.get_schedule_mut(CoreSchedule::FixedUpdate).unwrap();
-        schedule.configure_set(UpdateSet.after(SpawnSet));
+        {
+            let schedule = app.get_schedule_mut(CoreSchedule::FixedUpdate).unwrap();
+            schedule.configure_set(UpdateSet.after(SpawnSet));
+        }
+        app.add_system(
+            apply_system_buffers
+                .after(SpineSpawnSet)
+                .before(SpineSystem::Spawn),
+        )
+        .configure_set(SpineSpawnSet.after(SpineSystem::Load));
     }
 }

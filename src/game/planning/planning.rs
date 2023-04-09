@@ -6,8 +6,8 @@ use strum::IntoEnumIterator;
 use crate::{
     typewriter_text, AddFixedEvent, Articy, AssetLibrary, Clickable, ClickableSystem,
     CollisionShape, Depth, Dialogue, GameState, InteractionMode, InteractionSet, InteractionStack,
-    Item, PersistentGameState, Script, SecondOrder, Sfx, SfxKind, SpawnSet, TargetTransform,
-    Transform2, UnitKind, UpdateSet,
+    Item, PersistentGameState, Script, SecondOrder, Sfx, SfxKind, SpawnSet, SpineSpawnSet,
+    TargetTransform, Transform2, UnitKind, UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -37,7 +37,8 @@ impl Plugin for PlanningPlugin {
                 planning_start
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(PlanningSystem::Start)
-                    .in_set(SpawnSet),
+                    .in_set(SpawnSet)
+                    .in_set(SpineSpawnSet),
             )
             .add_system(
                 planning_update
