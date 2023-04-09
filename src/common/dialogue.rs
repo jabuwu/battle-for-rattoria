@@ -61,6 +61,7 @@ pub struct Dialogue {
     scripts: VecDeque<Script>,
     events: Vec<DialogueEvent>,
     chars: f32,
+    last_char_count: usize,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash)]
@@ -608,13 +609,14 @@ fn dialogue_update(
         if matches!(dialogue_action, DialogueAction::Choice { .. }) {
             dialogue.chars += time.delta_seconds() * 90.;
         }
+        let mut dialogue_string_len = 0;
         for (dialogue_entity, dialogue_text) in dialogue_text_query.iter() {
             if let Ok(mut dialogue_text_text) = text_query.get_mut(dialogue_entity) {
                 if let Some(section) = dialogue_text_text.sections.get_mut(0) {
-                    if transitioning {
-                        section.value = "".to_owned();
+                    let string = if transitioning {
+                        "".to_owned()
                     } else {
-                        section.value = match dialogue_action {
+                        match dialogue_action {
                             DialogueAction::Text { speaker, text, .. } => {
                                 if dialogue_text.speaker_kind == speaker.speaker_kind() {
                                     typewriter_text(
@@ -627,11 +629,17 @@ fn dialogue_update(
                                 }
                             }
                             _ => "".to_owned(),
-                        };
-                    }
+                        }
+                    };
+                    dialogue_string_len = dialogue_string_len.max(string.len());
+                    section.value = string;
                 }
             }
         }
+        if dialogue_string_len > dialogue.last_char_count {
+            sfx.play(SfxKind::DialogueCharacter);
+        }
+        dialogue.last_char_count = dialogue_string_len;
         let mut dialogue_option_text_query_sorted =
             dialogue_option_text_query.iter().collect::<Vec<_>>();
         dialogue_option_text_query_sorted.sort_by(|a, b| a.1 .0.cmp(&b.1 .0));
