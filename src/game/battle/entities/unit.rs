@@ -231,10 +231,16 @@ impl UnitKind {
     pub fn description(&self) -> &'static str {
         match self {
             UnitKind::Peasant => "Poor fighters but useful as meat shields in a throng.",
-            UnitKind::Warrior => "Meat and potatoes of every ratkin army.",
-            UnitKind::Archer => "Rats ready to rain death from afar.",
-            UnitKind::Mage => "Wielders of arcane powers, ready to melt away faces.",
-            UnitKind::Brute => "Natural born fighters, gluttonous eaters.",
+            UnitKind::Warrior => {
+                "Meat and potatoes of every ratkin army.\nEffective against moblings."
+            }
+            UnitKind::Archer => {
+                "Rats ready to rain death from afar.\nExtremely effective against warriors."
+            }
+            UnitKind::Mage => {
+                "Wielders of arcane powers, ready to melt away faces.\nEffective against clusters of units."
+            }
+            UnitKind::Brute => "Natural born fighters, gluttonous eaters.\nEffective against all units but moves slowly.",
         }
     }
 
