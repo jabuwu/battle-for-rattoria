@@ -199,6 +199,7 @@ fn parse_dialogue_nodes(
                         "Scoutling" => Speaker::Scoutling,
                         "Deserter" => Speaker::Deserter,
                         "Blasty-Rat" => Speaker::BlastyRat,
+                        "Cho the Bigg Rat" => Speaker::ChoTheBiggRat,
                         "Narrator" => Speaker::Narrator,
                         _ => panic!("Unknown speaker: {}", character.display_name),
                     }

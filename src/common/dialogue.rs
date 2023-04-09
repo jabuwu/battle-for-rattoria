@@ -4,9 +4,10 @@ use bevy::{prelude::*, sprite::Anchor};
 use bevy_spine::{prelude::*, rusty_spine::Skin};
 
 use crate::{
-    AddFixedEvent, ArticyDialogue, ArticyDialogueInstruction, ArticyDialogueKind, ArticyId,
-    AssetLibrary, Clickable, CollisionShape, Depth, GameState, InteractionMode, InteractionSet,
-    InteractionStack, Persistent, Sfx, SfxKind, Transform2, DEPTH_DIALOGUE,
+    AddFixedEvent, ArticyDialogue, ArticyDialogueInstruction, ArticyDialogueKind,
+    ArticyDialogueNode, ArticyId, AssetLibrary, Clickable, CollisionShape, Depth, GameState,
+    InteractionMode, InteractionSet, InteractionStack, Persistent, Sfx, SfxKind, Transform2,
+    DEPTH_DIALOGUE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -81,6 +82,7 @@ pub enum Speaker {
     Scoutling,
     Deserter,
     BlastyRat,
+    ChoTheBiggRat,
 
     Narrator,
 }
@@ -99,9 +101,10 @@ impl Speaker {
             Self::Mobling => SpeakerKind::Enemy,
             Self::StabbyRat => SpeakerKind::Enemy,
             Self::ShootyRat => SpeakerKind::Enemy,
-            Self::Scoutling => SpeakerKind::Unit,
-            Self::Deserter => SpeakerKind::Unit,
+            Self::Scoutling => SpeakerKind::Enemy,
+            Self::Deserter => SpeakerKind::Enemy,
             Self::BlastyRat => SpeakerKind::Enemy,
+            Self::ChoTheBiggRat => SpeakerKind::Enemy,
             Self::Narrator => SpeakerKind::Enemy,
         }
     }
@@ -122,6 +125,7 @@ impl Speaker {
             Self::Scoutling => "Scoutling",
             Self::Deserter => "Deserter",
             Self::BlastyRat => "Blasty-Rat",
+            Self::ChoTheBiggRat => "Cho the Bigg Rat",
             Self::Narrator => "Narrator",
         }
     }
@@ -165,20 +169,57 @@ impl Dialogue {
                     .map(|id| current_script.dialogue.nodes[id].clone())
                     .collect::<Vec<_>>();
                 let mut valid = true;
-                for node in &nodes {
-                    if !matches!(node.kind, ArticyDialogueKind::Message { .. }) {
-                        valid = false;
+                let mut choices = vec![];
+
+                fn recurse_choices(
+                    choices: &mut Vec<(String, Vec<ArticyId>)>,
+                    valid: &mut bool,
+                    nodes: &Vec<ArticyDialogueNode>,
+                    game_state: &GameState,
+                    current_script: &Script,
+                ) {
+                    for node in nodes {
+                        match &node.kind {
+                            ArticyDialogueKind::Message { text, .. } => {
+                                choices.push((text.clone(), node.children.clone()))
+                            }
+                            ArticyDialogueKind::Condition { variable, equals } => {
+                                let value = game_state.global_variables.get(variable).expect(
+                                    &format!("expected global variable to exist: {}", variable),
+                                );
+                                let child_index = if *value == *equals { 0 } else { 1 };
+                                if let Some(child) = node.children.get(child_index) {
+                                    recurse_choices(
+                                        choices,
+                                        valid,
+                                        &vec![current_script.dialogue.nodes[child].clone()],
+                                        game_state,
+                                        current_script,
+                                    );
+                                }
+                            }
+                            _ => *valid = false,
+                        }
                     }
                 }
-                if valid {
-                    let mut choices = vec![];
-                    for node in &nodes {
-                        let ArticyDialogueKind::Message { text, .. } = &node.kind else {
-                            unreachable!()
-                        };
-                        choices.push((text.clone(), node.children.clone()));
+                recurse_choices(
+                    &mut choices,
+                    &mut valid,
+                    &nodes,
+                    &game_state,
+                    current_script,
+                );
+
+                if valid && choices.len() > 0 {
+                    if choices.len() == 1 {
+                        self.action = Some(DialogueAction::Text {
+                            speaker: Speaker::Player,
+                            text: choices[0].0.clone(),
+                            children: choices[0].1.clone(),
+                        });
+                    } else {
+                        self.action = Some(DialogueAction::Choice { choices });
                     }
-                    self.action = Some(DialogueAction::Choice { choices });
                     self.chars = 0.;
                 } else {
                     self.action = Some(DialogueAction::Text {
@@ -575,7 +616,10 @@ fn dialogue_update(
                 Speaker::Mobling => Some("mobling"),
                 Speaker::StabbyRat => Some("stabby-rat"),
                 Speaker::ShootyRat => Some("shooty-rat"),
+                Speaker::Scoutling => Some("shooty-rat"),
+                Speaker::Deserter => Some("blasty-rat"),
                 Speaker::BlastyRat => Some("blasty-rat"),
+                Speaker::ChoTheBiggRat => Some("bigg-rat"),
                 Speaker::Narrator => Some("narrator"),
                 _ => None,
             } {
@@ -817,13 +861,20 @@ fn dialogue_update_interaction(
     interaction_stack.set_wants_interaction(InteractionMode::Dialogue, dialogue.action.is_some());
 }
 
+const UPPERCASE_MULTIPLIER: f32 = 1.5;
 pub fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
     let mut wrapped_string = String::new();
     for line in string.split('\n') {
-        let mut chars = 0;
+        let mut chars: f32 = 0.;
         for split in line.to_owned().split_ascii_whitespace() {
-            chars += split.len();
-            if chars
+            for c in split.chars() {
+                if c.is_ascii_uppercase() {
+                    chars += UPPERCASE_MULTIPLIER;
+                } else {
+                    chars += 1.;
+                }
+            }
+            if chars as usize
                 > if unit {
                     CHARACTERS_PER_LINE_UNITS
                 } else {
@@ -832,7 +883,14 @@ pub fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
             {
                 wrapped_string.push('\n');
                 wrapped_string += split;
-                chars = split.len();
+                chars = 0.;
+                for c in split.chars() {
+                    if c.is_ascii_uppercase() {
+                        chars += UPPERCASE_MULTIPLIER;
+                    } else {
+                        chars += 1.;
+                    }
+                }
             } else {
                 wrapped_string += split;
             }
