@@ -57,7 +57,6 @@ fn music_controller(
     asset_library: Res<AssetLibrary>,
     time: Res<Time>,
 ) {
-    mixer.set_master_volume(0.);
     let should_play = app_state.0.is_game_state();
     if should_play {
         if local.planning_instance.is_none() {
@@ -105,8 +104,7 @@ fn music_controller(
         }
     }
 
-    //let mut target_volume = if local.jingle_time > 0. { 0.05 } else { 0.7 };
-    let mut target_volume = 0.;
+    let mut target_volume = if local.jingle_time > 0. { 0.05 } else { 0.7 };
     let mut target_playback_rate = 1.;
     if app_state.0 == AppState::GameRewind {
         target_volume *= 0.1;
