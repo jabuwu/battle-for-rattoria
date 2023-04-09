@@ -514,10 +514,28 @@ fn planning_update_buttons_and_info(
             if button_clickable.hovered {
                 match button.kind {
                     PlanningButtonKind::Item(item) => {
-                        info_text = Some(vec![TextSection {
-                            value: item.name().to_owned(),
-                            style: header_style.clone(),
-                        }])
+                        info_text = Some(vec![
+                            TextSection {
+                                value: format!("{}\n", item.name()),
+                                style: header_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("Effect: "),
+                                style: bold_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("{}\n", item.positive_effect()),
+                                style: description_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("Side Effect: "),
+                                style: bold_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("{}", item.side_effect()),
+                                style: description_style.clone(),
+                            },
+                        ])
                     }
                     PlanningButtonKind::Unit(unit) => {
                         info_text = Some(vec![

@@ -62,6 +62,30 @@ impl Item {
             Self::FrostyWebStrands => 6,
         }
     }
+
+    pub fn positive_effect(&self) -> &'static str {
+        match self {
+            Self::CracklingMoss => "Quick Attack",
+            Self::SquirtBlopBerries => "Wetness",
+            Self::FiremanderSalts => "Blazing Fire",
+            Self::AxeShrooms => "Stronger Attack",
+            Self::BogHardWeeds => "Increased Defense",
+            Self::CeleryQuartz => "Increased Speed",
+            Self::FrostyWebStrands => "Chilling Ice",
+        }
+    }
+
+    pub fn side_effect(&self) -> &'static str {
+        match self {
+            Self::CracklingMoss => "Cowardly",
+            Self::SquirtBlopBerries => "Slowness",
+            Self::FiremanderSalts => "Spontaneous Combustion",
+            Self::AxeShrooms => "Friendly Fire",
+            Self::BogHardWeeds => "Sickness",
+            Self::CeleryQuartz => "Explosive",
+            Self::FrostyWebStrands => "Blindness",
+        }
+    }
 }
 
 #[derive(Default, Clone)]
