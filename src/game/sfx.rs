@@ -65,11 +65,11 @@ impl SfxKind {
             Self::UiFeedUnit => &sounds.ui_feed_unit,
             Self::DialogueShow => &sounds.dialogue_show,
             Self::DialogueHide => &sounds.dialogue_hide,
-            Self::DialogueSkipText => &sounds.dialogue_proceed,
+            Self::DialogueSkipText => &sounds.dialogue_skip_text,
             Self::DialogueProceed => &sounds.dialogue_proceed,
             Self::DialogueCharacter => &sounds.dialogue_character,
-            Self::DialogueChoiceHover => &sounds.dialogue_proceed,
-            Self::DialogueChoiceSelect => &sounds.dialogue_character,
+            Self::DialogueChoiceHover => &sounds.dialogue_choice_hover,
+            Self::DialogueChoiceSelect => &sounds.dialogue_choice_select,
             Self::CauldronAddSpice => &sounds.cauldron_add_spice,
             Self::LootGet => &sounds.loot_get,
             Self::JingleStart => &sounds.jingle_start,
@@ -100,7 +100,6 @@ fn sfx_play(
     mut sfx: ResMut<Sfx>,
     mut source_query: Query<(&mut AudioPlusSource, &SfxKind)>,
     mut battle_jingle_events: EventWriter<BattleJingleEvent>,
-    keys: Res<Input<KeyCode>>,
 ) {
     for kind in take(&mut sfx.queue) {
         for (mut source, source_kind) in source_query.iter_mut() {
@@ -114,8 +113,5 @@ fn sfx_play(
             SfxKind::JingleDefeat => battle_jingle_events.send(BattleJingleEvent::Defeat),
             _ => {}
         }
-    }
-    if keys.just_pressed(KeyCode::Key5) {
-        sfx.play(SfxKind::UiButtonRelease);
     }
 }

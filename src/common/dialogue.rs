@@ -636,9 +636,9 @@ fn dialogue_update(
                 }
             }
         }
-        if dialogue_string_len > dialogue.last_char_count {
+        /*if dialogue_string_len > dialogue.last_char_count {
             sfx.play(SfxKind::DialogueCharacter);
-        }
+        }*/
         dialogue.last_char_count = dialogue_string_len;
         let mut dialogue_option_text_query_sorted =
             dialogue_option_text_query.iter().collect::<Vec<_>>();

@@ -4,8 +4,6 @@ use bevy_kira_audio::AudioSource;
 
 #[derive(Default)]
 pub struct Sounds {
-    pub placeholder: AudioPlusSoundEffect,
-
     pub cutscene_text_appear: AudioPlusSoundEffect,
     pub cutscene_proceed: AudioPlusSoundEffect,
 
@@ -28,7 +26,7 @@ pub struct Sounds {
     // when player hovers over dialogue option
     pub dialogue_choice_hover: AudioPlusSoundEffect,
     // when player confirms dialogue option
-    pub dialogue_choice_selected: AudioPlusSoundEffect,
+    pub dialogue_choice_select: AudioPlusSoundEffect,
 
     pub cauldron_add_spice: AudioPlusSoundEffect,
 
@@ -52,17 +50,14 @@ impl Sounds {
     pub fn setup(asset_server: &AssetServer) -> Sounds {
         let distance = 2000.;
         Sounds {
-            placeholder: AudioPlusSoundEffect::multiple(vec![
-                asset_server.load("audio/placeholder.ogg")
-            ]),
             cutscene_text_appear: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
-                volume: 1.,
+                volume: 0.,
                 ..Default::default()
             },
             cutscene_proceed: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
-                volume: 1.,
+                volume: 0.,
                 ..Default::default()
             },
             ui_button_click: AudioPlusSoundEffect {
@@ -98,38 +93,38 @@ impl Sounds {
                 ..Default::default()
             },
             dialogue_show: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Release 01.ogg")],
                 volume: 1.,
                 ..Default::default()
             },
             dialogue_hide: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
-                volume: 1.,
+                volume: 0.,
                 ..Default::default()
             },
             dialogue_skip_text: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
-                volume: 1.,
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Click 01.ogg")],
+                volume: 0.3,
                 ..Default::default()
             },
             dialogue_proceed: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
-                volume: 1.,
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Click 01.ogg")],
+                volume: 0.3,
                 ..Default::default()
             },
             dialogue_character: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/UI/Dialogue Letter Tick 01.ogg")],
-                volume: 0.5,
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Dialogue Letter Tick 01.ogg")],
+                volume: 0.,
                 pitch_variation: 0.3,
                 ..Default::default()
             },
             dialogue_choice_hover: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Hover 01.ogg")],
                 volume: 1.,
                 ..Default::default()
             },
-            dialogue_choice_selected: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
+            dialogue_choice_select: AudioPlusSoundEffect {
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Confirm 01.ogg")],
                 volume: 1.,
                 ..Default::default()
             },

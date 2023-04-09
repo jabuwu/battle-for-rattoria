@@ -49,12 +49,9 @@ bounds:3112,109,382,314
 offsets:41,27,466,394
 rotate:90
 hint
-bounds:3112,5,102,102
+bounds:3625,1244,102,102
 offsets:9,9,120,120
 squirt_blop_berries
-bounds:3428,76,354,330
+bounds:3428,137,354,330
 offsets:54,21,466,394
-rotate:90
-start_battle
-bounds:3477,432,375,150
 rotate:90
