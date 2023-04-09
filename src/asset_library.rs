@@ -15,6 +15,7 @@ pub struct AssetLibrary {
     pub image_vignette: Handle<Image>,
     pub image_atlas_planning_buttons: Handle<TextureAtlas>,
     pub image_atlas_play: Handle<TextureAtlas>,
+    pub image_atlas_units: Handle<TextureAtlas>,
     pub image_play: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
@@ -72,6 +73,14 @@ fn asset_library_load(
         Vec2::new(400., 200.),
         1,
         3,
+        None,
+        None,
+    ));
+    asset_library.image_atlas_units = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/units.png"),
+        Vec2::new(400., 320.),
+        3,
+        2,
         None,
         None,
     ));

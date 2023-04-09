@@ -253,6 +253,16 @@ impl UnitKind {
             UnitKind::Brute => asset_library.spine_rat_brute.clone(),
         }
     }
+
+    pub fn index(&self) -> usize {
+        match self {
+            UnitKind::Peasant => 0,
+            UnitKind::Warrior => 1,
+            UnitKind::Archer => 2,
+            UnitKind::Mage => 3,
+            UnitKind::Brute => 4,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]

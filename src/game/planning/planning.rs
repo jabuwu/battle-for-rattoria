@@ -6,7 +6,8 @@ use strum::IntoEnumIterator;
 use crate::{
     typewriter_text, AddFixedEvent, Articy, AssetLibrary, Clickable, ClickableSystem,
     CollisionShape, Depth, Dialogue, GameState, InteractionMode, InteractionSet, InteractionStack,
-    Item, PersistentGameState, Script, Sfx, SfxKind, SpawnSet, Transform2, UnitKind, UpdateSet,
+    Item, PersistentGameState, Script, SecondOrder, Sfx, SfxKind, SpawnSet, TargetTransform,
+    Transform2, UnitKind, UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -18,6 +19,7 @@ pub enum PlanningSystem {
     UpdateUnitCountText,
     UpdateFoodCountText,
     UpdateItems,
+    UpdateUnitComp,
     StartBattle,
     Ui,
 }
@@ -29,6 +31,7 @@ impl Plugin for PlanningPlugin {
         app.init_resource::<PlanningState>()
             .add_fixed_event::<PlanningStartEvent>()
             .add_fixed_event::<PlanningEndedEvent>()
+            .add_fixed_event::<AddUnitCompEvent>()
             .add_system(
                 planning_start
                     .in_schedule(CoreSchedule::FixedUpdate)
@@ -55,6 +58,7 @@ impl Plugin for PlanningPlugin {
             .add_system(planning_update_unit_count_text.in_set(PlanningSystem::UpdateUnitCountText))
             .add_system(planning_update_food_count_text.in_set(PlanningSystem::UpdateFoodCountText))
             .add_system(planning_update_items.in_set(PlanningSystem::UpdateItems))
+            .add_system(planning_update_unit_comp.in_set(PlanningSystem::UpdateUnitComp))
             .add_system(planning_start_battle.in_set(PlanningSystem::StartBattle))
             .add_system(planning_ui.in_set(PlanningSystem::Ui));
     }
@@ -131,6 +135,13 @@ struct PlanningItem(usize);
 
 #[derive(Component)]
 struct PlanningHint;
+
+#[derive(Component)]
+struct PlanningUnitComp {
+    count: usize,
+}
+
+struct AddUnitCompEvent(UnitKind);
 
 fn planning_start(
     mut start_events: EventReader<PlanningStartEvent>,
@@ -434,6 +445,19 @@ fn planning_spine_ready(
                     });
                 }
             }
+            if let Some(unit_comp_entity) = spine_ready_event.bones.get("unit_comp") {
+                if let Some(mut unit_comp_entity) = commands.get_entity(*unit_comp_entity) {
+                    unit_comp_entity.with_children(|parent| {
+                        parent.spawn((
+                            TransformBundle::default(),
+                            VisibilityBundle::default(),
+                            Transform2::default().with_scale(Vec2::new(-0.75, 0.75)),
+                            Depth::Inherit(0.),
+                            PlanningUnitComp { count: 0 },
+                        ));
+                    });
+                }
+            }
         }
     }
 }
@@ -464,6 +488,7 @@ fn planning_update_buttons_and_info(
     mut info_text_query: Query<&mut Text, With<PlanningInfoText>>,
     mut sfx: ResMut<Sfx>,
     mut dialogue: ResMut<Dialogue>,
+    mut add_unit_comp_events: EventWriter<AddUnitCompEvent>,
     clickable_query: Query<&Clickable>,
     hint_query: Query<Entity, With<PlanningHint>>,
     asset_library: Res<AssetLibrary>,
@@ -593,6 +618,7 @@ fn planning_update_buttons_and_info(
                                     game_state.as_mut(),
                                 );
                             } else {
+                                add_unit_comp_events.send(AddUnitCompEvent(unit_kind));
                                 game_state.fed_army.mutate_count(unit_kind, |i| i + 1);
                                 game_state.available_army.mutate_count(unit_kind, |i| i - 1);
                                 game_state.food -= unit_cost;
@@ -732,6 +758,48 @@ fn planning_update_items(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+fn planning_update_unit_comp(
+    mut unit_comp_query: Query<(Entity, &mut PlanningUnitComp)>,
+    mut add_unit_comp_events: EventReader<AddUnitCompEvent>,
+    mut commands: Commands,
+    asset_library: Res<AssetLibrary>,
+) {
+    for add_unit_comp_event in add_unit_comp_events.iter() {
+        for (unit_comp_entity, mut unit_comp) in unit_comp_query.iter_mut() {
+            if let Some(mut unit_comp_entity) = commands.get_entity(unit_comp_entity) {
+                let y = unit_comp.count as f32 * -35.;
+                let init_y = y - 100.;
+                let x = 20. * if unit_comp.count % 2 == 0 { 1. } else { -1. };
+                let depth = unit_comp.count as f32 * 0.001;
+                unit_comp.count += 1;
+                unit_comp_entity.with_children(|parent| {
+                    parent.spawn((
+                        SpriteSheetBundle {
+                            sprite: TextureAtlasSprite {
+                                index: add_unit_comp_event.0.index(),
+                                ..Default::default()
+                            },
+                            texture_atlas: asset_library.image_atlas_units.clone(),
+                            ..Default::default()
+                        },
+                        Transform2::from_xy(x, init_y),
+                        TargetTransform {
+                            target: Vec2::new(x, y),
+                            second_order: SecondOrder::new_frequency_response(
+                                Vec2::new(x, init_y),
+                                2.,
+                                1.3,
+                                0.9,
+                            ),
+                        },
+                        Depth::Inherit(depth),
+                    ));
+                });
             }
         }
     }

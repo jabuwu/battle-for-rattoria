@@ -105,8 +105,10 @@ fn intro_next(
     mut text_query: Query<&mut Text, With<IntroText>>,
     mut sfx: ResMut<Sfx>,
     mouse_buttons: Res<Input<MouseButton>>,
+    keys: Res<Input<KeyCode>>,
 ) {
-    if mouse_buttons.just_pressed(MouseButton::Left) {
+    let fast_skip = keys.pressed(KeyCode::LShift) || keys.pressed(KeyCode::RShift);
+    if mouse_buttons.just_pressed(MouseButton::Left) || fast_skip {
         for mut text in text_query.iter_mut() {
             if let Some(section) = text.sections.get_mut(0) {
                 section.value = "".to_owned();
@@ -115,37 +117,49 @@ fn intro_next(
         for (mut intro, mut intro_spine) in spine_query.iter_mut() {
             match intro.scene {
                 0 => {
-                    sfx.play(SfxKind::CutsceneProceed);
+                    if !fast_skip {
+                        sfx.play(SfxKind::CutsceneProceed);
+                    }
                     let _ = intro_spine
                         .animation_state
                         .set_animation_by_name(1, "scene2", false);
                 }
                 1 => {
-                    sfx.play(SfxKind::CutsceneProceed);
+                    if !fast_skip {
+                        sfx.play(SfxKind::CutsceneProceed);
+                    }
                     let _ = intro_spine
                         .animation_state
                         .set_animation_by_name(2, "scene3", false);
                 }
                 2 => {
-                    sfx.play(SfxKind::CutsceneProceed);
+                    if !fast_skip {
+                        sfx.play(SfxKind::CutsceneProceed);
+                    }
                     let _ = intro_spine
                         .animation_state
                         .set_animation_by_name(3, "scene4", false);
                 }
                 3 => {
-                    sfx.play(SfxKind::CutsceneProceed);
+                    if !fast_skip {
+                        sfx.play(SfxKind::CutsceneProceed);
+                    }
                     let _ = intro_spine
                         .animation_state
                         .set_animation_by_name(4, "scene5", false);
                 }
                 4 => {
-                    sfx.play(SfxKind::CutsceneProceed);
+                    if !fast_skip {
+                        sfx.play(SfxKind::CutsceneProceed);
+                    }
                     let _ = intro_spine
                         .animation_state
                         .set_animation_by_name(4, "scene6", false);
                 }
                 5 => {
-                    sfx.play(SfxKind::CutsceneProceed);
+                    if !fast_skip {
+                        sfx.play(SfxKind::CutsceneProceed);
+                    }
                     let _ = intro_spine
                         .animation_state
                         .set_animation_by_name(5, "out", false);
@@ -163,7 +177,9 @@ fn intro_events(
     mut text_query: Query<&mut Text, With<IntroText>>,
     mut sfx: ResMut<Sfx>,
     intro_query: Query<&Intro>,
+    keys: Res<Input<KeyCode>>,
 ) {
+    let fast_skip = keys.pressed(KeyCode::LShift) || keys.pressed(KeyCode::RShift);
     for spine_event in spine_events.iter() {
         match spine_event {
             SpineEvent::Event {
@@ -177,7 +193,9 @@ fn intro_events(
                     match name.as_str() {
                         "subtitles" => {
                             if *float as usize == intro.scene {
-                                sfx.play(SfxKind::CutsceneTextAppear);
+                                if !fast_skip {
+                                    sfx.play(SfxKind::CutsceneTextAppear);
+                                }
                                 for mut text in text_query.iter_mut() {
                                     if let Some(section) = text.sections.get_mut(0) {
                                         section.value = string.replace("\\n", "\n");
