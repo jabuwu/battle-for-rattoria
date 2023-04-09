@@ -179,6 +179,7 @@ fn game_debug(
                     "Tutorial2",
                     "Tutorial3",
                     "Tutorial4",
+                    "Tutorial4_5",
                     "MustFeedUnits",
                 ] {
                     if ui.button(dialogue_str).clicked() {

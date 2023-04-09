@@ -463,9 +463,11 @@ fn planning_update_buttons_and_info(
     mut game_state: ResMut<GameState>,
     mut info_text_query: Query<&mut Text, With<PlanningInfoText>>,
     mut sfx: ResMut<Sfx>,
+    mut dialogue: ResMut<Dialogue>,
     clickable_query: Query<&Clickable>,
     hint_query: Query<Entity, With<PlanningHint>>,
     asset_library: Res<AssetLibrary>,
+    articy: Res<Articy>,
 ) {
     let mut info_text = None;
     let header_style = TextStyle {
@@ -580,15 +582,27 @@ fn planning_update_buttons_and_info(
                         if game_state.available_army.get_count(unit_kind) > 0
                             && game_state.food >= unit_cost
                         {
-                            game_state.fed_army.mutate_count(unit_kind, |i| i + 1);
-                            game_state.available_army.mutate_count(unit_kind, |i| i - 1);
-                            game_state.food -= unit_cost;
-                            for mut planning_spine in planning_spine_query.iter_mut() {
-                                let _ = planning_spine
-                                    .animation_state
-                                    .set_animation_by_name(1, "food_eat", false);
+                            if game_state.quest.war_chef == 1
+                                && game_state.quest.battle == 0
+                                && game_state.food <= 10
+                            {
+                                dialogue.queue(
+                                    Script::new(
+                                        articy.dialogues.get("Tutorial4_5").unwrap().clone(),
+                                    ),
+                                    game_state.as_mut(),
+                                );
+                            } else {
+                                game_state.fed_army.mutate_count(unit_kind, |i| i + 1);
+                                game_state.available_army.mutate_count(unit_kind, |i| i - 1);
+                                game_state.food -= unit_cost;
+                                for mut planning_spine in planning_spine_query.iter_mut() {
+                                    let _ = planning_spine
+                                        .animation_state
+                                        .set_animation_by_name(1, "food_eat", false);
+                                }
+                                sfx.play(SfxKind::UiFeedUnit);
                             }
-                            sfx.play(SfxKind::UiFeedUnit);
                         }
                     }
                     PlanningButtonKind::Noop => {}
