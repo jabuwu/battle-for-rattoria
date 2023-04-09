@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_spine::prelude::*;
 
 use crate::{
-    AddFixedEvent, AssetLibrary, Depth, EventSet, SpawnSet, UpdateSet, DEPTH_BATTLE_SPLASH,
+    AddFixedEvent, AssetLibrary, Depth, EventSet, Sfx, SfxKind, SpawnSet, UpdateSet,
+    DEPTH_BATTLE_SPLASH,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -93,6 +94,7 @@ fn battle_splash_spawn(
 fn battle_splash_on_ready(
     mut spine_ready_events: EventReader<SpineReadyEvent>,
     mut spine_query: Query<(&mut Spine, &BattleSplash)>,
+    mut sfx: ResMut<Sfx>,
 ) {
     for spine_ready_event in spine_ready_events.iter() {
         if let Ok((mut spine, battle_splash)) = spine_query.get_mut(spine_ready_event.entity) {
@@ -100,6 +102,7 @@ fn battle_splash_on_ready(
                 let _ = spine
                     .animation_state
                     .set_animation_by_name(0, "battle_start", false);
+                sfx.play(SfxKind::JingleStart);
             } else {
                 let _ = spine
                     .animation_state
@@ -112,8 +115,14 @@ fn battle_splash_on_ready(
 fn battle_splash_play(
     mut play_events: EventReader<BattleSplashPlayEvent>,
     mut spine_query: Query<&mut Spine, With<BattleSplash>>,
+    mut sfx: ResMut<Sfx>,
 ) {
     for play_event in play_events.iter() {
+        sfx.play(match play_event.kind {
+            BattleSplashKind::Start => SfxKind::JingleStart,
+            BattleSplashKind::Victory => SfxKind::JingleVictory,
+            BattleSplashKind::Defeat => SfxKind::JingleDefeat,
+        });
         for mut spine in spine_query.iter_mut() {
             let animation = match play_event.kind {
                 BattleSplashKind::Start => "battle_start",

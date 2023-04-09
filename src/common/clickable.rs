@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 
-use crate::{CollisionShape, Cursor};
+use crate::{CollisionShape, Cursor, InteractionMode, InteractionStack};
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct ClickableSystem;
 
 pub struct ClickablePlugin;
 
 impl Plugin for ClickablePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(clickable_update);
+        app.add_system(clickable_update.in_set(ClickableSystem));
     }
 }
 
@@ -14,6 +17,8 @@ impl Plugin for ClickablePlugin {
 pub struct Clickable {
     pub shape: CollisionShape,
     pub use_global: bool,
+
+    pub interaction_mode: InteractionMode,
 
     pub disabled: bool,
 
@@ -51,6 +56,7 @@ fn clickable_update(
     mut query: Query<(&mut Clickable, &GlobalTransform)>,
     cursor: Res<Cursor>,
     input: Res<Input<MouseButton>>,
+    interaction_stack: Res<InteractionStack>,
 ) {
     for (mut clickable, transform) in query.iter_mut() {
         let (scale, _, _) = transform.to_scale_rotation_translation();
@@ -65,15 +71,19 @@ fn clickable_update(
         clickable.last_hovered = clickable.hovered;
         clickable.last_clicked = clickable.clicked;
         clickable.confirmed = false;
-        clickable.hovered = shape
-            .at(transform.translation().truncate())
-            .overlaps(CollisionShape::Point { offset: Vec2::ZERO }.at(cursor.position));
-        if clickable.hovered && input.just_pressed(MouseButton::Left) {
+        clickable.hovered = interaction_stack.can_interact(clickable.interaction_mode)
+            && shape
+                .at(transform.translation().truncate())
+                .overlaps(CollisionShape::Point { offset: Vec2::ZERO }.at(cursor.position));
+        if clickable.hovered
+            && input.just_pressed(MouseButton::Left)
+            && interaction_stack.can_interact(clickable.interaction_mode)
+        {
             clickable.clicked = true;
         }
         if clickable.clicked && input.just_released(MouseButton::Left) {
             clickable.clicked = false;
-            if clickable.hovered {
+            if clickable.hovered && interaction_stack.can_interact(clickable.interaction_mode) {
                 clickable.confirmed = true;
             }
         }

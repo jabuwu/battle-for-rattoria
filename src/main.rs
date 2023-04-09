@@ -1,9 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy_audio_plus::prelude::AudioPlusListener;
 use bevy_game::{
-    AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GameDirector, GamePlugins, MainMenuPlugins,
-    Persistent,
+    AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GameDirector, GamePlugins, LoadingPlugin,
+    MainMenuPlugins, Persistent,
 };
 use std::io::Cursor;
 use winit::window::Icon;
@@ -25,6 +26,7 @@ fn main() {
         .add_plugin(AppStatePlugin)
         .add_plugin(AssetLibraryPlugin)
         .add_plugins(CommonPlugins)
+        .add_plugin(LoadingPlugin)
         .add_plugins(MainMenuPlugins)
         .add_plugins(GamePlugins)
         .add_system(setup.in_schedule(CoreSchedule::Startup))
@@ -33,7 +35,7 @@ fn main() {
 }
 
 fn setup(mut commands: Commands) {
-    commands.spawn((Camera2dBundle::default(), Persistent));
+    commands.spawn((Camera2dBundle::default(), AudioPlusListener, Persistent));
     commands.spawn((GameDirector, Persistent));
 }
 

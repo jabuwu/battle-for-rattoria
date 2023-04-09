@@ -4,8 +4,8 @@ use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::{
-    AppState, Articy, AssetLibrary, Clickable, Depth, Dialogue, GameState, PersistentGameState,
-    Script, Transform2, UnitKind,
+    AppState, Articy, AssetLibrary, Clickable, ClickableSystem, Depth, Dialogue, GameState,
+    PersistentGameState, Script, Transform2, UnitKind,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -28,8 +28,16 @@ impl Plugin for RewindPlugin {
                         .in_schedule(OnEnter(AppState::GameRewind))
                         .in_set(RewindSystem::Enter),
                 )
-                .add_system(rewind_stage_click.in_set(RewindSystem::StageClick))
-                .add_system(rewind_update_button.in_set(RewindSystem::UpdateButton))
+                .add_system(
+                    rewind_stage_click
+                        .in_set(RewindSystem::StageClick)
+                        .after(ClickableSystem),
+                )
+                .add_system(
+                    rewind_update_button
+                        .in_set(RewindSystem::UpdateButton)
+                        .after(ClickableSystem),
+                )
                 .add_system(rewind_update_button_text.in_set(RewindSystem::UpdateButtonText))
                 .add_system(rewind_update_battle_info.in_set(RewindSystem::UpdateBattleInfo));
         }
@@ -86,11 +94,19 @@ fn rewind_enter(
         persistent_game_state.show_rewind_screen_dialogue = false;
     }
     commands.spawn((
+        SpriteBundle {
+            texture: asset_library.image_rewind_bg.clone(),
+            ..Default::default()
+        },
+        Transform2::default(),
+        Depth::Exact(0.),
+    ));
+    commands.spawn((
         Text2dBundle {
             text: Text::from_section(
                 "Select Battle",
                 TextStyle {
-                    font: asset_library.font_placeholder.clone(),
+                    font: asset_library.font_heading.clone(),
                     font_size: 128.,
                     color: Color::WHITE,
                 },
@@ -99,7 +115,7 @@ fn rewind_enter(
             ..Default::default()
         },
         Transform2::from_xy(-615., 635.),
-        Depth::Exact(0.),
+        Depth::Exact(0.1),
     ));
     commands
         .spawn((
@@ -119,7 +135,7 @@ fn rewind_enter(
                 ..Default::default()
             },
             Transform2::from_xy(550., -500.),
-            Depth::Exact(0.),
+            Depth::Exact(0.1),
             RewindButton,
         ))
         .with_children(|parent| {
@@ -128,7 +144,7 @@ fn rewind_enter(
                     text: Text::from_section(
                         "",
                         TextStyle {
-                            font: asset_library.font_placeholder.clone(),
+                            font: asset_library.font_heading.clone(),
                             font_size: 92.,
                             color: Color::WHITE,
                         },
@@ -147,7 +163,7 @@ fn rewind_enter(
                 TextSection {
                     value: "Checkpoint Info\n\n".to_owned(),
                     style: TextStyle {
-                        font: asset_library.font_placeholder.clone(),
+                        font: asset_library.font_normal.clone(),
                         font_size: 82.,
                         color: Color::WHITE,
                     },
@@ -155,7 +171,7 @@ fn rewind_enter(
                 TextSection {
                     value: "".to_owned(),
                     style: TextStyle {
-                        font: asset_library.font_placeholder.clone(),
+                        font: asset_library.font_normal.clone(),
                         font_size: 42.,
                         color: Color::WHITE,
                     },
@@ -165,7 +181,7 @@ fn rewind_enter(
             ..Default::default()
         },
         Transform2::from_xy(550., 400.),
-        Depth::Exact(0.),
+        Depth::Exact(0.1),
         BattleInfo,
     ));
     let mut stage_index = 0;
@@ -194,6 +210,7 @@ fn rewind_enter(
                     ..Default::default()
                 },
                 Transform2::from_xy(x as f32 * 250. - 960., y as f32 * -250. + 430.),
+                Depth::Exact(0.1),
                 RewindStage {
                     index: stage_index,
                     enabled,
@@ -299,7 +316,7 @@ fn rewind_update_battle_info(
                 );
             }
             if !game_state.inventory.is_empty() {
-                info += &format!("Items:\n");
+                info += &format!("\nItems:\n");
                 for item in game_state.inventory.items() {
                     info += &format!("{}\n", item.name());
                 }

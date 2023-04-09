@@ -39,7 +39,7 @@ impl Quest {
             1 => match self.battle {
                 0 => UnitComposition {
                     peasants: 2,
-                    warriors: 2,
+                    warriors: 1,
                     archers: 0,
                     mages: 0,
                     brutes: 0,
@@ -170,6 +170,44 @@ impl Quest {
                 _ => BattleModifiers::default(),
             },
             _ => BattleModifiers::default(),
+        }
+    }
+
+    pub fn hint(&self) -> &'static str {
+        match self.war_chef {
+            0 => match self.battle {
+                0 => "Glut Rattan's small mobling force approaches!",
+                1 => "Glut Rattan's small mobling force approaches!",
+                2 => "Glut Rattan's small mobling force approaches!",
+                _ => "??",
+            },
+            1 => match self.battle {
+                0 => "Toothsy's small parley force approaches!",
+                1 => "Toothsy hopes to win this battle with moblings and warriors!",
+                2 => "Toothsy is weak but still has plenty of fight!",
+                _ => "??",
+            },
+            2 => match self.battle {
+                0 => "Rattin Hood hopes to rain arrows from above!",
+                1 => "Rattin Hood is making a stronger front line for his archers!",
+                2 => "Rattin Hood is almost out of steam!",
+                3 => "The ground shakes from Rattin Hood's final combatant!",
+                _ => "??",
+            },
+            3 => match self.battle {
+                0 => "Archmage Ratus sends a small force to test your army!",
+                1 => "Archmage Ratus aids his warriors with the power of magic!",
+                2 => "Archmage Ratus aids his warriors with the power of magic, again!",
+                3 => "Archmage Ratus sends his mobling hoard guarded by two mages!",
+                _ => "??",
+            },
+            4 => match self.battle {
+                0 => "Chompers the Barbarian sends his unstoppable (and soaked) mobling hoard!",
+                1 => "Chompers the Barbarian sends his finest warriors and one Bigg-Rat!",
+                2 => "The final battle!",
+                _ => "??",
+            },
+            _ => "??",
         }
     }
 }

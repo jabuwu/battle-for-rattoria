@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_audio_plus::prelude::*;
 use bevy_spine::prelude::*;
 use bitflags::bitflags;
 use enum_map::{Enum, EnumMap};
@@ -11,8 +12,8 @@ use crate::{
     CollisionShape, DamageInflictEvent, DamageKind, DamageModifier, DamageModifiers,
     DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
-    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2,
-    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, TempSfxBundle,
+    Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -227,6 +228,22 @@ impl UnitKind {
         }
     }
 
+    pub fn description(&self) -> &'static str {
+        match self {
+            UnitKind::Peasant => "Poor fighters but useful as meat shields in a throng.",
+            UnitKind::Warrior => {
+                "Meat and potatoes of every ratkin army.\nEffective against moblings."
+            }
+            UnitKind::Archer => {
+                "Rats ready to rain death from afar.\nExtremely effective against warriors."
+            }
+            UnitKind::Mage => {
+                "Wielders of arcane powers, ready to melt away faces.\nEffective against clusters of units."
+            }
+            UnitKind::Brute => "Natural born fighters, gluttonous eaters.\nEffective against all units but moves slowly.",
+        }
+    }
+
     pub fn skeleton(&self, asset_library: &AssetLibrary) -> Handle<SkeletonData> {
         match self {
             UnitKind::Peasant => asset_library.spine_rat.clone(),
@@ -234,6 +251,16 @@ impl UnitKind {
             UnitKind::Archer => asset_library.spine_rat_archer.clone(),
             UnitKind::Mage => asset_library.spine_rat_mage.clone(),
             UnitKind::Brute => asset_library.spine_rat_brute.clone(),
+        }
+    }
+
+    pub fn index(&self) -> usize {
+        match self {
+            UnitKind::Peasant => 0,
+            UnitKind::Warrior => 1,
+            UnitKind::Archer => 2,
+            UnitKind::Mage => 3,
+            UnitKind::Brute => 4,
         }
     }
 }
@@ -556,6 +583,12 @@ fn unit_damage_fx(
                     SpineFx,
                 ));
             }
+            commands.spawn(TempSfxBundle {
+                audio_source: AudioPlusSource::new(asset_library.sounds.unit_damage.clone())
+                    .as_playing(),
+                transform2: Transform2::from_translation(unit_transform.translation().truncate()),
+                ..Default::default()
+            });
         }
     }
 }
@@ -723,13 +756,20 @@ fn unit_attack(
 fn unit_die(
     mut health_die_events: EventReader<HealthDieEvent>,
     mut commands: Commands,
-    unit_query: Query<&Unit>,
+    unit_query: Query<&GlobalTransform, With<Unit>>,
+    asset_library: Res<AssetLibrary>,
 ) {
     for health_die_event in health_die_events.iter() {
-        if unit_query.contains(health_die_event.entity) {
+        if let Ok(unit_transform) = unit_query.get(health_die_event.entity) {
             if let Some(entity) = commands.get_entity(health_die_event.entity) {
                 entity.despawn_recursive();
             }
+            commands.spawn(TempSfxBundle {
+                audio_source: AudioPlusSource::new(asset_library.sounds.unit_die.clone())
+                    .as_playing(),
+                transform2: Transform2::from_translation(unit_transform.translation().truncate()),
+                ..Default::default()
+            });
         }
     }
 }
@@ -854,10 +894,12 @@ fn unit_combust(
     let mut rng = thread_rng();
     for (unit_entity, unit, _) in unit_query.iter_mut() {
         if unit.attributes.contains(Attributes::ON_FIRE) {
-            damage_inflict_events.send(DamageInflictEvent {
-                entity: unit_entity,
-                damage: time.period.as_secs_f32() * 5.,
-            });
+            if battle_state.battling() && battle_state.phase() == BattlePhase::Battling {
+                damage_inflict_events.send(DamageInflictEvent {
+                    entity: unit_entity,
+                    damage: time.period.as_secs_f32() * 5.,
+                });
+            }
         }
     }
     for team in Team::iter() {

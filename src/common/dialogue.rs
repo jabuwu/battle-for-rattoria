@@ -6,7 +6,7 @@ use bevy_spine::{prelude::*, rusty_spine::Skin};
 use crate::{
     AddFixedEvent, ArticyDialogue, ArticyDialogueInstruction, ArticyDialogueKind, ArticyId,
     AssetLibrary, Clickable, CollisionShape, Depth, GameState, InteractionMode, InteractionSet,
-    InteractionStack, Persistent, Transform2, DEPTH_DIALOGUE,
+    InteractionStack, Persistent, Sfx, SfxKind, Transform2, DEPTH_DIALOGUE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -18,15 +18,15 @@ pub enum DialogueSystem {
     UpdateInteraction,
 }
 
-const FONT_SIZE: f32 = 42.;
-const FONT_SIZE_NAME: f32 = 42.;
+const FONT_SIZE: f32 = 48.;
+const FONT_SIZE_NAME: f32 = 72.;
 const FONT_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 const FONT_COLOR_CHOICE: Color = Color::rgba(0.2, 0.2, 0.2, 0.97);
 const CHARACTERS_PER_LINE: usize = 40;
 const CHARACTERS_PER_LINE_UNITS: usize = 50;
-const CHOICES_DISTANCE: f32 = 44.;
-const CHOICES_PADDING: Vec2 = Vec2::new(20., 4.);
-const CHOICES_GAP: f32 = 4.;
+const CHOICES_DISTANCE: f32 = 48.;
+const CHOICES_PADDING: Vec2 = Vec2::new(20., 2.);
+const CHOICES_GAP: f32 = 2.;
 
 pub struct DialoguePlugin;
 
@@ -95,13 +95,13 @@ impl Speaker {
             Self::WarChef3 => SpeakerKind::Enemy,
             Self::WarChef4 => SpeakerKind::Enemy,
             Self::WarChef5 => SpeakerKind::Enemy,
-            Self::Mobling => SpeakerKind::Unit,
-            Self::StabbyRat => SpeakerKind::Unit,
-            Self::ShootyRat => SpeakerKind::Unit,
+            Self::Mobling => SpeakerKind::Enemy,
+            Self::StabbyRat => SpeakerKind::Enemy,
+            Self::ShootyRat => SpeakerKind::Enemy,
             Self::Scoutling => SpeakerKind::Unit,
             Self::Deserter => SpeakerKind::Unit,
-            Self::BlastyRat => SpeakerKind::Unit,
-            Self::Narrator => SpeakerKind::Unit,
+            Self::BlastyRat => SpeakerKind::Enemy,
+            Self::Narrator => SpeakerKind::Enemy,
         }
     }
 
@@ -349,7 +349,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_normal.clone(),
                                     font_size: FONT_SIZE,
                                     color: FONT_COLOR,
                                 },
@@ -371,7 +371,7 @@ fn dialogue_spine_ready(
                                     text: Text::from_section(
                                         "",
                                         TextStyle {
-                                            font: asset_library.font_placeholder.clone(),
+                                            font: asset_library.font_normal.clone(),
                                             font_size: FONT_SIZE,
                                             color: FONT_COLOR_CHOICE,
                                         },
@@ -402,6 +402,7 @@ fn dialogue_spine_ready(
                                             size: Vec2::splat(1.),
                                             offset: Vec2::ZERO,
                                         },
+                                        interaction_mode: InteractionMode::Dialogue,
                                         ..Default::default()
                                     },
                                 ));
@@ -420,7 +421,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_normal.clone(),
                                     font_size: FONT_SIZE,
                                     color: FONT_COLOR,
                                 },
@@ -440,7 +441,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_normal.clone(),
                                     font_size: FONT_SIZE,
                                     color: FONT_COLOR,
                                 },
@@ -468,7 +469,7 @@ fn dialogue_spine_ready(
                             text: Text::from_section(
                                 "War Chef",
                                 TextStyle {
-                                    font: asset_library.font_placeholder.clone(),
+                                    font: asset_library.font_heading.clone(),
                                     font_size: FONT_SIZE_NAME,
                                     color: FONT_COLOR,
                                 },
@@ -507,7 +508,6 @@ fn dialogue_spine_events(
 
 fn dialogue_update(
     mut dialogue: ResMut<Dialogue>,
-    mut _dialogue_root_query: Query<Entity, With<DialogueRoot>>,
     mut dialogue_spine_query: Query<(&mut Spine, &mut DialogueSpine)>,
     mut visibility_query: Query<&mut Visibility>,
     mut text_query: Query<&mut Text>,
@@ -515,6 +515,7 @@ fn dialogue_update(
     mut sprite_query: Query<&mut Sprite>,
     mut dialogue_events: EventWriter<DialogueEvent>,
     mut game_state: ResMut<GameState>,
+    mut sfx: ResMut<Sfx>,
     dialogue_text_query: Query<(Entity, &DialogueText)>,
     dialogue_name_text_query: Query<Entity, With<DialogueNameText>>,
     dialogue_option_text_query: Query<(Entity, &DialogueOptionText, &Children)>,
@@ -538,6 +539,7 @@ fn dialogue_update(
                     dialogue_spine
                         .animation_state
                         .set_animation_by_name(0, "dialogue_in", false);
+                sfx.play(SfxKind::DialogueShow);
             }
         } else {
             if dialogue_spine_state.visible_in {
@@ -547,6 +549,7 @@ fn dialogue_update(
                     dialogue_spine
                         .animation_state
                         .set_animation_by_name(0, "dialogue_out", false);
+                sfx.play(SfxKind::DialogueHide);
             }
         }
         transitioning = dialogue_spine_state.transitioning;
@@ -568,6 +571,11 @@ fn dialogue_update(
                 Speaker::WarChef3 => Some("wc3"),
                 Speaker::WarChef4 => Some("wc4"),
                 Speaker::WarChef5 => Some("wc5"),
+                Speaker::Mobling => Some("mobling"),
+                Speaker::StabbyRat => Some("stabby-rat"),
+                Speaker::ShootyRat => Some("shooty-rat"),
+                Speaker::BlastyRat => Some("blasty-rat"),
+                Speaker::Narrator => Some("narrator"),
                 _ => None,
             } {
                 if let Some(skin_general) = dialogue_spine.skeleton.data().find_skin(speaker_skin) {
@@ -652,6 +660,13 @@ fn dialogue_update(
                 if let Ok((_, dialogue_option_text_bg_clickable)) =
                     dialogue_option_text_bg_query.get(*dialogue_option_text_child)
                 {
+                    if dialogue_option_text_bg_clickable.just_hovered() {
+                        if let DialogueAction::Choice { choices } = dialogue_action {
+                            if dialogue_option_text.0 < choices.len() {
+                                sfx.play(SfxKind::DialogueChoiceHover);
+                            }
+                        }
+                    }
                     if dialogue_option_text_bg_clickable.hovered {
                         hovered = true;
                     }
@@ -713,19 +728,25 @@ fn dialogue_update(
             }
             choice_y += height;
         }
+        let fast_skip = keys.pressed(KeyCode::LShift) || keys.pressed(KeyCode::RShift);
         match dialogue_action {
             DialogueAction::Text { children, text, .. } => {
                 if keys.just_pressed(KeyCode::Space)
                     || mouse_buttons.just_pressed(MouseButton::Left)
-                    || keys.pressed(KeyCode::LControl)
-                    || keys.pressed(KeyCode::RControl)
+                    || fast_skip
                 {
                     let children = children.clone();
                     if typewriter_text(&text, dialogue.chars as usize, false).len()
                         == typewriter_text(&text, 99999, false).len()
                     {
                         dialogue.show(children, game_state.as_mut());
+                        if dialogue.action.is_some() && !fast_skip {
+                            sfx.play(SfxKind::DialogueProceed);
+                        }
                     } else {
+                        if !fast_skip {
+                            sfx.play(SfxKind::DialogueSkipText);
+                        }
                         dialogue.chars = 99999.;
                     }
                 }
@@ -740,6 +761,7 @@ fn dialogue_update(
                             false
                         };
                         if clicked || keys.just_pressed(*dialogue_key) {
+                            sfx.play(SfxKind::DialogueChoiceSelect);
                             dialogue.show(dialogue_line_choice.1.clone(), game_state.as_mut());
                             break;
                         }
@@ -787,7 +809,7 @@ fn dialogue_update_interaction(
     interaction_stack.set_wants_interaction(InteractionMode::Dialogue, dialogue.action.is_some());
 }
 
-fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
+pub fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
     let mut wrapped_string = String::new();
     for line in string.split('\n') {
         let mut chars = 0;
