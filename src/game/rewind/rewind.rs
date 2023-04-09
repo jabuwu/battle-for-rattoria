@@ -94,6 +94,14 @@ fn rewind_enter(
         persistent_game_state.show_rewind_screen_dialogue = false;
     }
     commands.spawn((
+        SpriteBundle {
+            texture: asset_library.image_rewind_bg.clone(),
+            ..Default::default()
+        },
+        Transform2::default(),
+        Depth::Exact(0.),
+    ));
+    commands.spawn((
         Text2dBundle {
             text: Text::from_section(
                 "Select Battle",
@@ -107,7 +115,7 @@ fn rewind_enter(
             ..Default::default()
         },
         Transform2::from_xy(-615., 635.),
-        Depth::Exact(0.),
+        Depth::Exact(0.1),
     ));
     commands
         .spawn((
@@ -127,7 +135,7 @@ fn rewind_enter(
                 ..Default::default()
             },
             Transform2::from_xy(550., -500.),
-            Depth::Exact(0.),
+            Depth::Exact(0.1),
             RewindButton,
         ))
         .with_children(|parent| {
@@ -173,7 +181,7 @@ fn rewind_enter(
             ..Default::default()
         },
         Transform2::from_xy(550., 400.),
-        Depth::Exact(0.),
+        Depth::Exact(0.1),
         BattleInfo,
     ));
     let mut stage_index = 0;
@@ -202,6 +210,7 @@ fn rewind_enter(
                     ..Default::default()
                 },
                 Transform2::from_xy(x as f32 * 250. - 960., y as f32 * -250. + 430.),
+                Depth::Exact(0.1),
                 RewindStage {
                     index: stage_index,
                     enabled,

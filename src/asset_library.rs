@@ -12,11 +12,12 @@ pub struct AssetLibrary {
     pub image_menu_bg: Handle<Image>,
     pub image_background_bg: Handle<Image>,
     pub image_planning_bg: Handle<Image>,
+    pub image_rewind_bg: Handle<Image>,
     pub image_vignette: Handle<Image>,
     pub image_atlas_planning_buttons: Handle<TextureAtlas>,
     pub image_atlas_play: Handle<TextureAtlas>,
     pub image_atlas_units: Handle<TextureAtlas>,
-    pub image_play: Handle<Image>,
+    pub image_bog_sick: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
     pub spine_rat_archer: Handle<SkeletonData>,
@@ -58,7 +59,9 @@ fn asset_library_load(
     asset_library.image_menu_bg = asset_server.load("images/Logo_with_Background.png");
     asset_library.image_background_bg = asset_server.load("images/battlefield_bg.png");
     asset_library.image_planning_bg = asset_server.load("images/Background_Camp.png");
+    asset_library.image_rewind_bg = asset_server.load("images/Background_Select_Battle.png");
     asset_library.image_vignette = asset_server.load("images/vignette.png");
+    asset_library.image_bog_sick = asset_server.load("images/bog_sick.png");
 
     asset_library.image_atlas_planning_buttons = texture_atlases.add(TextureAtlas::from_grid(
         asset_server.load("images/planning_buttons.png"),

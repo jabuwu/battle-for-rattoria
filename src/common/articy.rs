@@ -414,6 +414,7 @@ fn parse_condition(str: &str) -> (String, bool) {
                     _ => panic!("invalid condition: {}", str),
                 },
             ),
+            (Some(variable), None) => (variable.to_owned(), true),
             _ => panic!("invalid condition: {}", str),
         }
     } else {

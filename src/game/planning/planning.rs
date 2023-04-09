@@ -139,6 +139,9 @@ struct PlanningItem(usize);
 struct PlanningHint;
 
 #[derive(Component)]
+struct PlanningSick;
+
+#[derive(Component)]
 struct PlanningUnitComp {
     count: usize,
 }
@@ -335,10 +338,66 @@ fn planning_spine_ready(
                                     },
                                 ))
                                 .with_children(|parent| {
+                                    let bog_sick = game_state.sick_army.get_count(unit_kind);
+                                    if bog_sick > 0 {
+                                        parent.spawn((
+                                            SpriteBundle {
+                                                texture: asset_library.image_bog_sick.clone(),
+                                                ..Default::default()
+                                            },
+                                            Transform2::from_xy(200., 0.)
+                                                .with_scale(Vec2::splat(0.7)),
+                                            Depth::Inherit(0.02),
+                                            Clickable {
+                                                shape: CollisionShape::Rect {
+                                                    offset: Vec2::ZERO,
+                                                    size: Vec2::new(200., 120.),
+                                                },
+                                                ..Default::default()
+                                            },
+                                            PlanningSick,
+                                        ));
+
+                                        parent.spawn((
+                                            Text2dBundle {
+                                                text: Text::from_section(
+                                                    format!("x{}", bog_sick),
+                                                    TextStyle {
+                                                        font: asset_library.font_bold.clone(),
+                                                        font_size: 62.,
+                                                        color: Color::WHITE,
+                                                    },
+                                                )
+                                                .with_alignment(TextAlignment::Center),
+                                                text_anchor: Anchor::Center,
+                                                ..Default::default()
+                                            },
+                                            Transform2::from_xy(200., 0.),
+                                            Depth::Inherit(0.04),
+                                        ));
+                                        parent.spawn((
+                                            Text2dBundle {
+                                                text: Text::from_section(
+                                                    format!("x{}", bog_sick),
+                                                    TextStyle {
+                                                        font: asset_library.font_bold.clone(),
+                                                        font_size: 62.,
+                                                        color: Color::BLACK,
+                                                    },
+                                                )
+                                                .with_alignment(TextAlignment::Center),
+                                                text_anchor: Anchor::Center,
+                                                ..Default::default()
+                                            },
+                                            Transform2::from_xy(200., -4.),
+                                            Depth::Inherit(0.03),
+                                        ));
+                                    }
+
                                     parent.spawn((
                                         Text2dBundle {
                                             text: Text::from_section(
-                                                "x0",
+                                                "",
                                                 TextStyle {
                                                     font: asset_library.font_bold.clone(),
                                                     font_size: 62.,
@@ -534,6 +593,7 @@ fn planning_update_buttons_and_info(
     mut add_unit_comp_events: EventWriter<AddUnitCompEvent>,
     clickable_query: Query<&Clickable>,
     hint_query: Query<Entity, With<PlanningHint>>,
+    sick_query: Query<Entity, With<PlanningSick>>,
     asset_library: Res<AssetLibrary>,
     articy: Res<Articy>,
 ) {
@@ -700,6 +760,22 @@ fn planning_update_buttons_and_info(
                     },
                     TextSection {
                         value: "Hold left mouse button to see hint".to_owned(),
+                        style: description_style.clone(),
+                    },
+                ])
+            }
+        }
+    }
+    for sick_entity in sick_query.iter() {
+        if let Ok(sick_clickable) = clickable_query.get(sick_entity) {
+            if sick_clickable.hovered {
+                info_text = Some(vec![
+                    TextSection {
+                        value: "Sickness\n".to_owned(),
+                        style: header_style.clone(),
+                    },
+                    TextSection {
+                        value: "Some of your units are suffering bog sickness!\nThey will become available again next battle.".to_owned(),
                         style: description_style.clone(),
                     },
                 ])
