@@ -60,7 +60,7 @@ struct RewindStage {
 struct RewindButton;
 
 #[derive(Component)]
-struct RewindButtonText;
+struct RewindText;
 
 #[derive(Component)]
 struct BattleInfo;
@@ -119,22 +119,18 @@ fn rewind_enter(
     ));
     commands
         .spawn((
-            SpriteBundle {
-                sprite: Sprite {
-                    color: Color::DARK_GRAY,
-                    custom_size: Some(Vec2::new(900., 150.)),
-                    ..Default::default()
-                },
+            SpriteSheetBundle {
+                texture_atlas: asset_library.image_atlas_rewind_battle.clone(),
                 ..Default::default()
             },
             Clickable {
                 shape: crate::CollisionShape::Rect {
                     offset: Vec2::ZERO,
-                    size: Vec2::new(900., 150.),
+                    size: Vec2::new(700., 100.),
                 },
                 ..Default::default()
             },
-            Transform2::from_xy(550., -500.),
+            Transform2::from_xy(590., -450.).with_scale(Vec2::splat(1.5)),
             Depth::Exact(0.1),
             RewindButton,
         ))
@@ -144,17 +140,17 @@ fn rewind_enter(
                     text: Text::from_section(
                         "",
                         TextStyle {
-                            font: asset_library.font_heading.clone(),
-                            font_size: 92.,
+                            font: asset_library.font_normal.clone(),
+                            font_size: 42.,
                             color: Color::WHITE,
                         },
                     )
                     .with_alignment(TextAlignment::Center),
                     ..Default::default()
                 },
-                Transform2::default(),
+                Transform2::from_xy(0., -75.),
                 Depth::Inherit(0.01),
-                RewindButtonText,
+                RewindText,
             ));
         });
     commands.spawn((
@@ -259,7 +255,7 @@ fn rewind_stage_click(
 }
 
 fn rewind_update_button(
-    mut rewind_button_text_query: Query<(&mut Sprite, &Clickable), With<RewindButton>>,
+    mut rewind_button_text_query: Query<(&mut TextureAtlasSprite, &Clickable), With<RewindButton>>,
     mut game_state: ResMut<GameState>,
     mut next_state: ResMut<NextState<AppState>>,
     mut sfx: ResMut<Sfx>,
@@ -270,12 +266,19 @@ fn rewind_update_button(
         return;
     }
     for (mut rewind_button_sprite, rewind_button_clickable) in rewind_button_text_query.iter_mut() {
+        if rewind_button_clickable.just_clicked() {
+            sfx.play(SfxKind::UiButtonClick);
+        } else if rewind_button_clickable.just_hovered() {
+            sfx.play(SfxKind::UiButtonHover);
+        } else if rewind_button_clickable.just_released() {
+            sfx.play(SfxKind::UiButtonRelease);
+        }
         if rewind_button_clickable.clicked {
-            rewind_button_sprite.color = Color::rgb(0.8, 0.8, 0.8);
+            rewind_button_sprite.index = 2;
         } else if rewind_button_clickable.hovered {
-            rewind_button_sprite.color = Color::GRAY;
+            rewind_button_sprite.index = 1;
         } else {
-            rewind_button_sprite.color = Color::DARK_GRAY;
+            rewind_button_sprite.index = 0;
         }
         if rewind_button_clickable.confirmed {
             sfx.play(SfxKind::UiButtonConfirm);
@@ -287,15 +290,15 @@ fn rewind_update_button(
 }
 
 fn rewind_update_button_text(
-    mut rewind_button_text_query: Query<&mut Text, With<RewindButtonText>>,
+    mut rewind_text_query: Query<&mut Text, With<RewindText>>,
     rewind_state: Res<RewindState>,
 ) {
-    for mut rewind_button_text_text in rewind_button_text_query.iter_mut() {
-        if let Some(section) = rewind_button_text_text.sections.get_mut(0) {
+    for mut rewind_text_text in rewind_text_query.iter_mut() {
+        if let Some(section) = rewind_text_text.sections.get_mut(0) {
             if rewind_state.selected == rewind_state.stages.len() - 1 {
-                section.value = "Replay Previous Battle".to_owned();
+                section.value = "".to_owned();
             } else {
-                section.value = "Replay Selected Battle".to_owned();
+                section.value = "Note: progress will be lost!".to_owned();
             }
         }
     }

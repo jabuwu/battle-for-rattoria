@@ -19,6 +19,7 @@ pub struct AssetLibrary {
     pub image_atlas_units: Handle<TextureAtlas>,
     pub image_atlas_war_chef_rewind: Handle<TextureAtlas>,
     pub image_atlas_start_battle: Handle<TextureAtlas>,
+    pub image_atlas_rewind_battle: Handle<TextureAtlas>,
     pub image_bog_sick: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
@@ -101,6 +102,14 @@ fn asset_library_load(
     asset_library.image_atlas_start_battle = texture_atlases.add(TextureAtlas::from_grid(
         asset_server.load("images/Battle_Start_Button.png"),
         Vec2::new(440., 135.),
+        1,
+        3,
+        None,
+        None,
+    ));
+    asset_library.image_atlas_rewind_battle = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/Select_Battle_Button.png"),
+        Vec2::new(700., 100.),
         1,
         3,
         None,
