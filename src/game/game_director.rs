@@ -104,9 +104,12 @@ fn game_director_change_state(
                 game_state
                     .available_army
                     .subtract_units(&battle_ended_event.report.dead_units);
-                game_state.quest.next();
-                game_state.checkpoint();
-                next_state.set(AppState::GameIntermission);
+                if game_state.quest.next() {
+                    game_state.checkpoint();
+                    next_state.set(AppState::GameIntermission);
+                } else {
+                    next_state.set(AppState::GameOutro);
+                }
             } else {
                 next_state.set(AppState::GameRewind);
             }

@@ -86,7 +86,7 @@ fn music_controller(
             local.planning_instance = None;
         }
         if local.battle_instance.is_some() {
-            channel.stop();
+            battle_channel.stop();
             local.battle_instance = None;
         }
     }
@@ -116,11 +116,12 @@ fn music_controller(
     local.playback_rate = local
         .playback_rate
         .lerp(target_playback_rate, time.delta_seconds_f64() * 5.);
-    let target_battle_crossfade = if app_state.0 == AppState::GameBattle {
-        1.
-    } else {
-        0.
-    };
+    let target_battle_crossfade =
+        if app_state.0 == AppState::GameBattle || app_state.0 == AppState::GameOutro {
+            1.
+        } else {
+            0.
+        };
     local.battle_crossfade = local
         .battle_crossfade
         .lerp(target_battle_crossfade, time.delta_seconds_f64() * 2.);

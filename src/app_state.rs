@@ -13,6 +13,7 @@ pub enum AppState {
     GamePlanning,
     GameBattle,
     GameRewind,
+    GameOutro,
     Sandbox,
 }
 
@@ -27,6 +28,7 @@ impl AppState {
             AppState::GamePlanning => true,
             AppState::GameBattle => true,
             AppState::GameRewind => true,
+            AppState::GameOutro => true,
             AppState::Sandbox => false,
         }
     }
