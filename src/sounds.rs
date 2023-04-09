@@ -118,7 +118,7 @@ impl Sounds {
                 ..Default::default()
             },
             dialogue_character: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
+                audio_sources: vec![asset_server.load("audio/UI/Dialogue Letter Tick 01.ogg")],
                 volume: 0.5,
                 pitch_variation: 0.3,
                 ..Default::default()
