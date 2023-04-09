@@ -5,6 +5,7 @@ use crate::cleanup_non_persistent_entities;
 #[derive(Default, Debug, Hash, PartialEq, Eq, Clone, Copy, States)]
 pub enum AppState {
     #[default]
+    Loading,
     MainMenu,
     GameStart,
     GameIntermission,
@@ -17,6 +18,7 @@ pub enum AppState {
 impl AppState {
     pub fn is_game_state(&self) -> bool {
         match self {
+            AppState::Loading => false,
             AppState::MainMenu => false,
             AppState::GameStart => true,
             AppState::GameIntermission => true,
