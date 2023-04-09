@@ -39,7 +39,7 @@ impl Quest {
             1 => match self.battle {
                 0 => UnitComposition {
                     peasants: 2,
-                    warriors: 2,
+                    warriors: 1,
                     archers: 0,
                     mages: 0,
                     brutes: 0,

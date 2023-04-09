@@ -307,7 +307,7 @@ fn rewind_update_battle_info(
                 );
             }
             if !game_state.inventory.is_empty() {
-                info += &format!("Items:\n");
+                info += &format!("\nItems:\n");
                 for item in game_state.inventory.items() {
                     info += &format!("{}\n", item.name());
                 }

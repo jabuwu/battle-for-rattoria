@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_audio_plus::{prelude::AudioPlusMixer, source::AudioPlusSource};
+use bevy_audio_plus::source::AudioPlusSource;
 use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, AudioInstance, AudioTween};
 use lerp::Lerp;
 
@@ -46,7 +46,6 @@ pub enum BattleJingleEvent {
 }
 
 fn music_controller(
-    mut mixer: ResMut<AudioPlusMixer>,
     mut local: Local<MusicController>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
     mut battle_jingle_events: EventReader<BattleJingleEvent>,

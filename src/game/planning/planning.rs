@@ -15,6 +15,7 @@ pub enum PlanningSystem {
     Start,
     Update,
     SpineReady,
+    SpineEvents,
     UpdateButtonsAndInfo,
     UpdateUnitCountText,
     UpdateFoodCountText,
@@ -49,6 +50,7 @@ impl Plugin for PlanningPlugin {
                     .in_set(PlanningSystem::SpineReady)
                     .in_set(SpineSet::OnReady),
             )
+            .add_system(planning_spine_events.in_set(PlanningSystem::SpineEvents))
             .add_system(
                 planning_update_buttons_and_info
                     .in_set(PlanningSystem::UpdateButtonsAndInfo)
@@ -209,12 +211,18 @@ fn planning_spine_ready(
     mut spine_query: Query<&mut Spine, With<PlanningSpine>>,
     mut commands: Commands,
     asset_library: Res<AssetLibrary>,
+    game_state: Res<GameState>,
 ) {
     for spine_ready_event in spine_ready_events.iter() {
         if let Ok(mut spine) = spine_query.get_mut(spine_ready_event.entity) {
             let _ = spine
                 .animation_state
                 .set_animation_by_name(0, "cauldron", true);
+            if !game_state.loot.summary(asset_library.as_ref()).is_empty() {
+                let _ = spine
+                    .animation_state
+                    .set_animation_by_name(3, "loot", false);
+            }
             for slot_index in 0..7 {
                 if let Some(spice) = spine_ready_event
                     .bones
@@ -458,6 +466,41 @@ fn planning_spine_ready(
                     });
                 }
             }
+            if let Some(loot_text_entity) = spine_ready_event.bones.get("loot_text") {
+                if let Some(mut loot_text_entity) = commands.get_entity(*loot_text_entity) {
+                    loot_text_entity.with_children(|parent| {
+                        parent.spawn((
+                            Text2dBundle {
+                                text: Text::from_sections(
+                                    game_state.loot.summary(asset_library.as_ref()),
+                                )
+                                .with_alignment(TextAlignment::Center),
+                                text_anchor: Anchor::TopCenter,
+                                ..Default::default()
+                            },
+                            Transform2::default(),
+                            Depth::Inherit(0.01),
+                        ));
+                    });
+                }
+            }
+        }
+    }
+}
+
+fn planning_spine_events(
+    mut spine_events: EventReader<SpineEvent>,
+    mut sfx: ResMut<Sfx>,
+    planning_query: Query<&PlanningSpine>,
+) {
+    for spine_event in spine_events.iter() {
+        match spine_event {
+            SpineEvent::Event { entity, name, .. } => {
+                if planning_query.contains(*entity) && name == "sfx_loot" {
+                    sfx.play(SfxKind::LootGet);
+                }
+            }
+            _ => {}
         }
     }
 }

@@ -46,6 +46,8 @@ pub enum SfxKind {
 
     CauldronAddSpice,
 
+    LootGet,
+
     JingleStart,
     JingleVictory,
     JingleDefeat,
@@ -69,6 +71,7 @@ impl SfxKind {
             Self::DialogueChoiceHover => &sounds.dialogue_proceed,
             Self::DialogueChoiceSelect => &sounds.dialogue_character,
             Self::CauldronAddSpice => &sounds.cauldron_add_spice,
+            Self::LootGet => &sounds.loot_get,
             Self::JingleStart => &sounds.jingle_start,
             Self::JingleVictory => &sounds.jingle_victory,
             Self::JingleDefeat => &sounds.jingle_defeat,

@@ -32,6 +32,8 @@ pub struct Sounds {
 
     pub cauldron_add_spice: AudioPlusSoundEffect,
 
+    pub loot_get: AudioPlusSoundEffect,
+
     pub jingle_start: AudioPlusSoundEffect,
     pub jingle_victory: AudioPlusSoundEffect,
     pub jingle_defeat: AudioPlusSoundEffect,
@@ -136,6 +138,15 @@ impl Sounds {
                     asset_server.load("audio/sfx/Spice - Add to Cauldron 01.ogg"),
                     asset_server.load("audio/sfx/Spice - Add to Cauldron 02.ogg"),
                     asset_server.load("audio/sfx/Spice - Add to Cauldron 03.ogg"),
+                ],
+                volume: 1.,
+                ..Default::default()
+            },
+            loot_get: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/UI/Loot Received 01.ogg"),
+                    asset_server.load("audio/sfx/UI/Loot Received 02.ogg"),
+                    asset_server.load("audio/sfx/UI/Loot Received 03.ogg"),
                 ],
                 volume: 1.,
                 ..Default::default()

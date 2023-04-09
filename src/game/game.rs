@@ -25,19 +25,23 @@ fn game_dialogue_events(
     for dialogue_event in dialogue_events.iter() {
         match &dialogue_event.instruction {
             ArticyDialogueInstruction::AddUnits(unit_kind, count) => {
+                game_state.loot.add_units(*unit_kind, *count as isize);
                 game_state
                     .available_army
                     .mutate_count(*unit_kind, |i| i + *count);
             }
             ArticyDialogueInstruction::SubtractUnits(unit_kind, count) => {
+                game_state.loot.add_units(*unit_kind, *count as isize * -1);
                 game_state
                     .available_army
                     .mutate_count(*unit_kind, |i| (i - *count).max(0));
             }
             ArticyDialogueInstruction::AddFood(count) => {
+                game_state.loot.add_food(*count as isize);
                 game_state.food += count;
             }
             ArticyDialogueInstruction::SubtractFood(count) => {
+                game_state.loot.add_food(*count as isize * -1);
                 if *count > game_state.food {
                     game_state.food = 0;
                 } else {
@@ -45,6 +49,7 @@ fn game_dialogue_events(
                 }
             }
             ArticyDialogueInstruction::AddItem(item) => {
+                game_state.loot.add_items(*item, 1);
                 game_state.inventory.add(*item);
             }
             ArticyDialogueInstruction::SetGlobalVariable(name, value) => {
