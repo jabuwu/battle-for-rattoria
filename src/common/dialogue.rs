@@ -6,7 +6,7 @@ use bevy_spine::{prelude::*, rusty_spine::Skin};
 use crate::{
     AddFixedEvent, ArticyDialogue, ArticyDialogueInstruction, ArticyDialogueKind, ArticyId,
     AssetLibrary, Clickable, CollisionShape, Depth, GameState, InteractionMode, InteractionSet,
-    InteractionStack, Persistent, Transform2, DEPTH_DIALOGUE,
+    InteractionStack, Persistent, Sfx, SfxKind, Transform2, DEPTH_DIALOGUE,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -508,7 +508,6 @@ fn dialogue_spine_events(
 
 fn dialogue_update(
     mut dialogue: ResMut<Dialogue>,
-    mut _dialogue_root_query: Query<Entity, With<DialogueRoot>>,
     mut dialogue_spine_query: Query<(&mut Spine, &mut DialogueSpine)>,
     mut visibility_query: Query<&mut Visibility>,
     mut text_query: Query<&mut Text>,
@@ -516,6 +515,7 @@ fn dialogue_update(
     mut sprite_query: Query<&mut Sprite>,
     mut dialogue_events: EventWriter<DialogueEvent>,
     mut game_state: ResMut<GameState>,
+    mut sfx: ResMut<Sfx>,
     dialogue_text_query: Query<(Entity, &DialogueText)>,
     dialogue_name_text_query: Query<Entity, With<DialogueNameText>>,
     dialogue_option_text_query: Query<(Entity, &DialogueOptionText, &Children)>,
@@ -539,6 +539,7 @@ fn dialogue_update(
                     dialogue_spine
                         .animation_state
                         .set_animation_by_name(0, "dialogue_in", false);
+                sfx.play(SfxKind::DialogueShow);
             }
         } else {
             if dialogue_spine_state.visible_in {
@@ -548,6 +549,7 @@ fn dialogue_update(
                     dialogue_spine
                         .animation_state
                         .set_animation_by_name(0, "dialogue_out", false);
+                sfx.play(SfxKind::DialogueHide);
             }
         }
         transitioning = dialogue_spine_state.transitioning;
@@ -653,6 +655,13 @@ fn dialogue_update(
                 if let Ok((_, dialogue_option_text_bg_clickable)) =
                     dialogue_option_text_bg_query.get(*dialogue_option_text_child)
                 {
+                    if dialogue_option_text_bg_clickable.just_hovered() {
+                        if let DialogueAction::Choice { choices } = dialogue_action {
+                            if dialogue_option_text.0 < choices.len() {
+                                sfx.play(SfxKind::DialogueChoiceHover);
+                            }
+                        }
+                    }
                     if dialogue_option_text_bg_clickable.hovered {
                         hovered = true;
                     }
@@ -726,7 +735,11 @@ fn dialogue_update(
                         == typewriter_text(&text, 99999, false).len()
                     {
                         dialogue.show(children, game_state.as_mut());
+                        if dialogue.action.is_some() {
+                            sfx.play(SfxKind::DialogueProceed);
+                        }
                     } else {
+                        sfx.play(SfxKind::DialogueSkipText);
                         dialogue.chars = 99999.;
                     }
                 }
@@ -741,6 +754,7 @@ fn dialogue_update(
                             false
                         };
                         if clicked || keys.just_pressed(*dialogue_key) {
+                            sfx.play(SfxKind::DialogueChoiceSelect);
                             dialogue.show(dialogue_line_choice.1.clone(), game_state.as_mut());
                             break;
                         }
@@ -788,7 +802,7 @@ fn dialogue_update_interaction(
     interaction_stack.set_wants_interaction(InteractionMode::Dialogue, dialogue.action.is_some());
 }
 
-fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
+pub fn typewriter_text(string: &str, cap_chars: usize, unit: bool) -> String {
     let mut wrapped_string = String::new();
     for line in string.split('\n') {
         let mut chars = 0;

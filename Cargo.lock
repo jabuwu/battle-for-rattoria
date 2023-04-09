@@ -439,7 +439,7 @@ dependencies = [
 [[package]]
 name = "bevy_audio_plus"
 version = "0.1.0"
-source = "git+https://github.com/jabuwu/bevy_audio_plus?rev=cd1607ee479432851e2c815993a1c6bd24fc4141#cd1607ee479432851e2c815993a1c6bd24fc4141"
+source = "git+https://github.com/jabuwu/bevy_audio_plus?rev=edcee8e0b6527296540187d93c1601f506f45291#edcee8e0b6527296540187d93c1601f506f45291"
 dependencies = [
  "bevy",
  "bevy_kira_audio",

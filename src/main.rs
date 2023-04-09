@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy_audio_plus::prelude::AudioPlusListener;
 use bevy_game::{
     AppStatePlugin, AssetLibraryPlugin, CommonPlugins, GameDirector, GamePlugins, MainMenuPlugins,
     Persistent,
@@ -33,7 +34,7 @@ fn main() {
 }
 
 fn setup(mut commands: Commands) {
-    commands.spawn((Camera2dBundle::default(), Persistent));
+    commands.spawn((Camera2dBundle::default(), AudioPlusListener, Persistent));
     commands.spawn((GameDirector, Persistent));
 }
 

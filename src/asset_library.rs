@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_kira_audio::AudioSource;
 use bevy_spine::SkeletonData;
+
+use crate::Sounds;
 
 #[derive(Resource, Default)]
 pub struct AssetLibrary {
@@ -8,7 +9,6 @@ pub struct AssetLibrary {
     pub font_heading: Handle<Font>,
     pub font_normal: Handle<Font>,
     pub font_bold: Handle<Font>,
-    pub sound_placeholder: Handle<AudioSource>,
     pub image_background_bg: Handle<Image>,
     pub image_planning_bg: Handle<Image>,
     pub image_vignette: Handle<Image>,
@@ -23,6 +23,8 @@ pub struct AssetLibrary {
     pub spine_dialogue: Handle<SkeletonData>,
     pub spine_battle_splash: Handle<SkeletonData>,
     pub spine_planning: Handle<SkeletonData>,
+
+    pub sounds: Sounds,
 }
 
 pub struct AssetLibraryPlugin;
@@ -48,7 +50,6 @@ fn asset_library_load(
     asset_library.font_normal = asset_server.load("fonts/EBGaramond-SemiBold.ttf");
     asset_library.font_bold = asset_server.load("fonts/EBGaramond-ExtraBold.ttf");
 
-    asset_library.sound_placeholder = asset_server.load("audio/flying.ogg");
     asset_library.image_background_bg = asset_server.load("images/battlefield_bg.png");
     asset_library.image_planning_bg = asset_server.load("images/Background_Camp.png");
     asset_library.image_vignette = asset_server.load("images/vignette.png");
@@ -111,4 +112,6 @@ fn asset_library_load(
         asset_server.load("spines/planning/skeleton.skel"),
         asset_server.load("spines/planning/planning.atlas"),
     ));
+
+    asset_library.sounds = Sounds::setup(asset_server.as_ref());
 }

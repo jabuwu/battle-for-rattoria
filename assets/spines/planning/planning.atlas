@@ -41,6 +41,9 @@ offsets:6,7,550,550
 frosty_web_strands
 bounds:2756,384,382,314
 offsets:41,27,466,394
+hint
+bounds:2650,233,102,102
+offsets:9,9,120,120
 squirt_blop_berries
 bounds:2294,5,354,330
 offsets:54,21,466,394

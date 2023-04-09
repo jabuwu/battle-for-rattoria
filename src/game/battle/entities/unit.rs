@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_audio_plus::prelude::*;
 use bevy_spine::prelude::*;
 use bitflags::bitflags;
 use enum_map::{Enum, EnumMap};
@@ -11,8 +12,8 @@ use crate::{
     CollisionShape, DamageInflictEvent, DamageKind, DamageModifier, DamageModifiers,
     DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
-    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, Transform2,
-    UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, Target, Team, TempSfxBundle,
+    Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -566,6 +567,12 @@ fn unit_damage_fx(
                     SpineFx,
                 ));
             }
+            commands.spawn(TempSfxBundle {
+                audio_source: AudioPlusSource::new(asset_library.sounds.unit_damage.clone())
+                    .as_playing(),
+                transform2: Transform2::from_translation(unit_transform.translation().truncate()),
+                ..Default::default()
+            });
         }
     }
 }
@@ -733,13 +740,20 @@ fn unit_attack(
 fn unit_die(
     mut health_die_events: EventReader<HealthDieEvent>,
     mut commands: Commands,
-    unit_query: Query<&Unit>,
+    unit_query: Query<&GlobalTransform, With<Unit>>,
+    asset_library: Res<AssetLibrary>,
 ) {
     for health_die_event in health_die_events.iter() {
-        if unit_query.contains(health_die_event.entity) {
+        if let Ok(unit_transform) = unit_query.get(health_die_event.entity) {
             if let Some(entity) = commands.get_entity(health_die_event.entity) {
                 entity.despawn_recursive();
             }
+            commands.spawn(TempSfxBundle {
+                audio_source: AudioPlusSource::new(asset_library.sounds.unit_die.clone())
+                    .as_playing(),
+                transform2: Transform2::from_translation(unit_transform.translation().truncate()),
+                ..Default::default()
+            });
         }
     }
 }

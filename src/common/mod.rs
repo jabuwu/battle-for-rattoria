@@ -12,6 +12,7 @@ mod frames_to_live;
 mod hash_context;
 mod interaction_stack;
 mod plugins;
+mod temp_sfx;
 mod transform2;
 mod y_order;
 
@@ -29,5 +30,6 @@ pub use frames_to_live::*;
 pub use hash_context::*;
 pub use interaction_stack::*;
 pub use plugins::*;
+pub use temp_sfx::*;
 pub use transform2::*;
 pub use y_order::*;

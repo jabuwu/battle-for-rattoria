@@ -4,9 +4,9 @@ use bevy_spine::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::{
-    AddFixedEvent, Articy, AssetLibrary, Clickable, ClickableSystem, CollisionShape, Depth,
-    Dialogue, GameState, InteractionMode, InteractionSet, InteractionStack, Item,
-    PersistentGameState, Script, SpawnSet, Transform2, UnitKind, UpdateSet,
+    typewriter_text, AddFixedEvent, Articy, AssetLibrary, Clickable, ClickableSystem,
+    CollisionShape, Depth, Dialogue, GameState, InteractionMode, InteractionSet, InteractionStack,
+    Item, PersistentGameState, Script, Sfx, SfxKind, SpawnSet, Transform2, UnitKind, UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -128,6 +128,9 @@ struct PlanningStartBattle;
 
 #[derive(Component)]
 struct PlanningItem(usize);
+
+#[derive(Component)]
+struct PlanningHint;
 
 fn planning_start(
     mut start_events: EventReader<PlanningStartEvent>,
@@ -413,6 +416,24 @@ fn planning_spine_ready(
                     });
                 }
             }
+            if let Some(hint_entity) = spine_ready_event.bones.get("hint") {
+                if let Some(mut hint_entity) = commands.get_entity(*hint_entity) {
+                    hint_entity.with_children(|parent| {
+                        parent.spawn((
+                            Clickable {
+                                shape: CollisionShape::Rect {
+                                    offset: Vec2::ZERO,
+                                    size: Vec2::new(120., 120.),
+                                },
+                                ..Default::default()
+                            },
+                            TransformBundle::default(),
+                            Transform2::default(),
+                            PlanningHint,
+                        ));
+                    });
+                }
+            }
         }
     }
 }
@@ -437,12 +458,14 @@ fn planning_update(
 }
 
 fn planning_update_buttons_and_info(
-    mut button_query: Query<(&mut TextureAtlasSprite, &PlanningButton, &Clickable)>,
+    mut button_query: Query<(Entity, &mut TextureAtlasSprite, &PlanningButton)>,
     mut planning_spine_query: Query<&mut Spine, With<PlanningSpine>>,
     mut game_state: ResMut<GameState>,
     mut info_text_query: Query<&mut Text, With<PlanningInfoText>>,
+    mut sfx: ResMut<Sfx>,
+    clickable_query: Query<&Clickable>,
+    hint_query: Query<Entity, With<PlanningHint>>,
     asset_library: Res<AssetLibrary>,
-    interaction_stack: Res<InteractionStack>,
 ) {
     let mut info_text = None;
     let header_style = TextStyle {
@@ -460,86 +483,125 @@ fn planning_update_buttons_and_info(
         font_size: 52.,
         color: Color::WHITE,
     };
-    for (mut button_sprite, button, button_clickable) in button_query.iter_mut() {
-        let active = match button.kind {
-            PlanningButtonKind::Unit(unit) => game_state.available_army.get_count(unit) > 0,
-            PlanningButtonKind::Item(..) => game_state.used_items.is_empty(),
-            PlanningButtonKind::Noop => false,
-        };
-        let can_click = interaction_stack.can_interact(InteractionMode::Game);
-        if button_clickable.clicked && active && can_click {
-            button_sprite.index = button.image_index + 14;
-        } else if button_clickable.hovered && active && can_click {
-            button_sprite.index = button.image_index + 7;
-        } else {
-            button_sprite.index = button.image_index;
-        }
-        button_sprite.color = if active {
-            Color::WHITE
-        } else {
-            Color::rgba(0.5, 0.5, 0.5, 0.9)
-        };
-        if button_clickable.hovered {
-            match button.kind {
-                PlanningButtonKind::Item(item) => {
-                    info_text = Some(vec![TextSection {
-                        value: item.name().to_owned(),
-                        style: header_style.clone(),
-                    }])
+    for (button_entity, mut button_sprite, button) in button_query.iter_mut() {
+        if let Ok(button_clickable) = clickable_query.get(button_entity) {
+            let active = match button.kind {
+                PlanningButtonKind::Unit(unit) => game_state.available_army.get_count(unit) > 0,
+                PlanningButtonKind::Item(..) => game_state.consumed_items.is_empty(),
+                PlanningButtonKind::Noop => false,
+            };
+            if active {
+                if button_clickable.just_clicked() {
+                    sfx.play(SfxKind::UiButtonClick);
+                } else if button_clickable.just_hovered() {
+                    sfx.play(SfxKind::UiButtonHover);
+                } else if button_clickable.just_released() {
+                    sfx.play(SfxKind::UiButtonRelease);
                 }
-                PlanningButtonKind::Unit(unit) => {
-                    info_text = Some(vec![
-                        TextSection {
-                            value: format!("{}\n", unit.name()),
-                            style: header_style.clone(),
-                        },
-                        TextSection {
-                            value: format!("{}\n\n", unit.description()),
-                            style: description_style.clone(),
-                        },
-                        TextSection {
-                            value: format!("Food Cost: "),
-                            style: bold_style.clone(),
-                        },
-                        TextSection {
-                            value: format!("{}", unit.stats().cost),
-                            style: description_style.clone(),
-                        },
-                    ])
-                }
-                PlanningButtonKind::Noop => {}
             }
-        }
-        if button_clickable.confirmed && active && can_click {
-            match button.kind {
-                PlanningButtonKind::Item(item) => {
-                    for mut planning_spine in planning_spine_query.iter_mut() {
-                        let _ = planning_spine.skeleton.set_skin_by_name(item.skin_name());
-                        let _ = planning_spine.animation_state.set_animation_by_name(
-                            1,
-                            "insert_spices",
-                            false,
-                        );
+            if button_clickable.clicked && active {
+                button_sprite.index = button.image_index + 14;
+            } else if button_clickable.hovered && active {
+                button_sprite.index = button.image_index + 7;
+            } else {
+                button_sprite.index = button.image_index;
+            }
+            button_sprite.color = if active {
+                Color::WHITE
+            } else {
+                Color::rgba(0.5, 0.5, 0.5, 0.9)
+            };
+            if button_clickable.hovered {
+                match button.kind {
+                    PlanningButtonKind::Item(item) => {
+                        info_text = Some(vec![TextSection {
+                            value: item.name().to_owned(),
+                            style: header_style.clone(),
+                        }])
                     }
-                    game_state.used_items.push(item);
-                    game_state.inventory.remove_last(item);
+                    PlanningButtonKind::Unit(unit) => {
+                        info_text = Some(vec![
+                            TextSection {
+                                value: format!("{}\n", unit.name()),
+                                style: header_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("{}\n\n", unit.description()),
+                                style: description_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("Food Cost: "),
+                                style: bold_style.clone(),
+                            },
+                            TextSection {
+                                value: format!("{}", unit.stats().cost),
+                                style: description_style.clone(),
+                            },
+                        ])
+                    }
+                    PlanningButtonKind::Noop => {}
                 }
-                PlanningButtonKind::Unit(unit_kind) => {
-                    let unit_cost = unit_kind.stats().cost;
-                    if game_state.available_army.get_count(unit_kind) > 0
-                        && game_state.food >= unit_cost
-                    {
-                        game_state.fed_army.mutate_count(unit_kind, |i| i + 1);
-                        game_state.available_army.mutate_count(unit_kind, |i| i - 1);
-                        game_state.food -= unit_cost;
+            }
+            if button_clickable.confirmed && active {
+                match button.kind {
+                    PlanningButtonKind::Item(item) => {
                         for mut planning_spine in planning_spine_query.iter_mut() {
-                            let _ = planning_spine
-                                .animation_state
-                                .set_animation_by_name(1, "food_eat", false);
+                            let _ = planning_spine.skeleton.set_skin_by_name(item.skin_name());
+                            let _ = planning_spine.animation_state.set_animation_by_name(
+                                1,
+                                "insert_spices",
+                                false,
+                            );
+                        }
+                        sfx.play(SfxKind::CauldronAddSpice);
+                        game_state.consumed_items.push(item);
+                        game_state.inventory.remove_last(item);
+                    }
+                    PlanningButtonKind::Unit(unit_kind) => {
+                        let unit_cost = unit_kind.stats().cost;
+                        if game_state.available_army.get_count(unit_kind) > 0
+                            && game_state.food >= unit_cost
+                        {
+                            game_state.fed_army.mutate_count(unit_kind, |i| i + 1);
+                            game_state.available_army.mutate_count(unit_kind, |i| i - 1);
+                            game_state.food -= unit_cost;
+                            for mut planning_spine in planning_spine_query.iter_mut() {
+                                let _ = planning_spine
+                                    .animation_state
+                                    .set_animation_by_name(1, "food_eat", false);
+                            }
+                            sfx.play(SfxKind::UiFeedUnit);
                         }
                     }
+                    PlanningButtonKind::Noop => {}
                 }
-                PlanningButtonKind::Noop => {}
+            }
+        }
+    }
+    for hint_entity in hint_query.iter() {
+        if let Ok(hint_clickable) = clickable_query.get(hint_entity) {
+            if hint_clickable.clicked {
+                info_text = Some(vec![
+                    TextSection {
+                        value: "Battle Hint\n".to_owned(),
+                        style: header_style.clone(),
+                    },
+                    TextSection {
+                        value: typewriter_text(game_state.quest.hint(), 999, false),
+                        style: description_style.clone(),
+                    },
+                ])
+            } else if hint_clickable.hovered {
+                info_text = Some(vec![
+                    TextSection {
+                        value: "Battle Hint\n".to_owned(),
+                        style: header_style.clone(),
+                    },
+                    TextSection {
+                        value: "Hold left mouse button to see hint".to_owned(),
+                        style: description_style.clone(),
+                    },
+                ])
             }
         }
     }

@@ -31,7 +31,7 @@ default = ["bevy/animation", "bevy/bevy_asset", "bevy/bevy_scene", "bevy/bevy_wi
 [dependencies]
 bevy = { version = "0.10.1", default-features = false }
 bevy_kira_audio = "0.15"
-bevy_audio_plus = { git = "https://github.com/jabuwu/bevy_audio_plus", rev = "cd1607ee479432851e2c815993a1c6bd24fc4141" }
+bevy_audio_plus = { git = "https://github.com/jabuwu/bevy_audio_plus", rev = "edcee8e0b6527296540187d93c1601f506f45291" }
 bevy_spine = { version = "0.5", features = [ "workaround_5732" ] }
 bevy_egui = "0.20"
 rand = { version = "0.8.3" }

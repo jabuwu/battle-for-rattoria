@@ -4,7 +4,8 @@ use strum::IntoEnumIterator;
 
 use crate::{
     in_game_state, AppState, Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue,
-    DialogueEvent, GameState, Item, PersistentGameState, Script, UnitComposition, UnitKind,
+    DialogueEvent, GameState, Item, PersistentGameState, Script, Sfx, SfxKind, UnitComposition,
+    UnitKind,
 };
 
 pub struct GamePlugin;
@@ -71,6 +72,7 @@ fn game_debug(
     mut debug_draw_settings: ResMut<DebugDrawSettings>,
     mut game_state: ResMut<GameState>,
     mut dialogue: ResMut<Dialogue>,
+    mut sfx: ResMut<Sfx>,
     articy: Res<Articy>,
 ) {
     egui::Window::new("Debug")
@@ -204,6 +206,13 @@ fn game_debug(
                 for item in Item::iter() {
                     if ui.button(format!("Add {}", item.name())).clicked() {
                         game_state.inventory.add(item);
+                    }
+                }
+            });
+            ui.collapsing("Sounds", |ui| {
+                for sfx_kind in SfxKind::iter() {
+                    if ui.button(format!("{:?}", sfx_kind)).clicked() {
+                        sfx.play(sfx_kind);
                     }
                 }
             });
