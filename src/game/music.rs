@@ -132,7 +132,7 @@ fn music_controller(
         .and_then(|i| audio_instances.get_mut(i))
     {
         planning_instance.set_volume(
-            (1. - local.battle_crossfade) * local.volume,
+            (1. - local.battle_crossfade) * local.volume * 0.3,
             AudioTween::linear(Duration::from_millis(0)),
         );
         planning_instance.set_playback_rate(
