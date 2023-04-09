@@ -9,6 +9,7 @@ pub struct Sounds {
     pub ui_button_click: AudioPlusSoundEffect,
     pub ui_button_hover: AudioPlusSoundEffect,
     pub ui_button_release: AudioPlusSoundEffect,
+    pub ui_button_confirm: AudioPlusSoundEffect,
     pub ui_feed_unit: AudioPlusSoundEffect,
 
     // when dialogue box appears
@@ -61,6 +62,11 @@ impl Sounds {
             },
             ui_button_release: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Release 01.ogg")],
+                volume: 1.,
+                ..Default::default()
+            },
+            ui_button_confirm: AudioPlusSoundEffect {
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Confirm 01.ogg")],
                 volume: 1.,
                 ..Default::default()
             },

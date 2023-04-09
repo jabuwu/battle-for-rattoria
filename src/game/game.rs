@@ -3,9 +3,8 @@ use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
 use crate::{
-    in_game_state, AppState, Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue,
-    DialogueEvent, GameState, Item, PersistentGameState, Script, Sfx, SfxKind, UnitComposition,
-    UnitKind,
+    Articy, ArticyDialogueInstruction, DebugDrawSettings, Dialogue, DialogueEvent, GameState, Item,
+    PersistentGameState, Script, Sfx, SfxKind, UnitComposition, UnitKind,
 };
 
 pub struct GamePlugin;
@@ -16,9 +15,6 @@ impl Plugin for GamePlugin {
             .init_resource::<PersistentGameState>()
             .add_system(game_dialogue_events)
             .add_system(game_debug);
-        if app.world.contains_resource::<State<AppState>>() {
-            app.add_system(game_update.run_if(in_game_state));
-        }
     }
 }
 
@@ -58,12 +54,6 @@ fn game_dialogue_events(
                   game_state.intel.can_see[*unit_kind] = true;
               }*/
         }
-    }
-}
-
-fn game_update(mut next_app_state: ResMut<NextState<AppState>>, keys: Res<Input<KeyCode>>) {
-    if keys.just_pressed(KeyCode::Key0) {
-        next_app_state.set(AppState::MainMenu);
     }
 }
 

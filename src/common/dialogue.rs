@@ -723,23 +723,25 @@ fn dialogue_update(
             }
             choice_y += height;
         }
+        let fast_skip = keys.pressed(KeyCode::LShift) || keys.pressed(KeyCode::RShift);
         match dialogue_action {
             DialogueAction::Text { children, text, .. } => {
                 if keys.just_pressed(KeyCode::Space)
                     || mouse_buttons.just_pressed(MouseButton::Left)
-                    || keys.pressed(KeyCode::LControl)
-                    || keys.pressed(KeyCode::RControl)
+                    || fast_skip
                 {
                     let children = children.clone();
                     if typewriter_text(&text, dialogue.chars as usize, false).len()
                         == typewriter_text(&text, 99999, false).len()
                     {
                         dialogue.show(children, game_state.as_mut());
-                        if dialogue.action.is_some() {
+                        if dialogue.action.is_some() && !fast_skip {
                             sfx.play(SfxKind::DialogueProceed);
                         }
                     } else {
-                        sfx.play(SfxKind::DialogueSkipText);
+                        if !fast_skip {
+                            sfx.play(SfxKind::DialogueSkipText);
+                        }
                         dialogue.chars = 99999.;
                     }
                 }

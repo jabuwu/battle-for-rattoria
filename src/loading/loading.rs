@@ -31,11 +31,7 @@ impl Plugin for LoadingPlugin {
                         .run_if(in_state(AppState::Loading))
                         .after(LoadingSystem::CheckProgress),
                 )
-                .add_system(
-                    loading_check_progress
-                        .in_set(LoadingSystem::CheckProgress)
-                        .run_if(in_state(AppState::Loading)),
-                );
+                .add_system(loading_check_progress.in_set(LoadingSystem::CheckProgress));
         }
     }
 }
@@ -65,7 +61,7 @@ fn loading_enter(mut commands: Commands) {
         SpriteBundle {
             sprite: Sprite {
                 color: Color::WHITE,
-                custom_size: Some(Vec2::new(400., 100.)),
+                custom_size: Some(Vec2::new(800., 100.)),
                 ..Default::default()
             },
             ..Default::default()
@@ -84,7 +80,7 @@ fn loading_progress(
     for mut loading_bar_transform in loading_bar_query.iter_mut() {
         loading_bar_transform.scale.x = loading.progress;
     }
-    if loading.progress == 1. {
+    if loading.progress >= 1. {
         next_state.set(AppState::MainMenu);
     }
 }
@@ -116,7 +112,7 @@ macro_rules! loading_check_progress {
 
 // game jam'd
 loading_check_progress!(
-    67,
+    70,
     images: Image,
     audio_sources: AudioSource,
     fonts: Font,

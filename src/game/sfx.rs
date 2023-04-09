@@ -30,6 +30,7 @@ pub enum SfxKind {
     UiButtonClick,
     UiButtonHover,
     UiButtonRelease,
+    UiButtonConfirm,
     UiFeedUnit,
 
     DialogueShow,
@@ -53,6 +54,7 @@ impl SfxKind {
             Self::UiButtonClick => &sounds.ui_button_click,
             Self::UiButtonHover => &sounds.ui_button_hover,
             Self::UiButtonRelease => &sounds.ui_button_release,
+            Self::UiButtonConfirm => &sounds.ui_button_confirm,
             Self::UiFeedUnit => &sounds.ui_feed_unit,
             Self::DialogueShow => &sounds.dialogue_show,
             Self::DialogueHide => &sounds.dialogue_hide,

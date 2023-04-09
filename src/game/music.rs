@@ -185,7 +185,8 @@ fn music_controller(
         }
     }
 
-    let wants_ambient_battle = app_state.0 == AppState::GameBattle;
+    let wants_ambient_battle =
+        app_state.0 == AppState::MainMenu || app_state.0 == AppState::GameBattle;
     if let Some(ambient_battle) = local.ambient_battle {
         if !wants_ambient_battle {
             if let Some(entity) = commands.get_entity(ambient_battle) {

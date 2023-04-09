@@ -20716,7 +20716,7 @@
               "g": 0.75686276,
               "b": 0.8
             },
-            "Text": "PROTIP: Hold CTRL to quickly skip dialogue you've already read. Do not skip dialogue you haven't read as it's important!",
+            "Text": "PROTIP: Hold SHIFT to quickly skip dialogue you've already read. Do not skip dialogue you haven't read as it's important!",
             "ExternalId": "",
             "Position": {
               "x": 600.0,

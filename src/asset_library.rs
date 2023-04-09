@@ -9,10 +9,13 @@ pub struct AssetLibrary {
     pub font_heading: Handle<Font>,
     pub font_normal: Handle<Font>,
     pub font_bold: Handle<Font>,
+    pub image_menu_bg: Handle<Image>,
     pub image_background_bg: Handle<Image>,
     pub image_planning_bg: Handle<Image>,
     pub image_vignette: Handle<Image>,
     pub image_atlas_planning_buttons: Handle<TextureAtlas>,
+    pub image_atlas_play: Handle<TextureAtlas>,
+    pub image_play: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
     pub spine_rat_archer: Handle<SkeletonData>,
@@ -50,6 +53,7 @@ fn asset_library_load(
     asset_library.font_normal = asset_server.load("fonts/EBGaramond-SemiBold.ttf");
     asset_library.font_bold = asset_server.load("fonts/EBGaramond-ExtraBold.ttf");
 
+    asset_library.image_menu_bg = asset_server.load("images/Logo_with_Background.png");
     asset_library.image_background_bg = asset_server.load("images/battlefield_bg.png");
     asset_library.image_planning_bg = asset_server.load("images/Background_Camp.png");
     asset_library.image_vignette = asset_server.load("images/vignette.png");
@@ -59,6 +63,14 @@ fn asset_library_load(
         Vec2::new(230., 230.),
         7,
         6,
+        None,
+        None,
+    ));
+    asset_library.image_atlas_play = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/play.png"),
+        Vec2::new(400., 200.),
+        1,
+        3,
         None,
         None,
     ));
