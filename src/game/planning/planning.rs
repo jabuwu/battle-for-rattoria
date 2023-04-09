@@ -480,14 +480,17 @@ fn planning_spine_ready(
                 if let Some(mut start_battle_entity) = commands.get_entity(*start_battle_entity) {
                     start_battle_entity.with_children(|parent| {
                         parent.spawn((
+                            SpriteSheetBundle {
+                                texture_atlas: asset_library.image_atlas_start_battle.clone(),
+                                ..Default::default()
+                            },
                             Clickable {
                                 shape: CollisionShape::Rect {
                                     offset: Vec2::ZERO,
-                                    size: Vec2::new(375., 150.),
+                                    size: Vec2::new(430., 125.),
                                 },
                                 ..Default::default()
                             },
-                            TransformBundle::default(),
                             Transform2::default(),
                             PlanningStartBattle,
                         ));
@@ -928,10 +931,27 @@ fn planning_start_battle(
     mut planning_state: ResMut<PlanningState>,
     mut dialogue: ResMut<Dialogue>,
     mut game_state: ResMut<GameState>,
-    start_battle_query: Query<&Clickable, With<PlanningStartBattle>>,
+    mut sfx: ResMut<Sfx>,
+    mut start_battle_query: Query<(&mut TextureAtlasSprite, &Clickable), With<PlanningStartBattle>>,
     articy: Res<Articy>,
 ) {
-    for start_battle_clickable in start_battle_query.iter() {
+    for (mut start_battle_sprite, start_battle_clickable) in start_battle_query.iter_mut() {
+        if start_battle_clickable.just_clicked() {
+            sfx.play(SfxKind::UiButtonClick);
+        }
+        if start_battle_clickable.just_hovered() {
+            sfx.play(SfxKind::UiButtonHover);
+        }
+        if start_battle_clickable.just_released() {
+            sfx.play(SfxKind::UiButtonRelease);
+        }
+        if start_battle_clickable.clicked {
+            start_battle_sprite.index = 2;
+        } else if start_battle_clickable.hovered {
+            start_battle_sprite.index = 1;
+        } else {
+            start_battle_sprite.index = 0;
+        }
         if start_battle_clickable.confirmed {
             if let Some(tutorial_dialogue) = tutorial_dialogue(game_state.as_ref()) {
                 dialogue.queue(
@@ -939,6 +959,7 @@ fn planning_start_battle(
                     game_state.as_mut(),
                 );
             } else {
+                sfx.play(SfxKind::UiButtonConfirm);
                 planning_state.start = true;
             }
         }
@@ -1029,7 +1050,7 @@ fn planning_ui(
 }
 
 fn tutorial_dialogue(game_state: &GameState) -> Option<&'static str> {
-    if game_state.quest.war_chef == 0 {
+    /*if game_state.quest.war_chef == 0 {
         match game_state.quest.battle {
             0 => {
                 if game_state.available_army.peasants != 0 {
@@ -1058,5 +1079,6 @@ fn tutorial_dialogue(game_state: &GameState) -> Option<&'static str> {
         Some("MustFeedUnits")
     } else {
         None
-    }
+    }*/
+    None
 }

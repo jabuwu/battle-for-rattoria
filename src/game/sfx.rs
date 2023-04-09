@@ -100,7 +100,6 @@ fn sfx_play(
     mut sfx: ResMut<Sfx>,
     mut source_query: Query<(&mut AudioPlusSource, &SfxKind)>,
     mut battle_jingle_events: EventWriter<BattleJingleEvent>,
-    keys: Res<Input<KeyCode>>,
 ) {
     for kind in take(&mut sfx.queue) {
         for (mut source, source_kind) in source_query.iter_mut() {
@@ -114,8 +113,5 @@ fn sfx_play(
             SfxKind::JingleDefeat => battle_jingle_events.send(BattleJingleEvent::Defeat),
             _ => {}
         }
-    }
-    if keys.just_pressed(KeyCode::Key5) {
-        sfx.play(SfxKind::UiButtonRelease);
     }
 }

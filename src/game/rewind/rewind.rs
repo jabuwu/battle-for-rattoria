@@ -5,7 +5,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     AppState, Articy, AssetLibrary, Clickable, ClickableSystem, Depth, Dialogue, GameState,
-    PersistentGameState, Script, Transform2, UnitKind,
+    PersistentGameState, Script, Sfx, SfxKind, Transform2, UnitKind,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -163,7 +163,7 @@ fn rewind_enter(
                 TextSection {
                     value: "Checkpoint Info\n\n".to_owned(),
                     style: TextStyle {
-                        font: asset_library.font_normal.clone(),
+                        font: asset_library.font_heading.clone(),
                         font_size: 82.,
                         color: Color::WHITE,
                     },
@@ -197,16 +197,17 @@ fn rewind_enter(
             let enabled = stage_index < rewind_state.stages.len();
             let selected = stage_index == rewind_state.selected;
             let mut entity = commands.spawn((
-                SpriteBundle {
-                    sprite: Sprite {
+                SpriteSheetBundle {
+                    sprite: TextureAtlasSprite {
                         color: match (selected, enabled) {
                             (true, _) => Color::WHITE,
                             (_, true) => Color::GRAY,
-                            _ => Color::DARK_GRAY,
+                            _ => Color::rgb(0.1, 0.1, 0.1),
                         },
-                        custom_size: Some(Vec2::splat(200.)),
+                        index: y as usize,
                         ..Default::default()
                     },
+                    texture_atlas: asset_library.image_atlas_war_chef_rewind.clone(),
                     ..Default::default()
                 },
                 Transform2::from_xy(x as f32 * 250. - 960., y as f32 * -250. + 430.),
@@ -232,7 +233,8 @@ fn rewind_enter(
 
 fn rewind_stage_click(
     mut rewind_state: ResMut<RewindState>,
-    mut rewind_stage_query: Query<(&mut Sprite, &RewindStage, &Clickable)>,
+    mut rewind_stage_query: Query<(&mut TextureAtlasSprite, &RewindStage, &Clickable)>,
+    mut sfx: ResMut<Sfx>,
     dialogue: Res<Dialogue>,
 ) {
     if dialogue.active() {
@@ -242,6 +244,7 @@ fn rewind_stage_click(
         rewind_stage_query.iter_mut()
     {
         if rewind_stage_clickable.confirmed {
+            sfx.play(SfxKind::UiButtonClick);
             rewind_state.selected = rewind_stage.index;
         }
 
@@ -250,7 +253,7 @@ fn rewind_stage_click(
         rewind_stage_sprite.color = match (selected, enabled) {
             (true, _) => Color::WHITE,
             (_, true) => Color::GRAY,
-            _ => Color::DARK_GRAY,
+            _ => Color::rgb(0.1, 0.1, 0.1),
         };
     }
 }
@@ -259,6 +262,7 @@ fn rewind_update_button(
     mut rewind_button_text_query: Query<(&mut Sprite, &Clickable), With<RewindButton>>,
     mut game_state: ResMut<GameState>,
     mut next_state: ResMut<NextState<AppState>>,
+    mut sfx: ResMut<Sfx>,
     rewind_state: Res<RewindState>,
     dialogue: Res<Dialogue>,
 ) {
@@ -274,6 +278,7 @@ fn rewind_update_button(
             rewind_button_sprite.color = Color::DARK_GRAY;
         }
         if rewind_button_clickable.confirmed {
+            sfx.play(SfxKind::UiButtonConfirm);
             *game_state = rewind_state.stages[rewind_state.selected].clone();
             game_state.checkpoint();
             next_state.set(AppState::GameIntermission);
