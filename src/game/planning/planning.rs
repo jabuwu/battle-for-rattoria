@@ -347,12 +347,12 @@ fn planning_spine_ready(
                                                 ..Default::default()
                                             },
                                             Transform2::from_xy(200., 0.)
-                                                .with_scale(Vec2::splat(0.7)),
+                                                .with_scale(Vec2::splat(1.)),
                                             Depth::Inherit(0.02),
                                             Clickable {
                                                 shape: CollisionShape::Rect {
                                                     offset: Vec2::ZERO,
-                                                    size: Vec2::new(200., 120.),
+                                                    size: Vec2::new(150., 120.),
                                                 },
                                                 ..Default::default()
                                             },
