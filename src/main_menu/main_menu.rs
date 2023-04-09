@@ -56,7 +56,7 @@ fn main_menu_enter(
             texture: asset_library.image_menu_bg.clone(),
             ..Default::default()
         },
-        Transform2::from_xy(0., 150.),
+        Transform2::from_xy(0., 210.),
         Depth::Exact(0.1),
     ));
     commands.spawn((
@@ -64,7 +64,7 @@ fn main_menu_enter(
             texture_atlas: asset_library.image_atlas_play.clone(),
             ..Default::default()
         },
-        Transform2::from_xy(0., -570.).with_scale(Vec2::splat(1.4)),
+        Transform2::from_xy(0., -480.).with_scale(Vec2::splat(1.4)),
         Depth::Exact(0.2),
         Clickable {
             shape: CollisionShape::Rect {

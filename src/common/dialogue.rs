@@ -95,13 +95,13 @@ impl Speaker {
             Self::WarChef3 => SpeakerKind::Enemy,
             Self::WarChef4 => SpeakerKind::Enemy,
             Self::WarChef5 => SpeakerKind::Enemy,
-            Self::Mobling => SpeakerKind::Unit,
-            Self::StabbyRat => SpeakerKind::Unit,
-            Self::ShootyRat => SpeakerKind::Unit,
+            Self::Mobling => SpeakerKind::Enemy,
+            Self::StabbyRat => SpeakerKind::Enemy,
+            Self::ShootyRat => SpeakerKind::Enemy,
             Self::Scoutling => SpeakerKind::Unit,
             Self::Deserter => SpeakerKind::Unit,
-            Self::BlastyRat => SpeakerKind::Unit,
-            Self::Narrator => SpeakerKind::Unit,
+            Self::BlastyRat => SpeakerKind::Enemy,
+            Self::Narrator => SpeakerKind::Enemy,
         }
     }
 
@@ -571,6 +571,11 @@ fn dialogue_update(
                 Speaker::WarChef3 => Some("wc3"),
                 Speaker::WarChef4 => Some("wc4"),
                 Speaker::WarChef5 => Some("wc5"),
+                Speaker::Mobling => Some("mobling"),
+                Speaker::StabbyRat => Some("stabby-rat"),
+                Speaker::ShootyRat => Some("shooty-rat"),
+                Speaker::BlastyRat => Some("blasty-rat"),
+                Speaker::Narrator => Some("narrator"),
                 _ => None,
             } {
                 if let Some(skin_general) = dialogue_spine.skeleton.data().find_skin(speaker_skin) {

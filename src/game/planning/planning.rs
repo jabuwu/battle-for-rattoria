@@ -775,7 +775,7 @@ fn planning_update_buttons_and_info(
                         style: header_style.clone(),
                     },
                     TextSection {
-                        value: "Some of your units are suffering bog sickness!\nThey will become available again next battle.".to_owned(),
+                        value: "Some of your units are suffering Bog Sickness!\nThey will become available again next battle.".to_owned(),
                         style: description_style.clone(),
                     },
                 ])
