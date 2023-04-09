@@ -1050,7 +1050,7 @@ fn planning_ui(
 }
 
 fn tutorial_dialogue(game_state: &GameState) -> Option<&'static str> {
-    /*if game_state.quest.war_chef == 0 {
+    if game_state.quest.war_chef == 0 {
         match game_state.quest.battle {
             0 => {
                 if game_state.available_army.peasants != 0 {
@@ -1079,6 +1079,5 @@ fn tutorial_dialogue(game_state: &GameState) -> Option<&'static str> {
         Some("MustFeedUnits")
     } else {
         None
-    }*/
-    None
+    }
 }
