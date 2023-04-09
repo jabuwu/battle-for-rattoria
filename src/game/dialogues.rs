@@ -1,20 +1,28 @@
 use crate::{Articy, Item, Quest, Script};
 
 impl Quest {
-    pub fn next(&mut self) {
+    pub fn next(&mut self) -> bool {
         self.battle += 1;
         if self.war_chef == 0 && self.battle == 3 {
             self.war_chef = 1;
             self.battle = 0;
+            true
         } else if self.war_chef == 1 && self.battle == 3 {
             self.war_chef = 2;
             self.battle = 0;
+            true
         } else if self.war_chef == 2 && self.battle == 4 {
             self.war_chef = 3;
             self.battle = 0;
+            true
         } else if self.war_chef == 3 && self.battle == 4 {
             self.war_chef = 4;
             self.battle = 0;
+            true
+        } else if self.war_chef == 4 && self.battle == 3 {
+            false
+        } else {
+            true
         }
     }
 

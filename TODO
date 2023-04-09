@@ -1,13 +1,17 @@
+# Rewind
+Rewind ui
+Note: going back loses progress
+
+# Battle
+Move unit spines up so their feet is at y = 0
 Spine events do not work with fixed update - potential jank
 Better y order for projectiles, fx?
-Move unit spines up so their feet is at y = 0
+Battle modifiers
+  Ice
+  Wet
+  Explosive
+Improve unit animations
+Fix unit y ordering
+Add banners
+Game Balance
 Make units slow down when attacking
-Remove nametag for narrator
-Loading screen
-Flags
-Unit side effects
-Note: going back loses progress
-Limit to 1 item
-Show army comp
-sick units
-Item info
