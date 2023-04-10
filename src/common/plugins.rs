@@ -6,7 +6,7 @@ use bevy_spine::SpinePlugin;
 use crate::{
     ArticyPlugin, ClickablePlugin, CursorPlugin, DebugDrawPlugin, DialoguePlugin,
     FixedTimestepPlugin, ForceRatioPlugin, FramesToLivePlugin, InteractionStackPlugin, SetsPlugin,
-    TargetTransformPlugin, Transform2Plugin, YOrderPlugin,
+    TargetTransformPlugin, TextureAtlasFxPlugin, Transform2Plugin, YOrderPlugin,
 };
 
 pub struct CommonPlugins;
@@ -33,6 +33,7 @@ impl PluginGroup for CommonPlugins {
         group = group.add(CursorPlugin);
         group = group.add(ClickablePlugin);
         group = group.add(TargetTransformPlugin);
+        group = group.add(TextureAtlasFxPlugin);
 
         group
     }

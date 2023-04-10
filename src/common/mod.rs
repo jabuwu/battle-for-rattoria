@@ -15,6 +15,7 @@ mod plugins;
 mod second_order;
 mod target_transform;
 mod temp_sfx;
+mod texture_atlas_fx;
 mod transform2;
 mod y_order;
 
@@ -35,5 +36,6 @@ pub use plugins::*;
 pub use second_order::*;
 pub use target_transform::*;
 pub use temp_sfx::*;
+pub use texture_atlas_fx::*;
 pub use transform2::*;
 pub use y_order::*;

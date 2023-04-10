@@ -52,5 +52,8 @@ bevy_spine = { path = "crates/bevy_spine", features = [ "workaround_5732" ] }
 winit = { version = "0.28", default-features = false }
 image = { version = "0.24", default-features = false }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = "0.3.61"
+
 [build-dependencies]
 embed-resource = "1.4"

@@ -1,14 +1,8 @@
-sickness icon
-
 # Battle
-Move unit spines up so their feet is at y = 0
-Better y order for projectiles, fx?
 Battle modifiers
   Ice
   Wet
   Explosive
-Improve unit animations
-Fix unit y ordering
 Add banners
+Unit attack sounds
 Game Balance
-Make units slow down when attacking

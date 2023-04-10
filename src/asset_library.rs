@@ -20,6 +20,7 @@ pub struct AssetLibrary {
     pub image_atlas_war_chef_rewind: Handle<TextureAtlas>,
     pub image_atlas_start_battle: Handle<TextureAtlas>,
     pub image_atlas_rewind_battle: Handle<TextureAtlas>,
+    pub image_atlas_blood_splat: Handle<TextureAtlas>,
     pub image_bog_sick: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
@@ -27,7 +28,6 @@ pub struct AssetLibrary {
     pub spine_rat_mage: Handle<SkeletonData>,
     pub spine_rat_brute: Handle<SkeletonData>,
     pub spine_attack_magic: Handle<SkeletonData>,
-    pub spine_fx_blood_splat: Handle<SkeletonData>,
     pub spine_dialogue: Handle<SkeletonData>,
     pub spine_battle_splash: Handle<SkeletonData>,
     pub spine_planning: Handle<SkeletonData>,
@@ -115,6 +115,14 @@ fn asset_library_load(
         None,
         None,
     ));
+    asset_library.image_atlas_blood_splat = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/blood_splat.png"),
+        Vec2::new(336., 347.),
+        5,
+        1,
+        None,
+        None,
+    ));
 
     asset_library.spine_rat = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/rat_peasant/skeleton.skel"),
@@ -144,11 +152,6 @@ fn asset_library_load(
     asset_library.spine_attack_magic = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/magic_attack/skeleton.skel"),
         asset_server.load("spines/magic_attack/magic_attack.atlas"),
-    ));
-
-    asset_library.spine_fx_blood_splat = skeletons.add(SkeletonData::new_from_binary(
-        asset_server.load("spines/blood_splat/skeleton.skel"),
-        asset_server.load("spines/blood_splat/blood_splat.atlas"),
     ));
 
     asset_library.spine_dialogue = skeletons.add(SkeletonData::new_from_binary(

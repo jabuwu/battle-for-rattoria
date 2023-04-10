@@ -13,7 +13,7 @@ use crate::{
     DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
     HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, SpineSpawnSet, Target, Team,
-    TempSfxBundle, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    TempSfxBundle, TextureAtlasFx, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -616,18 +616,19 @@ fn unit_damage_fx(
     let mut rng = thread_rng();
     for damage_receive_event in damage_receive_events.iter() {
         if let Ok(unit_transform) = unit_query.get(damage_receive_event.entity) {
-            if rng.gen_bool(0.25) {
+            if rng.gen_bool(0.2) {
                 commands.spawn((
-                    SpineBundle {
-                        skeleton: asset_library.spine_fx_blood_splat.clone(),
+                    SpriteSheetBundle {
+                        texture_atlas: asset_library.image_atlas_blood_splat.clone(),
                         ..Default::default()
                     },
                     Transform2::from_translation(
                         unit_transform.translation().truncate()
-                            + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(-70.0..70.0)),
-                    ),
+                            + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(0.0..140.0)),
+                    )
+                    .with_scale(Vec2::splat(0.5)),
                     Depth::from(DEPTH_BLOOD_FX),
-                    SpineFx,
+                    TextureAtlasFx::new(5),
                 ));
             }
             commands.spawn(TempSfxBundle {

@@ -585,6 +585,7 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "web-sys",
  "winit",
 ]
 

@@ -168,6 +168,9 @@ fn loading_check_progress(
         atlas_assets
             .get(&asset_library.image_atlas_rewind_battle)
             .unwrap(),
+        atlas_assets
+            .get(&asset_library.image_atlas_blood_splat)
+            .unwrap(),
     ];
     let skeletons = [
         skeleton_assets.get(&asset_library.spine_rat).unwrap(),
@@ -181,9 +184,6 @@ fn loading_check_progress(
         skeleton_assets.get(&asset_library.spine_rat_brute).unwrap(),
         skeleton_assets
             .get(&asset_library.spine_attack_magic)
-            .unwrap(),
-        skeleton_assets
-            .get(&asset_library.spine_fx_blood_splat)
             .unwrap(),
         skeleton_assets.get(&asset_library.spine_dialogue).unwrap(),
         skeleton_assets

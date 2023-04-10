@@ -15,7 +15,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Bevy game".to_owned(), // ToDo
+                title: "Battle for Rattoria".to_owned(),
                 resolution: (1280., 768.).into(),
                 canvas: Some("#bevy".to_owned()),
                 fit_canvas_to_parent: true,
