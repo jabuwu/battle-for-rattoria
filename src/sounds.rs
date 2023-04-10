@@ -36,10 +36,28 @@ pub struct Sounds {
     pub jingle_victory: AudioPlusSoundEffect,
     pub jingle_defeat: AudioPlusSoundEffect,
 
-    pub unit_damage: AudioPlusSoundEffect,
-    pub unit_die: AudioPlusSoundEffect,
     pub unit_explode: AudioPlusSoundEffect,
     pub unit_fire: AudioPlusSoundEffect,
+
+    pub unit_peasant_attack: AudioPlusSoundEffect,
+    pub unit_peasant_damage: AudioPlusSoundEffect,
+    pub unit_peasant_die: AudioPlusSoundEffect,
+
+    pub unit_archer_attack: AudioPlusSoundEffect,
+    pub unit_archer_damage: AudioPlusSoundEffect,
+    pub unit_archer_die: AudioPlusSoundEffect,
+
+    pub unit_warrior_attack: AudioPlusSoundEffect,
+    pub unit_warrior_damage: AudioPlusSoundEffect,
+    pub unit_warrior_die: AudioPlusSoundEffect,
+
+    pub unit_mage_attack: AudioPlusSoundEffect,
+    pub unit_mage_damage: AudioPlusSoundEffect,
+    pub unit_mage_die: AudioPlusSoundEffect,
+
+    pub unit_brute_attack: AudioPlusSoundEffect,
+    pub unit_brute_damage: AudioPlusSoundEffect,
+    pub unit_brute_die: AudioPlusSoundEffect,
 
     pub ambient_cauldron: AudioPlusSoundEffect,
     pub ambient_battle: AudioPlusSoundEffect,
@@ -164,11 +182,27 @@ impl Sounds {
                 volume: 0.7,
                 ..Default::default()
             },
-            unit_damage: AudioPlusSoundEffect {
+            unit_peasant_attack: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Peasant - Attack 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Peasant - Attack 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Peasant - Attack 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                chance: 0.05,
+                ..Default::default()
+            },
+            unit_peasant_damage: AudioPlusSoundEffect {
                 audio_sources: vec![
                     asset_server.load("audio/sfx/Units/Common - Take Damage 01.ogg"),
                     asset_server.load("audio/sfx/Units/Common - Take Damage 02.ogg"),
                     asset_server.load("audio/sfx/Units/Common - Take Damage 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 04.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 05.ogg"),
                     asset_server.load("audio/sfx/Units/Peasant - Take Damage 01.ogg"),
                     asset_server.load("audio/sfx/Units/Peasant - Take Damage 02.ogg"),
                     asset_server.load("audio/sfx/Units/Peasant - Take Damage 03.ogg"),
@@ -178,10 +212,10 @@ impl Sounds {
                 pitch_variation: 0.4,
                 positional: true,
                 distance,
-                chance: 0.3,
+                chance: 0.1,
                 ..Default::default()
             },
-            unit_die: AudioPlusSoundEffect {
+            unit_peasant_die: AudioPlusSoundEffect {
                 audio_sources: vec![
                     asset_server.load("audio/sfx/Units/Common - Die 01.ogg"),
                     asset_server.load("audio/sfx/Units/Common - Die 02.ogg"),
@@ -189,6 +223,198 @@ impl Sounds {
                     asset_server.load("audio/sfx/Units/Peasant - Die 01.ogg"),
                     asset_server.load("audio/sfx/Units/Peasant - Die 02.ogg"),
                     asset_server.load("audio/sfx/Units/Peasant - Die 03.ogg"),
+                ],
+                volume: 0.8,
+                pitch: 0.9,
+                pitch_variation: 0.2,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_warrior_attack: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Warrior - Attack 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Attack 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Attack 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                chance: 0.3,
+                ..Default::default()
+            },
+            unit_warrior_damage: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 04.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 05.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Take Damage 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                chance: 0.3,
+                ..Default::default()
+            },
+            unit_warrior_die: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Warrior - Die 03.ogg"),
+                ],
+                volume: 0.8,
+                pitch: 0.9,
+                pitch_variation: 0.2,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_archer_attack: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Archer - Attack 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Attack 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Attack 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                chance: 0.3,
+                ..Default::default()
+            },
+            unit_archer_damage: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 04.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 05.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Take Damage 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                chance: 0.3,
+                ..Default::default()
+            },
+            unit_archer_die: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Archer - Die 03.ogg"),
+                ],
+                volume: 0.8,
+                pitch: 0.9,
+                pitch_variation: 0.2,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_mage_attack: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Mage - Attack 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Attack 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Attack 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_mage_damage: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 04.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 05.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Take Damage 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_mage_die: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Mage - Die 03.ogg"),
+                ],
+                volume: 0.8,
+                pitch: 0.9,
+                pitch_variation: 0.2,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_brute_attack: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Brute - Attack 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Attack 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Attack 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_brute_damage: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 04.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Take Damage 05.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Take Damage 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Take Damage 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Take Damage 03.ogg"),
+                ],
+                volume: 0.6,
+                pitch: 0.8,
+                pitch_variation: 0.4,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_brute_die: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Die 03.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Die 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Die 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Brute - Die 03.ogg"),
                 ],
                 volume: 0.8,
                 pitch: 0.9,

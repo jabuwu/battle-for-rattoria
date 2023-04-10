@@ -634,8 +634,14 @@ fn unit_damage_fx(
                     ));
                 }
                 commands.spawn(TempSfxBundle {
-                    audio_source: AudioPlusSource::new(asset_library.sounds.unit_damage.clone())
-                        .as_playing(),
+                    audio_source: AudioPlusSource::new(match unit.kind {
+                        UnitKind::Peasant => asset_library.sounds.unit_peasant_damage.clone(),
+                        UnitKind::Warrior => asset_library.sounds.unit_warrior_damage.clone(),
+                        UnitKind::Archer => asset_library.sounds.unit_archer_damage.clone(),
+                        UnitKind::Mage => asset_library.sounds.unit_mage_damage.clone(),
+                        UnitKind::Brute => asset_library.sounds.unit_brute_damage.clone(),
+                    })
+                    .as_playing(),
                     transform2: Transform2::from_translation(
                         unit_transform.translation().truncate(),
                     ),
@@ -707,6 +713,20 @@ fn unit_attack(
                     if friendly_fire {
                         hurt_flags |= unit.team.hit_flags();
                     }
+                    commands.spawn(TempSfxBundle {
+                        audio_source: AudioPlusSource::new(match unit.kind {
+                            UnitKind::Peasant => asset_library.sounds.unit_peasant_attack.clone(),
+                            UnitKind::Warrior => asset_library.sounds.unit_warrior_attack.clone(),
+                            UnitKind::Archer => asset_library.sounds.unit_archer_attack.clone(),
+                            UnitKind::Mage => asset_library.sounds.unit_mage_attack.clone(),
+                            UnitKind::Brute => asset_library.sounds.unit_brute_attack.clone(),
+                        })
+                        .as_playing(),
+                        transform2: Transform2::from_translation(
+                            unit_transform.translation().truncate(),
+                        ),
+                        ..Default::default()
+                    });
                     match attack_stats.hurt_box_kind {
                         AttackHurtBoxKind::OffsetRect {
                             offset: hurt_box_offset,
@@ -812,17 +832,23 @@ fn unit_attack(
 fn unit_die(
     mut health_die_events: EventReader<HealthDieEvent>,
     mut commands: Commands,
-    unit_query: Query<&GlobalTransform, With<Unit>>,
+    unit_query: Query<(&GlobalTransform, &Unit)>,
     asset_library: Res<AssetLibrary>,
 ) {
     for health_die_event in health_die_events.iter() {
-        if let Ok(unit_transform) = unit_query.get(health_die_event.entity) {
+        if let Ok((unit_transform, unit)) = unit_query.get(health_die_event.entity) {
             if let Some(entity) = commands.get_entity(health_die_event.entity) {
                 entity.despawn_recursive();
             }
             commands.spawn(TempSfxBundle {
-                audio_source: AudioPlusSource::new(asset_library.sounds.unit_die.clone())
-                    .as_playing(),
+                audio_source: AudioPlusSource::new(match unit.kind {
+                    UnitKind::Peasant => asset_library.sounds.unit_peasant_die.clone(),
+                    UnitKind::Warrior => asset_library.sounds.unit_warrior_die.clone(),
+                    UnitKind::Archer => asset_library.sounds.unit_archer_die.clone(),
+                    UnitKind::Mage => asset_library.sounds.unit_mage_die.clone(),
+                    UnitKind::Brute => asset_library.sounds.unit_brute_die.clone(),
+                })
+                .as_playing(),
                 transform2: Transform2::from_translation(unit_transform.translation().truncate()),
                 ..Default::default()
             });
