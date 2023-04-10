@@ -149,7 +149,4 @@ fn main_menu_update(
     if keys.just_pressed(KeyCode::S) {
         next_state.set(AppState::Sandbox);
     }
-    if keys.just_pressed(KeyCode::R) {
-        next_state.set(AppState::GameRewind);
-    }
 }
