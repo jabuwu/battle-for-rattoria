@@ -70,147 +70,149 @@ fn game_debug(
     mut sfx: ResMut<Sfx>,
     articy: Res<Articy>,
 ) {
-    egui::Window::new("Debug")
-        .default_open(false)
-        .show(contexts.ctx_mut(), |ui| {
-            ui.checkbox(&mut debug_draw_settings.draw_hit_boxes, "Draw Hitboxes");
-            ui.checkbox(&mut debug_draw_settings.draw_hurt_boxes, "Draw Hurtboxes");
-            ui.checkbox(&mut debug_draw_settings.draw_feelers, "Draw Feelers");
-            ui.collapsing("Variables", |ui| {
-                for (name, value) in game_state.global_variables.iter_mut() {
-                    ui.checkbox(value, name);
-                }
-            });
-            ui.collapsing("Quest", |ui| {
-                ui.label(format!("War Chef: {}", game_state.quest.war_chef));
-                ui.label(format!("Battle: {}", game_state.quest.battle));
-                if ui.button("next").clicked() {
-                    game_state.quest.next();
-                }
-                if ui.button("checkpoint").clicked() {
-                    game_state.checkpoint();
-                }
-            });
-            ui.collapsing("Units", |ui| {
-                if ui.button("-").clicked() && game_state.food > 0 {
-                    game_state.food -= 1;
-                }
-                ui.add(egui::DragValue::new(&mut game_state.food).clamp_range(0..=100));
-                if ui.button("+").clicked() && game_state.food < 100 {
-                    game_state.food += 1;
-                }
-                for unit_kind in UnitKind::iter() {
-                    ui.horizontal(|ui| {
-                        let mut count = game_state.available_army.get_count(unit_kind);
-                        if ui.button("-").clicked() && count > 0 {
-                            count -= 1;
+    if false {
+        egui::Window::new("Debug")
+            .default_open(false)
+            .show(contexts.ctx_mut(), |ui| {
+                ui.checkbox(&mut debug_draw_settings.draw_hit_boxes, "Draw Hitboxes");
+                ui.checkbox(&mut debug_draw_settings.draw_hurt_boxes, "Draw Hurtboxes");
+                ui.checkbox(&mut debug_draw_settings.draw_feelers, "Draw Feelers");
+                ui.collapsing("Variables", |ui| {
+                    for (name, value) in game_state.global_variables.iter_mut() {
+                        ui.checkbox(value, name);
+                    }
+                });
+                ui.collapsing("Quest", |ui| {
+                    ui.label(format!("War Chef: {}", game_state.quest.war_chef));
+                    ui.label(format!("Battle: {}", game_state.quest.battle));
+                    if ui.button("next").clicked() {
+                        game_state.quest.next();
+                    }
+                    if ui.button("checkpoint").clicked() {
+                        game_state.checkpoint();
+                    }
+                });
+                ui.collapsing("Units", |ui| {
+                    if ui.button("-").clicked() && game_state.food > 0 {
+                        game_state.food -= 1;
+                    }
+                    ui.add(egui::DragValue::new(&mut game_state.food).clamp_range(0..=100));
+                    if ui.button("+").clicked() && game_state.food < 100 {
+                        game_state.food += 1;
+                    }
+                    for unit_kind in UnitKind::iter() {
+                        ui.horizontal(|ui| {
+                            let mut count = game_state.available_army.get_count(unit_kind);
+                            if ui.button("-").clicked() && count > 0 {
+                                count -= 1;
+                            }
+                            ui.add(egui::DragValue::new(&mut count).clamp_range(0..=100));
+                            if ui.button("+").clicked() && count < 100 {
+                                count += 1;
+                            }
+                            game_state.available_army.set_count(unit_kind, count);
+                            ui.label(unit_kind.name_plural());
+                        });
+                    }
+                    if ui.button("WC2 Loadout").clicked() {
+                        game_state.food = 25;
+                        game_state.available_army = UnitComposition {
+                            peasants: 25,
+                            warriors: 5,
+                            archers: 0,
+                            mages: 0,
+                            brutes: 0,
+                        };
+                    }
+                    if ui.button("WC3 Loadout").clicked() {
+                        game_state.food = 29;
+                        game_state.available_army = UnitComposition {
+                            peasants: 23,
+                            warriors: 4,
+                            archers: 0,
+                            mages: 0,
+                            brutes: 0,
+                        };
+                    }
+                    if ui.button("WC4 Loadout").clicked() {
+                        game_state.food = 54;
+                        game_state.available_army = UnitComposition {
+                            peasants: 25,
+                            warriors: 8,
+                            archers: 21,
+                            mages: 0,
+                            brutes: 0,
+                        };
+                    }
+                    if ui.button("WC5 Loadout").clicked() {
+                        game_state.food = 65;
+                        game_state.available_army = UnitComposition {
+                            peasants: 30,
+                            warriors: 13,
+                            archers: 31,
+                            mages: 3,
+                            brutes: 0,
+                        };
+                    }
+                });
+                ui.collapsing("Dialogues", |ui| {
+                    for dialogue_str in [
+                        "WC1B1",
+                        "WC1B2",
+                        "WC1B3",
+                        "WC2B1",
+                        "WC2B2",
+                        "WC2B3",
+                        "WC3B1",
+                        "WC3B2",
+                        "WC3B3",
+                        "WC3B4",
+                        "WC4B1",
+                        "WC4B2",
+                        "WC4B3",
+                        "WC4B4",
+                        "WC5B1",
+                        "WC5B2",
+                        "WC5B3",
+                        "BogHardWeeds",
+                        "CeleryQuartz",
+                        "CracklingMoss",
+                        "AxeShrooms",
+                        "SquirtBlopBerries",
+                        "FrostyWebStrands",
+                        "RewindScreen",
+                        "Tutorial1",
+                        "Tutorial2",
+                        "Tutorial3",
+                        "Tutorial4",
+                        "Tutorial4_5",
+                        "MustFeedUnits",
+                    ] {
+                        if ui.button(dialogue_str).clicked() {
+                            dialogue.queue(
+                                Script::new(articy.dialogues[dialogue_str].clone()),
+                                game_state.as_mut(),
+                            );
                         }
-                        ui.add(egui::DragValue::new(&mut count).clamp_range(0..=100));
-                        if ui.button("+").clicked() && count < 100 {
-                            count += 1;
+                    }
+                    if ui.button("Clear").clicked() {
+                        dialogue.clear();
+                    }
+                });
+                ui.collapsing("Items", |ui| {
+                    for item in Item::iter() {
+                        if ui.button(format!("Add {}", item.name())).clicked() {
+                            game_state.inventory.add(item);
                         }
-                        game_state.available_army.set_count(unit_kind, count);
-                        ui.label(unit_kind.name_plural());
-                    });
-                }
-                if ui.button("WC2 Loadout").clicked() {
-                    game_state.food = 25;
-                    game_state.available_army = UnitComposition {
-                        peasants: 25,
-                        warriors: 5,
-                        archers: 0,
-                        mages: 0,
-                        brutes: 0,
-                    };
-                }
-                if ui.button("WC3 Loadout").clicked() {
-                    game_state.food = 29;
-                    game_state.available_army = UnitComposition {
-                        peasants: 23,
-                        warriors: 4,
-                        archers: 0,
-                        mages: 0,
-                        brutes: 0,
-                    };
-                }
-                if ui.button("WC4 Loadout").clicked() {
-                    game_state.food = 54;
-                    game_state.available_army = UnitComposition {
-                        peasants: 25,
-                        warriors: 8,
-                        archers: 21,
-                        mages: 0,
-                        brutes: 0,
-                    };
-                }
-                if ui.button("WC5 Loadout").clicked() {
-                    game_state.food = 65;
-                    game_state.available_army = UnitComposition {
-                        peasants: 30,
-                        warriors: 13,
-                        archers: 31,
-                        mages: 3,
-                        brutes: 0,
-                    };
-                }
-            });
-            ui.collapsing("Dialogues", |ui| {
-                for dialogue_str in [
-                    "WC1B1",
-                    "WC1B2",
-                    "WC1B3",
-                    "WC2B1",
-                    "WC2B2",
-                    "WC2B3",
-                    "WC3B1",
-                    "WC3B2",
-                    "WC3B3",
-                    "WC3B4",
-                    "WC4B1",
-                    "WC4B2",
-                    "WC4B3",
-                    "WC4B4",
-                    "WC5B1",
-                    "WC5B2",
-                    "WC5B3",
-                    "BogHardWeeds",
-                    "CeleryQuartz",
-                    "CracklingMoss",
-                    "AxeShrooms",
-                    "SquirtBlopBerries",
-                    "FrostyWebStrands",
-                    "RewindScreen",
-                    "Tutorial1",
-                    "Tutorial2",
-                    "Tutorial3",
-                    "Tutorial4",
-                    "Tutorial4_5",
-                    "MustFeedUnits",
-                ] {
-                    if ui.button(dialogue_str).clicked() {
-                        dialogue.queue(
-                            Script::new(articy.dialogues[dialogue_str].clone()),
-                            game_state.as_mut(),
-                        );
                     }
-                }
-                if ui.button("Clear").clicked() {
-                    dialogue.clear();
-                }
-            });
-            ui.collapsing("Items", |ui| {
-                for item in Item::iter() {
-                    if ui.button(format!("Add {}", item.name())).clicked() {
-                        game_state.inventory.add(item);
+                });
+                ui.collapsing("Sounds", |ui| {
+                    for sfx_kind in SfxKind::iter() {
+                        if ui.button(format!("{:?}", sfx_kind)).clicked() {
+                            sfx.play(sfx_kind);
+                        }
                     }
-                }
+                });
             });
-            ui.collapsing("Sounds", |ui| {
-                for sfx_kind in SfxKind::iter() {
-                    if ui.button(format!("{:?}", sfx_kind)).clicked() {
-                        sfx.play(sfx_kind);
-                    }
-                }
-            });
-        });
+    }
 }

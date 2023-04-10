@@ -22,7 +22,7 @@ pub struct Sounds {
     // when player proceeds normal text
     pub dialogue_proceed: AudioPlusSoundEffect,
     // for each individual character in dialogue (typewriter)
-    pub dialogue_character: AudioPlusSoundEffect, // TODO
+    pub dialogue_character: AudioPlusSoundEffect,
     // when player hovers over dialogue option
     pub dialogue_choice_hover: AudioPlusSoundEffect,
     // when player confirms dialogue option

@@ -70,7 +70,7 @@ fn asset_library_load(
     asset_library.image_planning_bg = asset_server.load("images/Background_Camp.png");
     asset_library.image_rewind_bg = asset_server.load("images/Background_Select_Battle.png");
     asset_library.image_vignette = asset_server.load("images/vignette.png");
-    asset_library.image_bog_sick = asset_server.load("images/Sickness_icon.png");
+    asset_library.image_bog_sick = asset_server.load("images/Sickness_Icon.png");
 
     asset_library.image_atlas_planning_buttons = texture_atlases.add(TextureAtlas::from_grid(
         asset_server.load("images/planning_buttons.png"),
