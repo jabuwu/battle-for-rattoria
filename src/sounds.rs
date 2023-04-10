@@ -77,28 +77,28 @@ impl Sounds {
                 ..Default::default()
             },
             cutscene_proceed: AudioPlusSoundEffect {
-                audio_sources: vec![asset_server.load("audio/placeholder.ogg")],
-                volume: 0.,
+                audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Click 01.ogg")],
+                volume: 0.7,
                 ..Default::default()
             },
             ui_button_click: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Click 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             ui_button_hover: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Hover 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             ui_button_release: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Release 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             ui_button_confirm: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Confirm 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             ui_feed_unit: AudioPlusSoundEffect {
@@ -115,7 +115,7 @@ impl Sounds {
             },
             dialogue_show: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Release 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             dialogue_hide: AudioPlusSoundEffect {
@@ -141,12 +141,12 @@ impl Sounds {
             },
             dialogue_choice_hover: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Button - Hover 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             dialogue_choice_select: AudioPlusSoundEffect {
                 audio_sources: vec![asset_server.load("audio/sfx/UI/Confirm 01.ogg")],
-                volume: 1.,
+                volume: 0.7,
                 ..Default::default()
             },
             cauldron_add_spice: AudioPlusSoundEffect {
