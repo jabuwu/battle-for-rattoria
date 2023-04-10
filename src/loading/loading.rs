@@ -222,6 +222,7 @@ fn loading_check_progress(
         &asset_library.sounds.unit_damage,
         &asset_library.sounds.unit_die,
         &asset_library.sounds.unit_explode,
+        &asset_library.sounds.unit_fire,
         &asset_library.sounds.ambient_cauldron,
         &asset_library.sounds.ambient_battle,
     ];

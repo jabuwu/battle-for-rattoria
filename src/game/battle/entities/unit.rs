@@ -519,59 +519,14 @@ fn unit_spawn(
                 },
             ))
             .with_children(|parent| {
-                if team_modifiers[BattleModifier::Fire] {
-                    parent.spawn((
-                        SpriteBundle {
-                            sprite: Sprite {
-                                color: Color::RED,
-                                custom_size: Some(Vec2::splat(20.)),
-                                ..Default::default()
-                            },
-                            ..Default::default()
-                        },
-                        Transform2::from_xy(0., 0.),
-                        Depth::Inherit(0.01),
-                    ));
-                }
-                if team_modifiers[BattleModifier::Ice] {
-                    parent.spawn((
-                        SpriteBundle {
-                            sprite: Sprite {
-                                color: Color::TURQUOISE,
-                                custom_size: Some(Vec2::splat(20.)),
-                                ..Default::default()
-                            },
-                            ..Default::default()
-                        },
-                        Transform2::from_xy(0., 40.),
-                        Depth::Inherit(0.01),
-                    ));
-                }
-                if team_modifiers[BattleModifier::Wet] {
-                    parent.spawn((
-                        SpriteBundle {
-                            sprite: Sprite {
-                                color: Color::BLUE,
-                                custom_size: Some(Vec2::splat(20.)),
-                                ..Default::default()
-                            },
-                            ..Default::default()
-                        },
-                        Transform2::from_xy(0., -40.),
-                        Depth::Inherit(0.01),
-                    ));
-                }
                 parent.spawn((
-                    SpriteBundle {
-                        sprite: Sprite {
-                            color: Color::rgba(1., 0., 0., 0.4),
-                            custom_size: Some(Vec2::new(200., 400.)),
-                            ..Default::default()
-                        },
+                    SpriteSheetBundle {
+                        texture_atlas: asset_library.image_atlas_fire.clone(),
                         visibility: Visibility::Hidden,
                         ..Default::default()
                     },
-                    Transform2::default(),
+                    AudioPlusSource::new(asset_library.sounds.unit_fire.clone()),
+                    Transform2::from_xy(0., 150.),
                     Depth::Inherit(0.01),
                     UnitFire,
                 ));
@@ -656,33 +611,37 @@ fn unit_slow(
 fn unit_damage_fx(
     mut damage_receive_events: EventReader<DamageReceiveEvent>,
     mut commands: Commands,
-    unit_query: Query<&GlobalTransform, With<Unit>>,
+    unit_query: Query<(&GlobalTransform, &Unit)>,
     asset_library: Res<AssetLibrary>,
 ) {
     let mut rng = thread_rng();
     for damage_receive_event in damage_receive_events.iter() {
-        if let Ok(unit_transform) = unit_query.get(damage_receive_event.entity) {
-            if rng.gen_bool(0.2) {
-                commands.spawn((
-                    SpriteSheetBundle {
-                        texture_atlas: asset_library.image_atlas_blood_splat.clone(),
-                        ..Default::default()
-                    },
-                    Transform2::from_translation(
-                        unit_transform.translation().truncate()
-                            + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(0.0..140.0)),
-                    )
-                    .with_scale(Vec2::splat(0.5)),
-                    Depth::from(DEPTH_BLOOD_FX),
-                    TextureAtlasFx::new(5),
-                ));
+        if let Ok((unit_transform, unit)) = unit_query.get(damage_receive_event.entity) {
+            if !unit.attributes.contains(Attributes::ON_FIRE) {
+                if rng.gen_bool(0.2) {
+                    commands.spawn((
+                        SpriteSheetBundle {
+                            texture_atlas: asset_library.image_atlas_blood_splat.clone(),
+                            ..Default::default()
+                        },
+                        Transform2::from_translation(
+                            unit_transform.translation().truncate()
+                                + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(0.0..140.0)),
+                        )
+                        .with_scale(Vec2::splat(0.5)),
+                        Depth::from(DEPTH_BLOOD_FX),
+                        TextureAtlasFx::new(5),
+                    ));
+                }
+                commands.spawn(TempSfxBundle {
+                    audio_source: AudioPlusSource::new(asset_library.sounds.unit_damage.clone())
+                        .as_playing(),
+                    transform2: Transform2::from_translation(
+                        unit_transform.translation().truncate(),
+                    ),
+                    ..Default::default()
+                });
             }
-            commands.spawn(TempSfxBundle {
-                audio_source: AudioPlusSource::new(asset_library.sounds.unit_damage.clone())
-                    .as_playing(),
-                transform2: Transform2::from_translation(unit_transform.translation().truncate()),
-                ..Default::default()
-            });
         }
     }
 }
@@ -984,10 +943,18 @@ struct UnitCombustion {
 fn unit_combust(
     mut local: Local<UnitCombustion>,
     mut unit_query: Query<(Entity, &mut Unit, &Children)>,
-    mut unit_fire_query: Query<&mut Visibility, With<UnitFire>>,
+    mut unit_fire_query: Query<
+        (
+            &mut Visibility,
+            &mut TextureAtlasSprite,
+            &mut AudioPlusSource,
+        ),
+        With<UnitFire>,
+    >,
     mut damage_inflict_events: EventWriter<DamageInflictEvent>,
     battle_state: Res<BattleState>,
     time: Res<FixedTime>,
+    frame_time: Res<Time>,
 ) {
     let mut rng = thread_rng();
     for (unit_entity, unit, _) in unit_query.iter_mut() {
@@ -1000,6 +967,9 @@ fn unit_combust(
                 });
             }
         }
+    }
+    for (_, mut unit_fire_sprite, _) in unit_fire_query.iter_mut() {
+        unit_fire_sprite.index = ((frame_time.elapsed_seconds() * 5.) as usize) % 4;
     }
     for team in Team::iter() {
         if battle_state.battling() && battle_state.phase() == BattlePhase::Battling {
@@ -1024,8 +994,11 @@ fn unit_combust(
                     units.shuffle(&mut rng);
                     if let Some((_, mut unit, unit_children)) = units.into_iter().nth(0) {
                         for child in unit_children.iter() {
-                            if let Ok(mut unit_fire_visibility) = unit_fire_query.get_mut(*child) {
+                            if let Ok((mut unit_fire_visibility, _, mut unit_fire_audio_source)) =
+                                unit_fire_query.get_mut(*child)
+                            {
                                 *unit_fire_visibility = Visibility::Visible;
+                                unit_fire_audio_source.play();
                             }
                         }
                         unit.attributes |= Attributes::ON_FIRE;

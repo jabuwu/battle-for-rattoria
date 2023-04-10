@@ -39,6 +39,7 @@ pub struct Sounds {
     pub unit_damage: AudioPlusSoundEffect,
     pub unit_die: AudioPlusSoundEffect,
     pub unit_explode: AudioPlusSoundEffect,
+    pub unit_fire: AudioPlusSoundEffect,
 
     pub ambient_cauldron: AudioPlusSoundEffect,
     pub ambient_battle: AudioPlusSoundEffect,
@@ -205,6 +206,13 @@ impl Sounds {
                 volume: 0.8,
                 pitch: 0.95,
                 pitch_variation: 0.1,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_fire: AudioPlusSoundEffect {
+                audio_sources: vec![asset_server.load("audio/sfx/Units/Common - Catch Fire 01.ogg")],
+                volume: 0.5,
                 positional: true,
                 distance,
                 ..Default::default()
