@@ -32,6 +32,8 @@ pub struct Sounds {
 
     pub loot_get: AudioPlusSoundEffect,
 
+    pub mayhem: AudioPlusSoundEffect,
+
     pub jingle_start: AudioPlusSoundEffect,
     pub jingle_victory: AudioPlusSoundEffect,
     pub jingle_defeat: AudioPlusSoundEffect,
@@ -165,6 +167,15 @@ impl Sounds {
                     asset_server.load("audio/sfx/UI/Loot Received 03.ogg"),
                 ],
                 volume: 1.,
+                ..Default::default()
+            },
+            mayhem: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Battle Start Mayhem 01.ogg"),
+                    asset_server.load("audio/sfx/Battle Start Mayhem 02.ogg"),
+                    asset_server.load("audio/sfx/Battle Start Mayhem 03.ogg"),
+                ],
+                volume: 0.7,
                 ..Default::default()
             },
             jingle_start: AudioPlusSoundEffect {

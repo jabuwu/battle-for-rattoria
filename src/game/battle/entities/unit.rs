@@ -174,6 +174,7 @@ impl UnitKind {
                 spawn_distance_max: 900.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(200., 400.),
+                stop_on_feeler: false,
                 retreat_chance: 0.005,
                 attributes: Attributes::empty(),
             },
@@ -187,7 +188,8 @@ impl UnitKind {
                 spawn_distance_min: 0.,
                 spawn_distance_max: 500.,
                 hit_box_size: Vec2::new(300., 400.),
-                feeler_size: Vec2::new(400., 400.),
+                feeler_size: Vec2::new(100., 400.),
+                stop_on_feeler: true,
                 retreat_chance: 0.01,
                 attributes: Attributes::empty(),
             },
@@ -202,6 +204,7 @@ impl UnitKind {
                 spawn_distance_max: 600.,
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(2200., 400.),
+                stop_on_feeler: false,
                 retreat_chance: 0.33,
                 attributes: Attributes::MAY_RETREAT,
             },
@@ -217,6 +220,7 @@ impl UnitKind {
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(1400., 400.),
                 retreat_chance: 1.,
+                stop_on_feeler: false,
                 attributes: Attributes::MAY_RETREAT,
             },
             UnitKind::Brute => UnitStats {
@@ -229,7 +233,8 @@ impl UnitKind {
                 spawn_distance_min: 150.,
                 spawn_distance_max: 250.,
                 hit_box_size: Vec2::new(300., 500.),
-                feeler_size: Vec2::new(400., 400.),
+                feeler_size: Vec2::new(200., 400.),
+                stop_on_feeler: true,
                 retreat_chance: 0.005,
                 attributes: Attributes::MAY_FRIENDLY_FIRE,
             },
@@ -305,6 +310,7 @@ pub struct UnitStats {
     pub spawn_distance_max: f32,
     pub hit_box_size: Vec2,
     pub feeler_size: Vec2,
+    pub stop_on_feeler: bool,
     pub retreat_chance: f32,
     pub attributes: Attributes,
 }
@@ -653,12 +659,14 @@ fn unit_damage_fx(
 }
 
 fn unit_update(
-    mut unit_query: Query<(&mut Transform2, &Unit)>,
+    mut unit_query: Query<(&mut Transform2, &Unit, &Feeler)>,
     time: Res<FixedTime>,
     battle_state: Res<BattleState>,
 ) {
-    if battle_state.phase() != BattlePhase::PreBattle {
-        for (mut unit_transform, unit) in unit_query.iter_mut() {
+    for (mut unit_transform, unit, unit_feeler) in unit_query.iter_mut() {
+        let should_walk = battle_state.phase() != BattlePhase::PreBattle
+            && (!unit_feeler.feeling || !unit.stats.stop_on_feeler);
+        if should_walk {
             unit_transform.translation.x +=
                 time.period.as_secs_f32() * unit.speed() * unit_transform.scale.x.signum();
         }
@@ -886,12 +894,14 @@ fn unit_update_animations(
 ) {
     let mut rng = thread_rng();
     for (mut unit_spine, unit, unit_feeler) in unit_query.iter_mut() {
+        let should_walk = battle_state.phase() != BattlePhase::PreBattle
+            && (!unit_feeler.feeling || !unit.stats.stop_on_feeler);
         let current_animation_name = unit_spine
             .animation_state
             .track_at_index(UNIT_TRACK_WALK)
             .map(|track| track.animation().name().to_owned())
             .unwrap_or(String::new());
-        if battle_state.phase() != BattlePhase::PreBattle {
+        if should_walk {
             if current_animation_name != "walk" {
                 if let Ok(mut track) = unit_spine.animation_state.set_animation_by_name(
                     UNIT_TRACK_WALK as i32,

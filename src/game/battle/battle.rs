@@ -10,7 +10,7 @@ use strum_macros::EnumIter;
 use crate::{
     AddFixedEvent, BattleSplashEndedEvent, BattleSplashKind, BattleSplashPlayEvent,
     BattleSplashSpawnEvent, BattlefieldSpawnEvent, DamageReceiveEvent, EventSet, HealthDieEvent,
-    SpawnSet, Team, Unit, UnitKind, UnitSpawnEvent, UpdateSet,
+    Sfx, SfxKind, SpawnSet, Team, Unit, UnitKind, UnitSpawnEvent, UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -340,11 +340,15 @@ fn battle_end_detection(
     }
     let mut friendly_count = 0;
     let mut enemy_count = 0;
+    let mut enemy_has_brute = false;
     for unit in unit_query.iter() {
         if !unit.retreating {
             if unit.team == Team::Friendly {
                 friendly_count += 1;
             } else if unit.team == Team::Enemy {
+                if unit.kind == UnitKind::Brute {
+                    enemy_has_brute = true;
+                }
                 enemy_count += 1;
             }
         }
@@ -363,7 +367,7 @@ fn battle_end_detection(
         || (battle_state.damage_inflicted && battle_state.time_since_last_damage > 4.)
         || (!battle_state.damage_inflicted && battle_state.time_since_last_damage > 8.)
     {
-        let victory = friendly_count > enemy_count;
+        let victory = !enemy_has_brute && friendly_count > enemy_count;
         battle_state.report.victory = victory;
         battle_state.phase = BattlePhase::End { victory };
         battle_splash_play_events.send(BattleSplashPlayEvent {
@@ -380,9 +384,11 @@ pub fn battle_splash_ended(
     mut battle_splash_ended_events: EventReader<BattleSplashEndedEvent>,
     mut battle_state: ResMut<BattleState>,
     mut battle_ended_events: EventWriter<BattleEndedEvent>,
+    mut sfx: ResMut<Sfx>,
 ) {
     for _ in battle_splash_ended_events.iter() {
         if battle_state.phase == BattlePhase::PreBattle {
+            sfx.play(SfxKind::Mayhem);
             battle_state.phase = BattlePhase::Battling;
         } else if matches!(battle_state.phase, BattlePhase::End { .. }) {
             battle_ended_events.send(BattleEndedEvent {

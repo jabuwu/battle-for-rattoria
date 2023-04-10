@@ -48,6 +48,8 @@ pub enum SfxKind {
 
     LootGet,
 
+    Mayhem,
+
     JingleStart,
     JingleVictory,
     JingleDefeat,
@@ -72,6 +74,7 @@ impl SfxKind {
             Self::DialogueChoiceSelect => &sounds.dialogue_choice_select,
             Self::CauldronAddSpice => &sounds.cauldron_add_spice,
             Self::LootGet => &sounds.loot_get,
+            Self::Mayhem => &sounds.mayhem,
             Self::JingleStart => &sounds.jingle_start,
             Self::JingleVictory => &sounds.jingle_victory,
             Self::JingleDefeat => &sounds.jingle_defeat,

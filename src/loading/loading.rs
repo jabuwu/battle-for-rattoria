@@ -216,6 +216,7 @@ fn loading_check_progress(
         &asset_library.sounds.dialogue_choice_select,
         &asset_library.sounds.cauldron_add_spice,
         &asset_library.sounds.loot_get,
+        &asset_library.sounds.mayhem,
         &asset_library.sounds.jingle_start,
         &asset_library.sounds.jingle_victory,
         &asset_library.sounds.jingle_defeat,
