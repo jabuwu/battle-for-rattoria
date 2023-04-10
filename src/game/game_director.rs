@@ -3,7 +3,7 @@ use std::mem::take;
 use bevy::prelude::*;
 
 use crate::{
-    in_game_state, not_in_game_state_or_sandbox, AppState, BattleConfig, BattleEndedEvent,
+    in_game_state, not_in_game_state_or_sandbox, AppState, Banner, BattleConfig, BattleEndedEvent,
     BattleModifier, BattleModifiers, BattleStartEvent, BattleState, GameState, Intel, Item,
     PlanningEndedEvent, PlanningStartEvent, PlanningState,
 };
@@ -83,8 +83,16 @@ fn game_director_battle_enter(
         config: BattleConfig {
             friendly_units,
             friendly_modifiers,
+            friendly_banner: Banner::Player,
             enemy_units: game_state.quest.enemy_unit_composition(),
             enemy_modifiers: game_state.quest.enemy_modifiers(),
+            enemy_banner: match game_state.quest.war_chef {
+                0 => Banner::WarChef1,
+                1 => Banner::WarChef2,
+                2 => Banner::WarChef3,
+                3 => Banner::WarChef4,
+                _ => Banner::WarChef5,
+            },
         },
         sandbox: false,
     });

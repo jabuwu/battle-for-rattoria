@@ -198,6 +198,7 @@ fn loading_check_progress(
         skeleton_assets.get(&asset_library.spine_planning).unwrap(),
         skeleton_assets.get(&asset_library.spine_intro).unwrap(),
         skeleton_assets.get(&asset_library.spine_outro).unwrap(),
+        skeleton_assets.get(&asset_library.spine_banner).unwrap(),
     ];
     let sound_effects = [
         &asset_library.sounds.cutscene_text_appear,

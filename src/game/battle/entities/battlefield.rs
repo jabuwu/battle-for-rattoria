@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AddFixedEvent, AssetLibrary, EventSet, SpawnSet};
+use crate::{AddFixedEvent, AssetLibrary, Depth, EventSet, SpawnSet, Transform2};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum BattlefieldSystem {
@@ -33,9 +33,14 @@ fn battlefield_spawn(
     asset_library: Res<AssetLibrary>,
 ) {
     for _ in spawn_events.iter() {
-        commands.spawn((SpriteBundle {
-            texture: asset_library.image_background_bg.clone(),
-            ..Default::default()
-        },));
+        commands.spawn((
+            SpriteBundle {
+                texture: asset_library.image_background_bg.clone(),
+                ..Default::default()
+            },
+            Transform2::default(),
+            Depth::Exact(0.),
+            Battlefield,
+        ));
     }
 }

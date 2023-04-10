@@ -37,6 +37,7 @@ pub struct AssetLibrary {
     pub spine_planning: Handle<SkeletonData>,
     pub spine_intro: Handle<SkeletonData>,
     pub spine_outro: Handle<SkeletonData>,
+    pub spine_banner: Handle<SkeletonData>,
 
     pub sounds: Sounds,
 }
@@ -213,6 +214,11 @@ fn asset_library_load(
     asset_library.spine_outro = skeletons.add(SkeletonData::new_from_binary(
         asset_server.load("spines/outro/skeleton.skel"),
         asset_server.load("spines/outro/outro.atlas"),
+    ));
+
+    asset_library.spine_banner = skeletons.add(SkeletonData::new_from_binary(
+        asset_server.load("spines/banner/skeleton.skel"),
+        asset_server.load("spines/banner/banner.atlas"),
     ));
 
     asset_library.sounds = Sounds::setup(asset_server.as_ref());

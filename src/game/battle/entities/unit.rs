@@ -188,7 +188,7 @@ impl UnitKind {
                 spawn_distance_min: 0.,
                 spawn_distance_max: 500.,
                 hit_box_size: Vec2::new(300., 400.),
-                feeler_size: Vec2::new(100., 400.),
+                feeler_size: Vec2::new(150., 400.),
                 stop_on_feeler: true,
                 retreat_chance: 0.01,
                 attributes: Attributes::empty(),

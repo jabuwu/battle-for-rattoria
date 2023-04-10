@@ -8,9 +8,10 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use crate::{
-    AddFixedEvent, BattleSplashEndedEvent, BattleSplashKind, BattleSplashPlayEvent,
-    BattleSplashSpawnEvent, BattlefieldSpawnEvent, DamageReceiveEvent, EventSet, HealthDieEvent,
-    Sfx, SfxKind, SpawnSet, Team, Unit, UnitKind, UnitSpawnEvent, UpdateSet,
+    AddFixedEvent, BannerSpawnEvent, BattleSplashEndedEvent, BattleSplashKind,
+    BattleSplashPlayEvent, BattleSplashSpawnEvent, BattlefieldSpawnEvent, DamageReceiveEvent,
+    EventSet, HealthDieEvent, Sfx, SfxKind, SpawnSet, Team, Unit, UnitKind, UnitSpawnEvent,
+    UpdateSet,
 };
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
@@ -36,6 +37,7 @@ impl Plugin for BattlePlugin {
                     .in_set(EventSet::<BattlefieldSpawnEvent>::Sender)
                     .in_set(EventSet::<BattleSplashSpawnEvent>::Sender)
                     .in_set(EventSet::<UnitSpawnEvent>::Sender)
+                    .in_set(EventSet::<BannerSpawnEvent>::Sender)
                     .after(EventSet::<BattleStartEvent>::Sender),
             )
             .add_system(
@@ -132,8 +134,10 @@ pub struct BattleReport {
 pub struct BattleConfig {
     pub friendly_units: UnitComposition,
     pub friendly_modifiers: BattleModifiers,
+    pub friendly_banner: Banner,
     pub enemy_units: UnitComposition,
     pub enemy_modifiers: BattleModifiers,
+    pub enemy_banner: Banner,
 }
 
 impl BattleConfig {
@@ -143,6 +147,17 @@ impl BattleConfig {
             Team::Enemy => &self.enemy_units,
         }
     }
+}
+
+#[derive(Default, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
+pub enum Banner {
+    #[default]
+    Player,
+    WarChef1,
+    WarChef2,
+    WarChef3,
+    WarChef4,
+    WarChef5,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
@@ -269,6 +284,7 @@ fn battle_start(
     mut battlefield_spawn_events: EventWriter<BattlefieldSpawnEvent>,
     mut battle_splash_spawn_events: EventWriter<BattleSplashSpawnEvent>,
     mut unit_spawn_events: EventWriter<UnitSpawnEvent>,
+    mut banner_spawn_events: EventWriter<BannerSpawnEvent>,
 ) {
     for start_event in start_events.iter() {
         *battle_state = BattleState::default();
@@ -305,6 +321,15 @@ fn battle_start(
                 }
             }
         }
+
+        banner_spawn_events.send(BannerSpawnEvent {
+            banner: start_event.config.friendly_banner,
+            position: Vec2::new(-950., -270.),
+        });
+        banner_spawn_events.send(BannerSpawnEvent {
+            banner: start_event.config.enemy_banner,
+            position: Vec2::new(850., -270.),
+        });
     }
 }
 
