@@ -900,8 +900,6 @@ dependencies = [
 [[package]]
 name = "bevy_spine"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f849c5d7de0d06b34e3289b4cd76c9f6196cdfcc2bb10162ce4f7a7c553b1b20"
 dependencies = [
  "bevy",
  "bevy_math",
