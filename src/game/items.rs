@@ -71,7 +71,9 @@ impl Item {
             Self::AxeShrooms => "All attacks deal more damage.",
             Self::BogHardWeeds => "Increase defense.",
             Self::CeleryQuartz => "Increase movement speed.",
-            Self::FrostyWebStrands => "Ice damage slows enemies.",
+            Self::FrostyWebStrands => {
+                "Ice damage slows enemies and is effective\nagainst wet enemies."
+            }
         }
     }
 

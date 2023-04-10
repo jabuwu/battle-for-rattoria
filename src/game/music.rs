@@ -63,6 +63,8 @@ fn music_controller(
     asset_library: Res<AssetLibrary>,
     time: Res<Time>,
 ) {
+    let dt = time.delta_seconds_f64().min(0.5);
+
     let should_play = app_state.0.is_game_state();
     if should_play {
         if local.planning_instance.is_none() {
@@ -113,7 +115,7 @@ fn music_controller(
     }
 
     if local.jingle_time > 0. {
-        local.jingle_time -= time.delta_seconds_f64();
+        local.jingle_time -= dt;
     }
 
     for jingle_event in battle_jingle_events.iter() {
@@ -132,11 +134,9 @@ fn music_controller(
     }
     local.volume = local.volume.lerp(
         target_volume,
-        time.delta_seconds_f64() * if local.jingle_time > 0. { 5. } else { 1. },
+        dt * if local.jingle_time > 0. { 5. } else { 1. },
     );
-    local.playback_rate = local
-        .playback_rate
-        .lerp(target_playback_rate, time.delta_seconds_f64() * 5.);
+    local.playback_rate = local.playback_rate.lerp(target_playback_rate, dt * 5.);
     let target_battle_crossfade =
         if app_state.0 == AppState::GameBattle || app_state.0 == AppState::GameOutro {
             1.
@@ -150,10 +150,8 @@ fn music_controller(
     };
     local.battle_crossfade = local
         .battle_crossfade
-        .lerp(target_battle_crossfade, time.delta_seconds_f64() * 2.);
-    local.intro_crossfade = local
-        .intro_crossfade
-        .lerp(target_intro_crossfade, time.delta_seconds_f64() * 1.);
+        .lerp(target_battle_crossfade, dt * 2.);
+    local.intro_crossfade = local.intro_crossfade.lerp(target_intro_crossfade, dt * 1.);
 
     let planning_position = if let Some(planning_instance) = local
         .planning_instance

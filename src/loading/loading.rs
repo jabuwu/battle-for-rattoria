@@ -148,6 +148,8 @@ fn loading_check_progress(
         asset_library.image_rewind_bg.id(),
         asset_library.image_vignette.id(),
         asset_library.image_bog_sick.id(),
+        asset_library.image_banner_shadow.id(),
+        asset_library.image_arrow.id(),
         asset_library.sounds.music_battle.id(),
         asset_library.sounds.music_intro.id(),
         asset_library.sounds.music_planning.id(),

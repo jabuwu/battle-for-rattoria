@@ -1,6 +1,6 @@
 use std::mem::take;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Anchor};
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -157,10 +157,10 @@ fn rewind_enter(
         Text2dBundle {
             text: Text::from_sections(vec![
                 TextSection {
-                    value: "Checkpoint Info\n\n".to_owned(),
+                    value: "Checkpoint Info\n".to_owned(),
                     style: TextStyle {
                         font: asset_library.font_heading.clone(),
-                        font_size: 82.,
+                        font_size: 128.,
                         color: Color::WHITE,
                     },
                 },
@@ -174,9 +174,10 @@ fn rewind_enter(
                 },
             ])
             .with_alignment(TextAlignment::Center),
+            text_anchor: Anchor::TopCenter,
             ..Default::default()
         },
-        Transform2::from_xy(550., 400.),
+        Transform2::from_xy(550., 705.),
         Depth::Exact(0.1),
         BattleInfo,
     ));
@@ -315,7 +316,7 @@ fn rewind_update_battle_info(
     for mut battle_info_text in battle_info_query.iter_mut() {
         if let Some(mut section) = battle_info_text.sections.get_mut(1) {
             let mut info = String::new();
-            info += &format!("Food: {}\n\n", game_state.food);
+            info += &format!("\nFood: {}\n\n", game_state.food);
             for unit_kind in UnitKind::iter() {
                 info += &format!(
                     "{}: {}\n",

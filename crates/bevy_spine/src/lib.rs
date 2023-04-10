@@ -142,6 +142,11 @@ impl Plugin for SpinePlugin {
                     .in_set(SpineSystem::Update)
                     .after(SpineSet::OnReady),
             )
+            .add_system(
+                spine_update
+                    .in_set(SpineSystem::Update)
+                    .after(SpineSet::OnReady),
+            )
             .add_system(spine_render.in_set(SpineSystem::Render))
             .add_system(
                 apply_system_buffers
@@ -693,6 +698,12 @@ fn spine_fixed_update(
         while let Some(event) = events.pop_front() {
             spine_events.send(event);
         }
+    }
+}
+
+fn spine_update(mut spine_query: Query<&mut Spine>) {
+    for mut spine in spine_query.iter_mut() {
+        spine.update(0.0001);
     }
 }
 

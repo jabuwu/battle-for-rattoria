@@ -65,6 +65,14 @@ fn banner_spawn(
                 banner: spawn_event.banner,
             },
         ));
+        commands.spawn((
+            SpriteBundle {
+                texture: asset_library.image_banner_shadow.clone(),
+                ..Default::default()
+            },
+            Transform2::from_translation(spawn_event.position).with_scale(Vec2::splat(0.75)),
+            Depth::Exact(0.001),
+        ));
     }
 }
 

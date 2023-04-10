@@ -175,7 +175,7 @@ impl UnitKind {
                 hit_box_size: Vec2::new(100., 400.),
                 feeler_size: Vec2::new(200., 400.),
                 stop_on_feeler: false,
-                retreat_chance: 0.005,
+                retreat_chance: 0.01,
                 attributes: Attributes::empty(),
             },
             UnitKind::Warrior => UnitStats {
@@ -190,7 +190,7 @@ impl UnitKind {
                 hit_box_size: Vec2::new(300., 400.),
                 feeler_size: Vec2::new(150., 400.),
                 stop_on_feeler: true,
-                retreat_chance: 0.01,
+                retreat_chance: 0.02,
                 attributes: Attributes::empty(),
             },
             UnitKind::Archer => UnitStats {
@@ -235,7 +235,7 @@ impl UnitKind {
                 hit_box_size: Vec2::new(300., 500.),
                 feeler_size: Vec2::new(200., 400.),
                 stop_on_feeler: true,
-                retreat_chance: 0.005,
+                retreat_chance: 0.002,
                 attributes: Attributes::MAY_FRIENDLY_FIRE,
             },
         }
@@ -813,11 +813,7 @@ fn unit_attack(
                                 },
                                 HurtBoxDespawner,
                                 SpriteBundle {
-                                    sprite: Sprite {
-                                        custom_size: Some(Vec2::new(60., 10.)),
-                                        color: Color::BLACK,
-                                        ..Default::default()
-                                    },
+                                    texture: asset_library.image_arrow.clone(),
                                     ..Default::default()
                                 },
                                 Transform2::from_translation(

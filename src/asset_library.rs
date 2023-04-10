@@ -14,6 +14,8 @@ pub struct AssetLibrary {
     pub image_planning_bg: Handle<Image>,
     pub image_rewind_bg: Handle<Image>,
     pub image_vignette: Handle<Image>,
+    pub image_banner_shadow: Handle<Image>,
+    pub image_arrow: Handle<Image>,
     pub image_atlas_planning_buttons: Handle<TextureAtlas>,
     pub image_atlas_play: Handle<TextureAtlas>,
     pub image_atlas_units: Handle<TextureAtlas>,
@@ -71,6 +73,8 @@ fn asset_library_load(
     asset_library.image_rewind_bg = asset_server.load("images/Background_Select_Battle.png");
     asset_library.image_vignette = asset_server.load("images/vignette.png");
     asset_library.image_bog_sick = asset_server.load("images/Sickness_Icon.png");
+    asset_library.image_banner_shadow = asset_server.load("images/flag_shadow.png");
+    asset_library.image_arrow = asset_server.load("images/arrow.png");
 
     asset_library.image_atlas_planning_buttons = texture_atlases.add(TextureAtlas::from_grid(
         asset_server.load("images/planning_buttons.png"),
