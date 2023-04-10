@@ -33,7 +33,7 @@ fn texture_atlas_fx_update(
     for (texture_atlas_fx_entity, mut texture_atlas_fx, mut texture_atlas_fx_sprite) in
         texture_atlas_fx_query.iter_mut()
     {
-        texture_atlas_fx.frame += time.delta_seconds() * 10.;
+        texture_atlas_fx.frame += time.delta_seconds() * 15.;
         let frame_int = texture_atlas_fx.frame as usize;
         if frame_int < texture_atlas_fx.frames {
             texture_atlas_fx_sprite.index = frame_int;

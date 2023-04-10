@@ -13,7 +13,8 @@ use crate::{
     DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
     HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, SpineSpawnSet, Target, Team,
-    TempSfxBundle, TextureAtlasFx, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_PROJECTILE,
+    TempSfxBundle, TextureAtlasFx, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
+    DEPTH_EXPLOSION_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -35,6 +36,7 @@ pub enum UnitSystem {
     UpdateAnimations,
     UpdateFeeler,
     Combust,
+    Explode,
 }
 
 pub struct UnitPlugin;
@@ -126,6 +128,14 @@ impl Plugin for UnitPlugin {
                 unit_combust
                     .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(UnitSystem::Combust)
+                    .in_set(UpdateSet)
+                    .in_set(EventSet::<DamageInflictEvent>::Sender)
+                    .before(UnitSystem::Update),
+            )
+            .add_system(
+                unit_explode
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::Explode)
                     .in_set(UpdateSet)
                     .in_set(EventSet::<DamageInflictEvent>::Sender)
                     .before(UnitSystem::Update),
@@ -985,6 +995,84 @@ fn unit_combust(
         } else {
             local.time_until_next_combustion[team] = 0.;
             local.time_since_last_combustion[team] = 0.;
+        }
+    }
+}
+
+#[derive(Default)]
+struct UnitExplosion {
+    time_since_last_explosion: EnumMap<Team, f32>,
+    time_until_next_explosion: EnumMap<Team, f32>,
+}
+
+fn unit_explode(
+    mut local: Local<UnitExplosion>,
+    mut unit_query: Query<(Entity, &mut Unit, &GlobalTransform)>,
+    mut damage_inflict_events: EventWriter<DamageInflictEvent>,
+    mut commands: Commands,
+    battle_state: Res<BattleState>,
+    time: Res<FixedTime>,
+    asset_library: Res<AssetLibrary>,
+) {
+    let mut rng = thread_rng();
+    for team in Team::iter() {
+        if battle_state.battling() && battle_state.phase() == BattlePhase::Battling {
+            if local.time_until_next_explosion[team] == 0. {
+                local.time_until_next_explosion[team] = rng.gen_range(0.5..1.);
+            }
+            if battle_state.get_modifiers(team)[BattleModifier::Explosive] {
+                let mut combust = false;
+                if local.time_since_last_explosion[team] > local.time_until_next_explosion[team] {
+                    combust = true;
+                    local.time_since_last_explosion[team] = 0.;
+                    local.time_until_next_explosion[team] = rng.gen_range(0.5..2.0);
+                }
+                local.time_since_last_explosion[team] += time.period.as_secs_f32();
+                if combust {
+                    let mut units = unit_query
+                        .iter_mut()
+                        .filter(|(_, unit, _)| {
+                            unit.team == team && !unit.attributes.contains(Attributes::ON_FIRE)
+                        })
+                        .collect::<Vec<_>>();
+                    units.shuffle(&mut rng);
+                    if let Some((unit_entity, _, unit_transform)) = units.into_iter().nth(0) {
+                        commands.spawn((
+                            SpriteSheetBundle {
+                                texture_atlas: asset_library.image_atlas_explosion.clone(),
+                                ..Default::default()
+                            },
+                            Transform2::from_translation(
+                                unit_transform.translation().truncate()
+                                    + Vec2::new(
+                                        rng.gen_range(-20.0..20.0),
+                                        rng.gen_range(0.0..140.0),
+                                    ),
+                            )
+                            .with_scale(Vec2::splat(1.)),
+                            Depth::from(DEPTH_EXPLOSION_FX),
+                            TextureAtlasFx::new(5),
+                        ));
+                        commands.spawn(TempSfxBundle {
+                            audio_source: AudioPlusSource::new(
+                                asset_library.sounds.unit_explode.clone(),
+                            )
+                            .as_playing(),
+                            transform2: Transform2::from_translation(
+                                unit_transform.translation().truncate(),
+                            ),
+                            ..Default::default()
+                        });
+                        damage_inflict_events.send(DamageInflictEvent {
+                            entity: unit_entity,
+                            damage: 999999.,
+                        });
+                    }
+                }
+            }
+        } else {
+            local.time_until_next_explosion[team] = 0.;
+            local.time_since_last_explosion[team] = 0.;
         }
     }
 }

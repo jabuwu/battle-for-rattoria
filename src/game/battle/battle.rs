@@ -244,7 +244,7 @@ impl BattleModifier {
             Self::FriendlyFire => "Friendly Fire",
             Self::Cowardly => "Cowardly",
             Self::Sickness => "Sickness",
-            Self::Explosive => "Explosive (TODO)",
+            Self::Explosive => "Explosive",
             Self::Combustion => "Combustion",
             Self::Blindness => "Blindness",
             Self::Slowness => "Slowness",

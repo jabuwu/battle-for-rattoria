@@ -171,6 +171,10 @@ fn loading_check_progress(
         atlas_assets
             .get(&asset_library.image_atlas_blood_splat)
             .unwrap(),
+        atlas_assets
+            .get(&asset_library.image_atlas_explosion)
+            .unwrap(),
+        atlas_assets.get(&asset_library.image_atlas_fire).unwrap(),
     ];
     let skeletons = [
         skeleton_assets.get(&asset_library.spine_rat).unwrap(),
@@ -215,6 +219,7 @@ fn loading_check_progress(
         &asset_library.sounds.jingle_defeat,
         &asset_library.sounds.unit_damage,
         &asset_library.sounds.unit_die,
+        &asset_library.sounds.unit_explode,
         &asset_library.sounds.ambient_cauldron,
         &asset_library.sounds.ambient_battle,
     ];

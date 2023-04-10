@@ -38,6 +38,7 @@ pub struct Sounds {
 
     pub unit_damage: AudioPlusSoundEffect,
     pub unit_die: AudioPlusSoundEffect,
+    pub unit_explode: AudioPlusSoundEffect,
 
     pub ambient_cauldron: AudioPlusSoundEffect,
     pub ambient_battle: AudioPlusSoundEffect,
@@ -191,6 +192,19 @@ impl Sounds {
                 volume: 0.8,
                 pitch: 0.9,
                 pitch_variation: 0.2,
+                positional: true,
+                distance,
+                ..Default::default()
+            },
+            unit_explode: AudioPlusSoundEffect {
+                audio_sources: vec![
+                    asset_server.load("audio/sfx/Units/Common - Explode 01.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Explode 02.ogg"),
+                    asset_server.load("audio/sfx/Units/Common - Explode 03.ogg"),
+                ],
+                volume: 0.8,
+                pitch: 0.95,
+                pitch_variation: 0.1,
                 positional: true,
                 distance,
                 ..Default::default()

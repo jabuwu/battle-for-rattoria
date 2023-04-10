@@ -21,6 +21,9 @@ pub struct AssetLibrary {
     pub image_atlas_start_battle: Handle<TextureAtlas>,
     pub image_atlas_rewind_battle: Handle<TextureAtlas>,
     pub image_atlas_blood_splat: Handle<TextureAtlas>,
+    pub image_atlas_explosion: Handle<TextureAtlas>,
+    pub image_atlas_fire: Handle<TextureAtlas>,
+    pub image_atlas_wet: Handle<TextureAtlas>,
     pub image_bog_sick: Handle<Image>,
     pub spine_rat: Handle<SkeletonData>,
     pub spine_rat_warrior: Handle<SkeletonData>,
@@ -119,6 +122,30 @@ fn asset_library_load(
         asset_server.load("images/blood_splat.png"),
         Vec2::new(336., 347.),
         5,
+        1,
+        None,
+        None,
+    ));
+    asset_library.image_atlas_explosion = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/explosion.png"),
+        Vec2::new(400., 400.),
+        5,
+        1,
+        None,
+        None,
+    ));
+    asset_library.image_atlas_fire = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/fire.png"),
+        Vec2::new(214., 325.),
+        4,
+        1,
+        None,
+        None,
+    ));
+    asset_library.image_atlas_wet = texture_atlases.add(TextureAtlas::from_grid(
+        asset_server.load("images/wet.png"),
+        Vec2::new(300., 358.),
+        4,
         1,
         None,
         None,
