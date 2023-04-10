@@ -1076,7 +1076,7 @@ fn tutorial_dialogue(game_state: &GameState) -> Option<&'static str> {
             _ => {}
         }
     }
-    if game_state.fed_army.total_units() == 0 {
+    if game_state.fed_army.total_units() == 0 && game_state.available_army.total_units() != 0 {
         Some("MustFeedUnits")
     } else {
         None
