@@ -65,25 +65,25 @@ impl Item {
 
     pub fn positive_effect(&self) -> &'static str {
         match self {
-            Self::CracklingMoss => "Quick Attack",
-            Self::SquirtBlopBerries => "Wetness",
-            Self::FiremanderSalts => "Blazing Fire",
-            Self::AxeShrooms => "Stronger Attack",
-            Self::BogHardWeeds => "Increased Defense",
-            Self::CeleryQuartz => "Increased Speed",
-            Self::FrostyWebStrands => "Chilling Ice",
+            Self::CracklingMoss => "Attack more quickly.",
+            Self::SquirtBlopBerries => "Become wet and resist fire.",
+            Self::FiremanderSalts => "Fire damage burns non-armored enemies.",
+            Self::AxeShrooms => "All attacks deal more damage.",
+            Self::BogHardWeeds => "Increase defense.",
+            Self::CeleryQuartz => "Increase movement speed.",
+            Self::FrostyWebStrands => "Ice damage slows enemies.",
         }
     }
 
     pub fn side_effect(&self) -> &'static str {
         match self {
-            Self::CracklingMoss => "Cowardly",
-            Self::SquirtBlopBerries => "Slowness",
-            Self::FiremanderSalts => "Spontaneous Combustion",
-            Self::AxeShrooms => "Friendly Fire",
-            Self::BogHardWeeds => "Sickness",
-            Self::CeleryQuartz => "Explosive",
-            Self::FrostyWebStrands => "Blindness",
+            Self::CracklingMoss => "Units may run from battle.",
+            Self::SquirtBlopBerries => "Units become slow.",
+            Self::FiremanderSalts => "Units may spontaneously combust.",
+            Self::AxeShrooms => "Units may attack friendlies.",
+            Self::BogHardWeeds => "Units become sick and unusable next\nbattle.",
+            Self::CeleryQuartz => "Units may explode.",
+            Self::FrostyWebStrands => "Units become blind and attack\nrandomly.",
         }
     }
 }
