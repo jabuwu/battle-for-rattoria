@@ -20,6 +20,7 @@ use bevy::{
     },
     sprite::{Material2dPlugin, Mesh2dHandle},
 };
+use fixed_timestep::AddFixedEvent;
 use materials::{
     SpineAdditiveMaterial, SpineAdditivePmaMaterial, SpineMultiplyMaterial,
     SpineMultiplyPmaMaterial, SpineNormalMaterial, SpineNormalPmaMaterial, SpineScreenMaterial,
@@ -112,8 +113,8 @@ impl Plugin for SpinePlugin {
             .add_plugin(SpineSyncPlugin::first())
             .insert_resource(SpineTextures::init())
             .insert_resource(SpineReadyEvents::default())
-            .add_event::<SpineTextureCreateEvent>()
-            .add_event::<SpineTextureDisposeEvent>()
+            .add_fixed_event::<SpineTextureCreateEvent>()
+            .add_fixed_event::<SpineTextureDisposeEvent>()
             .add_asset::<Atlas>()
             .add_asset::<SkeletonJson>()
             .add_asset::<SkeletonBinary>()
@@ -121,8 +122,8 @@ impl Plugin for SpinePlugin {
             .init_asset_loader::<AtlasLoader>()
             .init_asset_loader::<SkeletonJsonLoader>()
             .init_asset_loader::<SkeletonBinaryLoader>()
-            .add_event::<SpineReadyEvent>()
-            .add_event::<SpineEvent>()
+            .add_fixed_event::<SpineReadyEvent>()
+            .add_fixed_event::<SpineEvent>()
             .add_system(spine_load.in_set(SpineSystem::Load))
             .add_system(
                 spine_spawn
@@ -136,7 +137,8 @@ impl Plugin for SpinePlugin {
                     .before(SpineSet::OnReady),
             )
             .add_system(
-                spine_update
+                spine_fixed_update
+                    .in_schedule(CoreSchedule::FixedUpdate)
                     .in_set(SpineSystem::Update)
                     .after(SpineSet::OnReady),
             )
@@ -619,11 +621,11 @@ struct SpineUpdateLocal {
     events: Arc<Mutex<VecDeque<SpineEvent>>>,
 }
 
-fn spine_update(
+fn spine_fixed_update(
     mut spine_query: Query<(Entity, &mut Spine)>,
     mut spine_ready_events: EventReader<SpineReadyEvent>,
     mut spine_events: EventWriter<SpineEvent>,
-    time: Res<Time>,
+    time: Res<FixedTime>,
     local: Local<SpineUpdateLocal>,
 ) {
     for event in spine_ready_events.iter() {
@@ -684,7 +686,7 @@ fn spine_update(
         }
     }
     for (_, mut spine) in spine_query.iter_mut() {
-        spine.update(time.delta_seconds());
+        spine.update(time.period.as_secs_f32());
     }
     {
         let mut events = local.events.lock().unwrap();

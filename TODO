@@ -2,7 +2,6 @@ sickness icon
 
 # Battle
 Move unit spines up so their feet is at y = 0
-Spine events do not work with fixed update - potential jank
 Better y order for projectiles, fx?
 Battle modifiers
   Ice

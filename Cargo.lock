@@ -576,6 +576,7 @@ dependencies = [
  "bitflags",
  "embed-resource",
  "enum-map",
+ "fixed_timestep",
  "image",
  "lerp",
  "rand",
@@ -903,6 +904,7 @@ version = "0.5.0"
 dependencies = [
  "bevy",
  "bevy_math",
+ "fixed_timestep",
  "rusty_spine",
 ]
 
@@ -1696,6 +1698,13 @@ dependencies = [
  "libc",
  "redox_syscall 0.2.16",
  "windows-sys 0.45.0",
+]
+
+[[package]]
+name = "fixed_timestep"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
