@@ -5,4 +5,6 @@ pub const DEPTH_BATTLE_SPLASH: DepthLayer = DepthLayer::Front(0.1);
 
 pub const DEPTH_BLOOD_FX: DepthLayer = DepthLayer::Foreground(0.);
 pub const DEPTH_EXPLOSION_FX: DepthLayer = DepthLayer::Foreground(0.);
+pub const DEPTH_ICE_FX: DepthLayer = DepthLayer::Foreground(0.);
+pub const DEPTH_DRIP_FX: DepthLayer = DepthLayer::Foreground(0.);
 pub const DEPTH_PROJECTILE: DepthLayer = DepthLayer::Foreground(0.1);

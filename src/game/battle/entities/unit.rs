@@ -14,7 +14,7 @@ use crate::{
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
     HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, SpineSpawnSet, Target, Team,
     TempSfxBundle, TextureAtlasFx, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
-    DEPTH_EXPLOSION_FX, DEPTH_PROJECTILE,
+    DEPTH_EXPLOSION_FX, DEPTH_ICE_FX, DEPTH_PROJECTILE,
 };
 
 const UNIT_SCALE: f32 = 0.7;
@@ -37,6 +37,7 @@ pub enum UnitSystem {
     UpdateFeeler,
     Combust,
     Explode,
+    Drip,
 }
 
 pub struct UnitPlugin;
@@ -138,6 +139,13 @@ impl Plugin for UnitPlugin {
                     .in_set(UnitSystem::Explode)
                     .in_set(UpdateSet)
                     .in_set(EventSet::<DamageInflictEvent>::Sender)
+                    .before(UnitSystem::Update),
+            )
+            .add_system(
+                unit_drip
+                    .in_schedule(CoreSchedule::FixedUpdate)
+                    .in_set(UnitSystem::Drip)
+                    .in_set(UpdateSet)
                     .before(UnitSystem::Update),
             );
     }
@@ -378,7 +386,8 @@ pub struct Unit {
     pub team: Team,
     pub kind: UnitKind,
     pub stats: UnitStats,
-    pub slow_timer: f32,
+    pub damage_slow_timer: f32,
+    pub ice_slow_timer: f32,
     pub retreating: bool,
     pub blind: bool,
     pub attributes: Attributes,
@@ -401,12 +410,13 @@ impl Unit {
     }
 
     pub fn speed(&self) -> f32 {
+        let ice_multiplier = if self.ice_slow_timer > 0. { 0.3 } else { 1. };
         if self.retreating {
-            300.
-        } else if self.slow_timer > 0. {
-            self.stats.speed_slow
+            300. * ice_multiplier
+        } else if self.damage_slow_timer > 0. {
+            self.stats.speed_slow * ice_multiplier
         } else {
-            self.stats.speed
+            self.stats.speed * ice_multiplier
         }
     }
 }
@@ -501,7 +511,8 @@ fn unit_spawn(
                     team,
                     kind: spawn_event.kind,
                     stats,
-                    slow_timer: 0.,
+                    damage_slow_timer: 0.,
+                    ice_slow_timer: 0.,
                     retreating: false,
                     blind: team_modifiers[BattleModifier::Blindness] && rng.gen_bool(0.5),
                     attributes: stats.attributes,
@@ -600,19 +611,44 @@ fn unit_spine_ready(
 }
 
 fn unit_slow(
-    mut unit_query: Query<&mut Unit>,
+    mut unit_query: Query<(&mut Unit, &GlobalTransform)>,
     mut damage_receive_events: EventReader<DamageReceiveEvent>,
+    mut commands: Commands,
     time: Res<FixedTime>,
+    asset_library: Res<AssetLibrary>,
 ) {
-    for mut unit in unit_query.iter_mut() {
-        unit.slow_timer -= time.period.as_secs_f32();
-        if unit.slow_timer < 0. {
-            unit.slow_timer = 0.;
+    let mut rng = thread_rng();
+    for (mut unit, _) in unit_query.iter_mut() {
+        unit.damage_slow_timer -= time.period.as_secs_f32();
+        if unit.damage_slow_timer < 0. {
+            unit.damage_slow_timer = 0.;
+        }
+        unit.ice_slow_timer -= time.period.as_secs_f32();
+        if unit.ice_slow_timer < 0. {
+            unit.ice_slow_timer = 0.;
         }
     }
     for damage_receive_event in damage_receive_events.iter() {
-        if let Ok(mut unit) = unit_query.get_mut(damage_receive_event.entity) {
-            unit.slow_timer = 0.5;
+        if let Ok((mut unit, unit_transform)) = unit_query.get_mut(damage_receive_event.entity) {
+            if damage_receive_event.slow {
+                unit.ice_slow_timer = 0.5;
+                if rng.gen_bool(0.1) {
+                    commands.spawn((
+                        SpriteSheetBundle {
+                            texture_atlas: asset_library.image_atlas_ice.clone(),
+                            ..Default::default()
+                        },
+                        Transform2::from_translation(
+                            unit_transform.translation().truncate()
+                                + Vec2::new(rng.gen_range(-20.0..20.0), rng.gen_range(0.0..140.0)),
+                        )
+                        .with_scale(Vec2::splat(0.4)),
+                        Depth::from(DEPTH_ICE_FX),
+                        TextureAtlasFx::new(4),
+                    ));
+                }
+            }
+            unit.damage_slow_timer = 0.5;
         }
     }
 }
@@ -729,6 +765,7 @@ fn unit_attack(
                                     damage_modifiers,
                                     max_hits: attack_stats.hit_count,
                                     ignore_entity: unit_entity,
+                                    slow: team_modifiers[BattleModifier::Ice],
                                 },
                                 TransformBundle::default(),
                                 Transform2::from_translation(
@@ -761,6 +798,7 @@ fn unit_attack(
                                             damage_modifiers,
                                             max_hits: attack_stats.hit_count,
                                             ignore_entity: unit_entity,
+                                            slow: team_modifiers[BattleModifier::Ice],
                                         },
                                     },
                                     SpineFx,
@@ -784,6 +822,7 @@ fn unit_attack(
                                     damage_modifiers,
                                     max_hits: attack_stats.hit_count,
                                     ignore_entity: unit_entity,
+                                    slow: team_modifiers[BattleModifier::Ice],
                                 },
                                 HurtBoxDespawner,
                                 SpriteBundle {
@@ -957,6 +996,7 @@ fn unit_combust(
                 damage_inflict_events.send(DamageInflictEvent {
                     entity: unit_entity,
                     damage: time.period.as_secs_f32() * 5.,
+                    slow: false,
                 });
             }
         }
@@ -1031,9 +1071,7 @@ fn unit_explode(
                 if combust {
                     let mut units = unit_query
                         .iter_mut()
-                        .filter(|(_, unit, _)| {
-                            unit.team == team && !unit.attributes.contains(Attributes::ON_FIRE)
-                        })
+                        .filter(|(_, unit, _)| unit.team == team)
                         .collect::<Vec<_>>();
                     units.shuffle(&mut rng);
                     if let Some((unit_entity, _, unit_transform)) = units.into_iter().nth(0) {
@@ -1066,6 +1104,7 @@ fn unit_explode(
                         damage_inflict_events.send(DamageInflictEvent {
                             entity: unit_entity,
                             damage: 999999.,
+                            slow: false,
                         });
                     }
                 }
@@ -1073,6 +1112,67 @@ fn unit_explode(
         } else {
             local.time_until_next_explosion[team] = 0.;
             local.time_since_last_explosion[team] = 0.;
+        }
+    }
+}
+
+#[derive(Default)]
+struct UnitDrip {
+    time_since_last_drip: EnumMap<Team, f32>,
+    time_until_next_drip: EnumMap<Team, f32>,
+}
+
+fn unit_drip(
+    mut local: Local<UnitDrip>,
+    mut unit_query: Query<(Entity, &mut Unit, &GlobalTransform)>,
+    mut commands: Commands,
+    battle_state: Res<BattleState>,
+    time: Res<FixedTime>,
+    asset_library: Res<AssetLibrary>,
+) {
+    let mut rng = thread_rng();
+    for team in Team::iter() {
+        if battle_state.battling() && battle_state.phase() == BattlePhase::Battling {
+            if local.time_until_next_drip[team] == 0. {
+                local.time_until_next_drip[team] = rng.gen_range(0.1..0.4);
+            }
+            if battle_state.get_modifiers(team)[BattleModifier::Wet] {
+                let mut combust = false;
+                if local.time_since_last_drip[team] > local.time_until_next_drip[team] {
+                    combust = true;
+                    local.time_since_last_drip[team] = 0.;
+                    local.time_until_next_drip[team] = rng.gen_range(0.3..0.7);
+                }
+                local.time_since_last_drip[team] += time.period.as_secs_f32();
+                if combust {
+                    let mut units = unit_query
+                        .iter_mut()
+                        .filter(|(_, unit, _)| unit.team == team)
+                        .collect::<Vec<_>>();
+                    units.shuffle(&mut rng);
+                    if let Some((_, _, unit_transform)) = units.into_iter().nth(0) {
+                        commands.spawn((
+                            SpriteSheetBundle {
+                                texture_atlas: asset_library.image_atlas_wet.clone(),
+                                ..Default::default()
+                            },
+                            Transform2::from_translation(
+                                unit_transform.translation().truncate()
+                                    + Vec2::new(
+                                        rng.gen_range(-20.0..20.0),
+                                        rng.gen_range(0.0..140.0),
+                                    ),
+                            )
+                            .with_scale(Vec2::splat(0.5)),
+                            Depth::from(DEPTH_EXPLOSION_FX),
+                            TextureAtlasFx::new(4),
+                        ));
+                    }
+                }
+            }
+        } else {
+            local.time_until_next_drip[team] = 0.;
+            local.time_since_last_drip[team] = 0.;
         }
     }
 }

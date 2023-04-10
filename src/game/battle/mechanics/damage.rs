@@ -157,6 +157,7 @@ pub struct HurtBox {
     pub damage_modifiers: DamageModifiers,
     pub max_hits: usize,
     pub ignore_entity: Entity,
+    pub slow: bool,
 }
 
 #[derive(Clone, Copy, Default, Component)]
@@ -165,17 +166,20 @@ pub struct HurtBoxDespawner;
 pub struct DamageInflictEvent {
     pub entity: Entity,
     pub damage: f32,
+    pub slow: bool,
 }
 
 pub struct DamageReceiveEvent {
     pub entity: Entity,
     pub damage: f32,
+    pub slow: bool,
     _private: (),
 }
 
 pub struct DamageCandidate {
     entity: Entity,
     damage: f32,
+    slow: bool,
 }
 
 pub fn damage_update(
@@ -222,6 +226,7 @@ pub fn damage_update(
                     damage_candidates.push(DamageCandidate {
                         entity: hit_box_entity,
                         damage,
+                        slow: hurt_box.slow,
                     });
                 }
             }
@@ -232,6 +237,7 @@ pub fn damage_update(
                 damage_inflict_events.send(DamageInflictEvent {
                     entity: damage_candidate.entity,
                     damage: damage_candidate.damage,
+                    slow: damage_candidate.slow,
                 });
                 hurt_box.max_hits -= 1;
             } else {
@@ -254,6 +260,7 @@ pub fn damage_events(
         damage_receive_events.send(DamageReceiveEvent {
             entity: damage_inflict_event.entity,
             damage: damage_inflict_event.damage,
+            slow: damage_inflict_event.slow,
             _private: (),
         });
     }

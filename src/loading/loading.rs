@@ -175,6 +175,8 @@ fn loading_check_progress(
             .get(&asset_library.image_atlas_explosion)
             .unwrap(),
         atlas_assets.get(&asset_library.image_atlas_fire).unwrap(),
+        atlas_assets.get(&asset_library.image_atlas_wet).unwrap(),
+        atlas_assets.get(&asset_library.image_atlas_ice).unwrap(),
     ];
     let skeletons = [
         skeleton_assets.get(&asset_library.spine_rat).unwrap(),
