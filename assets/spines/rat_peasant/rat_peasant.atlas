@@ -1,0 +1,13 @@
+rat_peasant.png
+size:402,265
+filter:Nearest,Linear
+pma:true
+arm_back
+bounds:319,92,52,60
+offsets:172,108,261,315
+arm_front
+bounds:319,154,81,109
+offsets:101,108,261,315
+rat
+bounds:2,2,261,315
+rotate:90

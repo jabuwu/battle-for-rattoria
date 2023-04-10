@@ -117,8 +117,8 @@ fn asset_library_load(
     ));
 
     asset_library.spine_rat = skeletons.add(SkeletonData::new_from_binary(
-        asset_server.load("spines/rat_test/skeleton.skel"),
-        asset_server.load("spines/rat_test/rat_test.atlas"),
+        asset_server.load("spines/rat_peasant/skeleton.skel"),
+        asset_server.load("spines/rat_peasant/rat_peasant.atlas"),
     ));
 
     asset_library.spine_rat_warrior = skeletons.add(SkeletonData::new_from_binary(

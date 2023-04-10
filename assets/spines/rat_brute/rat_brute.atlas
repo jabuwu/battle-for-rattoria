@@ -1,6 +1,11 @@
 rat_brute.png
-size:729,597
+size:993,531
 filter:Nearest,Linear
 pma:true
+arm
+bounds:564,71,427,458
+offsets:298,135,725,593
 rat_brute
-bounds:2,2,725,593
+bounds:2,2,527,560
+offsets:0,0,725,593
+rotate:90

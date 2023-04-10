@@ -19,10 +19,12 @@ use crate::{
 const UNIT_SCALE: f32 = 0.7;
 const UNIT_TRACK_WALK: usize = 0;
 const UNIT_TRACK_ATTACK: usize = 1;
+const UNIT_TRACK_COLOR: usize = 2;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, SystemSet)]
 pub enum UnitSystem {
     Spawn,
+    SpineReady,
     Slow,
     DamageFx,
     Update,
@@ -47,6 +49,11 @@ impl Plugin for UnitPlugin {
                     .in_set(SpawnSet)
                     .in_set(SpineSpawnSet)
                     .after(EventSet::<UnitSpawnEvent>::Sender),
+            )
+            .add_system(
+                unit_spine_ready
+                    .in_set(UnitSystem::SpineReady)
+                    .in_set(SpineSet::OnReady),
             )
             .add_system(
                 unit_slow
@@ -311,7 +318,7 @@ impl Attack {
                 hit_count: 5,
                 hurt_box_kind: AttackHurtBoxKind::OffsetRect {
                     offset: 150.,
-                    size: Vec2::new(200., 150.),
+                    size: Vec2::new(150., 150.),
                 },
             },
             Attack::Arrow => AttackStats {
@@ -437,10 +444,16 @@ fn unit_spawn(
             stats.speed *= 0.5;
             stats.speed_slow *= 0.5;
         }
+        let mut crossfades = Crossfades::new();
+        crossfades.add("idle", "walk", 0.2);
+        crossfades.add("walk", "idle", 0.2);
+        crossfades.add("attack", "attack_stop", 0.2);
+        crossfades.add("attack_stop", "attack", 0.2);
         commands
             .spawn((
                 SpineBundle {
                     skeleton: spawn_event.kind.skeleton(asset_library.as_ref()),
+                    crossfades,
                     ..Default::default()
                 },
                 Transform2::from_translation(spawn_event.position).with_scale(Vec2::new(
@@ -456,7 +469,7 @@ fn unit_spawn(
                 HitBox {
                     flags: team.hit_flags(),
                     shape: CollisionShape::Rect {
-                        offset: Vec2::ZERO,
+                        offset: Vec2::new(0., stats.hit_box_size.y * 0.25),
                         size: stats.hit_box_size,
                     },
                     defense: if team_modifiers[BattleModifier::ExtraDefense] {
@@ -542,6 +555,37 @@ fn unit_spawn(
                     UnitFire,
                 ));
             });
+    }
+}
+
+fn unit_spine_ready(
+    mut spine_ready_events: EventReader<SpineReadyEvent>,
+    mut spine_query: Query<(&mut Spine, &Unit)>,
+    battle_state: Res<BattleState>,
+) {
+    for spine_ready_event in spine_ready_events.iter() {
+        if let Ok((mut spine, unit)) = spine_query.get_mut(spine_ready_event.entity) {
+            let modifiers = battle_state.get_modifiers(unit.team);
+            if modifiers[BattleModifier::Fire] {
+                let _ = spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_COLOR as i32,
+                    "fire",
+                    true,
+                );
+            } else if modifiers[BattleModifier::Wet] {
+                let _ = spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_COLOR as i32,
+                    "wet",
+                    true,
+                );
+            } else if modifiers[BattleModifier::Ice] {
+                let _ = spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_COLOR as i32,
+                    "ice",
+                    true,
+                );
+            }
+        }
     }
 }
 
@@ -666,7 +710,7 @@ fn unit_attack(
                                 HurtBox {
                                     flags: hurt_flags,
                                     shape: CollisionShape::Rect {
-                                        offset: Vec2::ZERO,
+                                        offset: Vec2::new(0., hurt_box_size.y * 0.25),
                                         size: hurt_box_size,
                                     },
                                     damage: attack_stats.damage * damage_multiplier,
@@ -740,7 +784,7 @@ fn unit_attack(
                                     ..Default::default()
                                 },
                                 Transform2::from_translation(
-                                    unit_transform.translation().truncate(),
+                                    unit_transform.translation().truncate() + Vec2::new(0., 90.),
                                 ),
                                 Projectile {
                                     velocity: Vec2::new(unit.move_direction() * 2500., 300.),
@@ -807,39 +851,42 @@ fn unit_update_animations(
 ) {
     let mut rng = thread_rng();
     for (mut unit_spine, unit, unit_feeler) in unit_query.iter_mut() {
+        let current_animation_name = unit_spine
+            .animation_state
+            .track_at_index(UNIT_TRACK_WALK)
+            .map(|track| track.animation().name().to_owned())
+            .unwrap_or(String::new());
         if battle_state.phase() != BattlePhase::PreBattle {
-            if unit_spine
-                .animation_state
-                .track_at_index(UNIT_TRACK_WALK)
-                .is_none()
-            {
+            if current_animation_name != "walk" {
                 if let Ok(mut track) = unit_spine.animation_state.set_animation_by_name(
                     UNIT_TRACK_WALK as i32,
-                    "animation",
+                    "walk",
                     true,
                 ) {
                     track.set_timescale(rng.gen_range(0.9..1.1));
                 }
             }
         } else {
-            if unit_spine
-                .animation_state
-                .track_at_index(UNIT_TRACK_WALK)
-                .is_some()
-            {
-                unit_spine
-                    .animation_state
-                    .clear_track(UNIT_TRACK_WALK as i32);
+            if current_animation_name != "idle" {
+                if let Ok(mut track) = unit_spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_WALK as i32,
+                    "idle",
+                    true,
+                ) {
+                    track.set_track_time(rng.gen_range(0.0..1.0));
+                    track.set_timescale(rng.gen_range(0.9..1.1));
+                }
             }
         }
+        let current_animation_name = unit_spine
+            .animation_state
+            .track_at_index(UNIT_TRACK_ATTACK)
+            .map(|track| track.animation().name().to_owned())
+            .unwrap_or(String::new());
         if (unit.can_attack() && unit_feeler.feeling || unit.blind)
             && battle_state.phase() == BattlePhase::Battling
         {
-            if unit_spine
-                .animation_state
-                .track_at_index(UNIT_TRACK_ATTACK)
-                .is_none()
-            {
+            if current_animation_name != "attack" {
                 if let Ok(mut track) = unit_spine.animation_state.set_animation_by_name(
                     UNIT_TRACK_ATTACK as i32,
                     "attack",
@@ -858,14 +905,12 @@ fn unit_update_animations(
                 }
             }
         } else {
-            if unit_spine
-                .animation_state
-                .track_at_index(UNIT_TRACK_ATTACK)
-                .is_some()
-            {
-                unit_spine
-                    .animation_state
-                    .clear_track(UNIT_TRACK_ATTACK as i32);
+            if current_animation_name != "attack_stop" {
+                let _ = unit_spine.animation_state.set_animation_by_name(
+                    UNIT_TRACK_ATTACK as i32,
+                    "attack_stop",
+                    true,
+                );
             }
         }
     }

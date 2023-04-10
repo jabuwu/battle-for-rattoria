@@ -284,8 +284,8 @@ fn battle_start(
         }
 
         const X_DISTANCE: f32 = 400.;
-        const Y_MIN: f32 = -300.;
-        const Y_MAX: f32 = -100.;
+        const Y_MIN: f32 = -400.;
+        const Y_MAX: f32 = -200.;
         let mut rng = thread_rng();
         for team in Team::iter() {
             let units = start_event.config.get_units(team);
