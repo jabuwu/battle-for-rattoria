@@ -2,18 +2,18 @@ use bevy::prelude::*;
 use bevy_audio_plus::prelude::*;
 use bevy_spine::prelude::*;
 use bitflags::bitflags;
-use enum_map::{Enum, EnumMap};
+use enum_map::{enum_map, Enum, EnumMap};
 use rand::prelude::*;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use crate::{
     AddFixedEvent, AreaOfEffectTargeting, AssetLibrary, BattleModifier, BattlePhase, BattleState,
-    CollisionShape, DamageInflictEvent, DamageKind, DamageModifier, DamageModifiers,
+    CollisionShape, DamageFlags, DamageInflictEvent, DamageKind, DamageModifier, DamageModifiers,
     DamageReceiveEvent, DamageSystem, DefenseKind, DefenseModifier, DefenseModifiers, Depth,
     DepthLayer, EventSet, Feeler, FramesToLive, Health, HealthDieEvent, HitBox, HurtBox,
     HurtBoxDespawner, Projectile, SpawnSet, SpineAttack, SpineFx, SpineSpawnSet, Target, Team,
-    TempSfxBundle, TextureAtlasFx, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX,
+    TempSfxBundle, TextureAtlasFx, Transform2, UpdateSet, YOrder, DEPTH_BLOOD_FX, DEPTH_DRIP_FX,
     DEPTH_EXPLOSION_FX, DEPTH_ICE_FX, DEPTH_PROJECTILE,
 };
 
@@ -1074,7 +1074,7 @@ fn unit_explode(
                 if local.time_since_last_explosion[team] > local.time_until_next_explosion[team] {
                     combust = true;
                     local.time_since_last_explosion[team] = 0.;
-                    local.time_until_next_explosion[team] = rng.gen_range(0.5..2.0);
+                    local.time_until_next_explosion[team] = rng.gen_range(1.5..3.0);
                 }
                 local.time_since_last_explosion[team] += time.period.as_secs_f32();
                 if combust {
@@ -1084,22 +1084,24 @@ fn unit_explode(
                         .collect::<Vec<_>>();
                     units.shuffle(&mut rng);
                     if let Some((unit_entity, _, unit_transform)) = units.into_iter().nth(0) {
-                        commands.spawn((
-                            SpriteSheetBundle {
-                                texture_atlas: asset_library.image_atlas_explosion.clone(),
-                                ..Default::default()
-                            },
-                            Transform2::from_translation(
-                                unit_transform.translation().truncate()
-                                    + Vec2::new(
-                                        rng.gen_range(-20.0..20.0),
-                                        rng.gen_range(0.0..140.0),
-                                    ),
-                            )
-                            .with_scale(Vec2::splat(1.)),
-                            Depth::from(DEPTH_EXPLOSION_FX),
-                            TextureAtlasFx::new(5),
-                        ));
+                        let dummy_entity = commands
+                            .spawn((
+                                SpriteSheetBundle {
+                                    texture_atlas: asset_library.image_atlas_explosion.clone(),
+                                    ..Default::default()
+                                },
+                                Transform2::from_translation(
+                                    unit_transform.translation().truncate()
+                                        + Vec2::new(
+                                            rng.gen_range(-20.0..20.0),
+                                            rng.gen_range(0.0..140.0),
+                                        ),
+                                )
+                                .with_scale(Vec2::splat(1.)),
+                                Depth::from(DEPTH_EXPLOSION_FX),
+                                TextureAtlasFx::new(5),
+                            ))
+                            .id();
                         commands.spawn(TempSfxBundle {
                             audio_source: AudioPlusSource::new(
                                 asset_library.sounds.unit_explode.clone(),
@@ -1115,6 +1117,25 @@ fn unit_explode(
                             damage: 999999.,
                             slow: false,
                         });
+                        commands.spawn((
+                            HurtBox {
+                                flags: DamageFlags::all(),
+                                shape: CollisionShape::Rect {
+                                    offset: Vec2::new(0., 90.),
+                                    size: Vec2::new(200., 200.),
+                                },
+                                damage: 50.,
+                                damage_kind: DamageKind::Magic,
+                                damage_modifiers: enum_map! { DamageModifier::Fire => true, _ => false},
+                                max_hits: 2,
+                                ignore_entity: dummy_entity,
+                                slow: false,
+                            },
+                            TransformBundle::default(),
+                            Transform2::from_translation(unit_transform.translation().truncate()),
+                            FramesToLive::new(10),
+                            Depth::Exact(1.),
+                        ));
                     }
                 }
             }
@@ -1173,7 +1194,7 @@ fn unit_drip(
                                     ),
                             )
                             .with_scale(Vec2::splat(0.5)),
-                            Depth::from(DEPTH_EXPLOSION_FX),
+                            Depth::from(DEPTH_DRIP_FX),
                             TextureAtlasFx::new(4),
                         ));
                     }

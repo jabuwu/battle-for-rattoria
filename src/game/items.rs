@@ -81,7 +81,7 @@ impl Item {
             Self::SquirtBlopBerries => "Units become slow.",
             Self::FiremanderSalts => "Units may spontaneously combust.",
             Self::AxeShrooms => "Units may attack friendlies.",
-            Self::BogHardWeeds => "Units become sick and unusable next\nbattle.",
+            Self::BogHardWeeds => "Some units become sick and unusable \nnext battle.",
             Self::CeleryQuartz => "Units may explode.",
             Self::FrostyWebStrands => "Units become blind and attack\nrandomly.",
         }
